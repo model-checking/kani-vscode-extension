@@ -20,6 +20,17 @@ export function activate(context: vscode.ExtensionContext) {
 		const answer = await vscode.window.showInformationMessage('Hello World from Kani!', "yes", "no");
 		if(answer === "yes"){
 			console.log("Running Kani");
+			const kaniCommand: string = "kani";
+
+			// Detect source file
+			const sourceFile = vscode.window.activeTextEditor?.document;
+			const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
+
+			// String template for the final command that runs in the terminal
+			let finalCommand = `${kaniCommand} ${sourceFile?.fileName}`;
+
+			terminal.show();
+			terminal.sendText(finalCommand);
 		}
 		else{
 			console.log("not running kani");
