@@ -17,20 +17,10 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 
-		const answer = await vscode.window.showInformationMessage('Hello World from Kani!', "yes", "no");
+		const answer = await vscode.window.showInformationMessage('Run Kani?', "yes", "no");
 		if(answer === "yes"){
 			console.log("Running Kani");
-			const kaniCommand: string = "kani";
-
-			// Detect source file
-			const sourceFile = vscode.window.activeTextEditor?.document;
-			const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
-
-			// String template for the final command that runs in the terminal
-			let finalCommand = `${kaniCommand} ${sourceFile?.fileName}`;
-
-			terminal.show();
-			terminal.sendText(finalCommand);
+			runCommand("kani");
 		}
 		else{
 			console.log("not running kani");
@@ -38,7 +28,45 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
+	const runcargoKani = vscode.commands.registerCommand('Kani.runcargoKani', async () => {
+
+		//TODO: Always point to the root of the cargo crate (or source file) before running cargo kani
+		const answer = await vscode.window.showInformationMessage('Run Cargo Kani?', "yes", "no");
+		if(answer === "yes"){
+			console.log("Running Cargo Kani");
+			runCommand("cargo kani");
+		}
+		else{
+			console.log("not running cargo kani");
+		}
+
+	});
+
 	context.subscriptions.push(runKani);
+	context.subscriptions.push(runcargoKani);
+
+	// Run cargo clean once done
+
+}
+
+function runCommand(command: string): void {
+	// const kaniCommand: string = "cargo kani";
+	let finalCommand = ``;
+
+	// Detect source file
+	const sourceFile = vscode.window.activeTextEditor?.document;
+	const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
+
+	// String template for the final command that runs in the terminal
+	if(command === "kani") {
+		finalCommand = `${command} ${sourceFile?.fileName}`;
+	}
+	else{
+		finalCommand = `${command}`;
+	}
+
+	terminal.show();
+	terminal.sendText(finalCommand);
 }
 
 // this method is called when your extension is deactivated
