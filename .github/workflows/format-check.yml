@@ -22,6 +22,7 @@ jobs:
           ./scripts/run-autopep8.sh
 
       - name: Check TS code formatting
-        run: npm install -g npm@latest
-        run: npm install
-        run: npm run lint
+        run: |
+          npm install -g npm@latest
+          npm install
+          npm run lint
