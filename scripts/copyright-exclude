@@ -15,3 +15,5 @@ gitignore
 gitmodules
 ignore
 scripts/copyright-exclude
+.json
+eslintrc.js

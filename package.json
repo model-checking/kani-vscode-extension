@@ -1,0 +1,55 @@
+{
+    "name": "kani-vscode-extension",
+    "displayName": "kani-vscode-extension",
+    "description": "VSCode Extension for Kani Rust Verifier",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.72.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:kani-vscode-extension.helloWorld"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "kani-vscode-extension.helloWorld",
+                "title": "Hello World"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint . --ext .ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/glob": "^8.0.0",
+        "@types/mocha": "^10.0.0",
+        "@types/node": "16.x",
+        "@types/vscode": "^1.72.0",
+        "@typescript-eslint/eslint-plugin": "^5.42.1",
+        "@typescript-eslint/parser": "^5.42.1",
+        "@vscode/test-electron": "^2.1.5",
+        "babel-eslint": "^10.1.0",
+        "eslint": "^8.27.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-standard-with-typescript": "^23.0.0",
+        "eslint-plugin-header": "^3.1.1",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-n": "^15.5.1",
+        "eslint-plugin-no-null": "^1.0.2",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-promise": "^6.1.1",
+        "glob": "^8.0.3",
+        "mocha": "^10.0.0",
+        "prettier": "2.7.1",
+        "typescript": "^4.8.4"
+    }
+}

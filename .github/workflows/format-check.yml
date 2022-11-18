@@ -13,10 +13,8 @@ jobs:
       - name: Execute copyright check
         run: ./scripts/run-copyright-check.sh
 
-      - name: Check C code formatting
-        run: ./scripts/run-clang-format.sh -d
-
-      - name: Check Python code formatting
+      - name: Check TS code formatting
         run: |
-          pip3 install --upgrade autopep8
-          ./scripts/run-autopep8.sh
+          npm install -g npm@latest
+          npm install
+          npm run lint

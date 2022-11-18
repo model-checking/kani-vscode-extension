@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "*": ["types/*"],
+        },
+        "incremental": true,
+        "module": "commonjs",
+        "target": "es6",
+        "outDir": "dist",
+        "sourceMap": true,
+        "moduleResolution": "node",
+        "rootDir": ".",
+        "resolveJsonModule": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "lib": ["dom", "es6", "esnext.asynciterable"],
+        "skipLibCheck": true,
+        "jsx": "preserve"
+    },
+    "exclude": ["node_modules", ".vscode-test", "src/testFixtures", "dist"]
+}
