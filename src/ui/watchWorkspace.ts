@@ -1,10 +1,11 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
+
 import {
-	getWorkspaceTestPatterns,
 	findInitialFiles,
 	getOrCreateFile,
+	getWorkspaceTestPatterns,
 } from '../test-tree/createTests';
 
 // Function to re-create test tree and new test cases upon triggering events

@@ -1,9 +1,10 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import { exec } from 'child_process';
-import { KaniResponse } from '../constants';
 import { readFileSync, writeFileSync } from 'fs';
 import { promisify } from 'util';
+
+import { KaniResponse } from '../constants';
 import { getRootDir } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 

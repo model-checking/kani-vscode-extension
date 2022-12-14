@@ -2,20 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
+
+import { gatherTestItems } from './test-tree/buildTree';
 import {
-	getWorkspaceTestPatterns,
+	TestCase,
+	TestFile,
 	findInitialFiles,
 	getOrCreateFile,
+	getWorkspaceTestPatterns,
 	testData,
-	TestFile,
-	TestCase,
 } from './test-tree/createTests';
-import { checkFileForProofs } from './ui/sourceCodeParser';
-import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
-import { startWatchingWorkspace } from './ui/watchWorkspace';
-import { showInformationMessage } from './ui/showMessage';
 import { callViewerReport } from './ui/reportView/callReport';
-import { gatherTestItems } from './test-tree/buildTree';
+import { showInformationMessage } from './ui/showMessage';
+import { checkFileForProofs } from './ui/sourceCodeParser';
+import { startWatchingWorkspace } from './ui/watchWorkspace';
+import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext) {

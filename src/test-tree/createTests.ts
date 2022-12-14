@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
+
+import { KaniResponse } from '../constants';
 import {
-	runKaniHarness,
 	captureFailedChecks,
 	runCargoKaniTest,
 	runCargoKaniTestForFailedChecks,
+	runKaniHarness,
 } from '../model/kaniBinaryRunner';
-import { KaniResponse } from '../constants';
-import { parseRustfile, checkFileForProofs } from '../ui/sourceCodeParser';
+import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 
 export type KaniData = TestFile | TestCase | string;

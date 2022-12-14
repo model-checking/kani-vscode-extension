@@ -1,9 +1,10 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { Uri, workspace } from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
+
+import { Uri, workspace } from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
 

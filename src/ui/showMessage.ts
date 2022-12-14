@@ -1,6 +1,7 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
+
 import { runCommandPure } from '../model/kaniBinaryRunner';
 
 // Show message to user about running kani or cargo kani as a command on the crate

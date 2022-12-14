@@ -1,10 +1,12 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import process = require('process');
 import { setTimeout } from 'timers/promises';
+
+import * as vscode from 'vscode';
+
 import { checkCargoExist, getRootDir } from '../../utils';
 
 // Call the visualize flag on the harness and render the html page
