@@ -1,0 +1,20 @@
+# Copyright Kani Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+name: Format Check
+on: pull_request
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v2
+
+      - name: Execute copyright check
+        run: ./scripts/run-copyright-check.sh
+
+      - name: Check TS code formatting
+        run: |
+          npm install -g npm@latest
+          npm install
+          npm run lint
