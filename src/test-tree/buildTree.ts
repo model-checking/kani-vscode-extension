@@ -1,3 +1,5 @@
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
 // Place all the items in a collection and convert them into an array of items

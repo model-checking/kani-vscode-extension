@@ -1,3 +1,5 @@
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as parser from '../../ui/sourceCodeParser';
 
 const proofRe = /kani::proof.*((.|\n)*?){/gm;

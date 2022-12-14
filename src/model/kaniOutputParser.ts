@@ -1,3 +1,5 @@
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 import { KaniResponse } from "../constants";
 
 // Failed property location information
