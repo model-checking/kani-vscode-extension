@@ -1,0 +1,49 @@
+import { Uri, workspace } from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { TextDecoder } from 'util';
+
+const textDecoder = new TextDecoder('utf-8');
+
+// Get the raw text from a given file given it's path uri
+export const getContentFromFilesystem = async (uri: Uri) => {
+	try {
+		const rawContent = await workspace.fs.readFile(uri);
+		return textDecoder.decode(rawContent);
+	} catch (e) {
+		console.warn(`Error providing tests for ${uri.fsPath}`, e);
+		return '';
+	}
+};
+
+// Convert path to URI
+export function getRootDirURI(): Uri {
+	let crateURI: Uri = Uri.parse('');
+	if (workspace.workspaceFolders !== undefined) {
+		crateURI = workspace.workspaceFolders[0].uri;
+		return crateURI;
+	}
+
+	return crateURI;
+}
+
+// Get the workspace of the current directory
+export function getRootDir(): string {
+	let crateURI: Uri = Uri.parse('');
+	if (workspace.workspaceFolders !== undefined) {
+		crateURI = workspace.workspaceFolders[0].uri;
+		return crateURI.fsPath;
+	}
+
+	return crateURI.fsPath;
+}
+
+// Check if the current crate has cargo.toml or not for switching between kani and cargo kani
+export function checkCargoExist() {
+	const rootDir = getRootDir();
+	if (fs.existsSync(path.join(rootDir, 'Cargo.toml'))) {
+		return true;
+	} else {
+		return false;
+	}
+}
