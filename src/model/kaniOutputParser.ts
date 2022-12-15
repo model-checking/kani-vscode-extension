@@ -2,14 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import { KaniResponse } from '../constants';
 
-// Failed property location information
-interface Location {
-	fileLocation: string;
-	line: number;
-	column: number;
-	function: string;
-}
-
 /**
  * Metadata about the property that needs to be processed before presenting to the UI
  *
@@ -24,7 +16,7 @@ class CheckInstance {
 	propertyName: string;
 	status: string;
 	description: string;
-	location: Location | string;
+	location: string;
 
 	constructor(
 		checkNumber: number,
