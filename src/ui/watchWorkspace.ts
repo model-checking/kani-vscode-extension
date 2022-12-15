@@ -18,7 +18,7 @@ import {
 export function startWatchingWorkspace(
 	controller: vscode.TestController,
 	treeRoot?: vscode.TestItem,
-) {
+): vscode.FileSystemWatcher[] {
 	const watcher = getWorkspaceTestPatterns().map(({ workspaceFolder, pattern }) => {
 		const watcher = vscode.workspace.createFileSystemWatcher(pattern);
 

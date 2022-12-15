@@ -20,6 +20,11 @@ export const testData = new WeakMap<vscode.TestItem, KaniData>();
 // const colorFG = '\u001b[31m';
 // const resetFG = '\u001b[39m';
 
+interface TestFileMetaData {
+	file: vscode.TestItem;
+	data: TestFile;
+}
+
 /**
  * Get rust crates from all the workspaces open on vscode
  *
@@ -47,7 +52,7 @@ export async function findInitialFiles(
 	controller: vscode.TestController,
 	pattern: vscode.GlobPattern,
 	rootItem?: vscode.TestItem,
-) {
+): Promise<void> {
 	for (const file of await vscode.workspace.findFiles(pattern)) {
 		const fileHasProofs = checkFileForProofs(await getContentFromFilesystem(file));
 		if (fileHasProofs) {
@@ -75,7 +80,7 @@ export function getOrCreateFile(
 	controller: vscode.TestController,
 	uri: Uri,
 	rootItem?: vscode.TestItem,
-) {
+): TestFileMetaData {
 	const existing = controller.items.get(uri.toString());
 	if (existing) {
 		return { file: existing, data: testData.get(existing) as TestFile };

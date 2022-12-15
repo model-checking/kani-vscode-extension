@@ -35,7 +35,7 @@ class CheckInstance {
 	/**
 	 * Structured Response for the Diff Output
 	 */
-	public createFailureMessage() {
+	public createFailureMessage(): string {
 		const responseMessage = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}`;
 		return responseMessage;
 	}
@@ -43,7 +43,7 @@ class CheckInstance {
 	/**
 	 * Output text for the message
 	 */
-	public createDisplayMessage() {
+	public createDisplayMessage(): string {
 		const responseMessage = `${this.description}`;
 		return responseMessage;
 	}
@@ -61,7 +61,7 @@ function responseParser(responseString: string) {
 }
 
 // Search for specific results and return the diff messages
-function getResultsSubArray(splittedResponse: string[]) {
+function getResultsSubArray(splittedResponse: string[]): KaniResponse {
 	// Search for sub array containing only the results
 	// and the summary sub array
 	const a: any = splittedResponse.find((element) => element.includes('RESULTS'));
