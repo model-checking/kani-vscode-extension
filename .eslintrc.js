@@ -9,7 +9,7 @@ module.exports = {
         node: true,
         mocha: true,
     },
-    plugins: ['@typescript-eslint', 'header', 'no-null'],
+    plugins: ['@typescript-eslint', 'header', 'no-null', 'eslint-plugin-tsdoc'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/eslint-recommended',
@@ -21,6 +21,7 @@ module.exports = {
     ],
     rules: {
         curly: 2,
+        "tsdoc/syntax": "off",
         'no-async-promise-executor': 'off',
         '@typescript-eslint/no-misused-promises': 'off',
         '@typescript-eslint/prefer-regexp-exec': 'off',

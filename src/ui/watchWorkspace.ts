@@ -8,7 +8,13 @@ import {
 	getWorkspaceTestPatterns,
 } from '../test-tree/createTests';
 
-// Function to re-create test tree and new test cases upon triggering events
+/**
+ * Function to re-create test tree and new test cases upon triggering events
+ *
+ * @param controller - Test Controller that contains all test cases and files
+ * @param rootItem - Root node of the test tree
+ * @returns - file system watcher that is notified on file events
+ */
 export function startWatchingWorkspace(
 	controller: vscode.TestController,
 	treeRoot?: vscode.TestItem,

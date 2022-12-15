@@ -1,6 +1,7 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
+
 import { checkFileForProofs } from '../../ui/sourceCodeParser';
 import { programWithProof, rustFileWithoutProof } from '../test-programs/sampleRustString';
 import { getHarnessListFromParsing, getUnwindMapFromParsing } from '../test-programs/stubbedParser';

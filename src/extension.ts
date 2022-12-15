@@ -31,6 +31,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	const crateURI: Uri = getRootDirURI();
 	// console.log(crateURI);
 	const treeRoot = controller.createTestItem('Kani proofs', 'Kani Proofs', crateURI);
+
+	/**
+	 * Run Handler is the controlled callback function that runs whenever a test case is clicked
+	 *
+	 * @param request
+	 * @param cancellation
+	 */
 	const runHandler = (request: vscode.TestRunRequest, cancellation: vscode.CancellationToken) => {
 		const queue: { test: vscode.TestItem; data: TestCase }[] = [];
 		const run = controller.createTestRun(request);
@@ -84,6 +91,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		};
 
+		/**
+		 * Run the test queue serially
+		 * TODO: Parallelize test runs if they don't have race conditions
+		 */
 		const runTestQueue = async () => {
 			for (const { test, data } of queue) {
 				run.appendOutput(`Running ${test.id}\r\n`);
@@ -106,6 +117,9 @@ export async function activate(context: vscode.ExtensionContext) {
 			run.end();
 		};
 
+		/**
+		 *  Map from line uri to coverage info
+		 */
 		run.coverageProvider = {
 			provideFileCoverage() {
 				const coverage: vscode.FileCoverage[] = [];
@@ -122,9 +136,17 @@ export async function activate(context: vscode.ExtensionContext) {
 			},
 		};
 
+		// Initial test case scan across the crate
 		discoverTests(request.include ?? gatherTestItems(controller.items)).then(runTestQueue);
 	};
 
+	/**
+	 * Refresh Handler is run whenever the refresh button is clicked
+	 * Actions -
+	 * 1. Get all relevant files
+	 * 2. Check if they contain proofs
+	 * 3. Update test tree with test cases from relevant files
+	 */
 	controller.refreshHandler = async () => {
 		await Promise.all(
 			getWorkspaceTestPatterns().map(({ pattern }) => findInitialFiles(controller, pattern)),
@@ -134,8 +156,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	};
 
+	// Add run handler to run profile as a test run (vs debug run)
 	controller.createRunProfile('Kani Proofs', vscode.TestRunProfileKind.Run, runHandler, true);
 
+	// Add crate watcher to vscode subscriptions
 	context.subscriptions.push(...startWatchingWorkspace(controller, treeRoot));
 
 	controller.resolveHandler = async (item) => {
@@ -188,6 +212,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		data.addToCrate(controller, file, treeRoot);
 	}
 
+	// Update the test tree with proofs whenever a test case is opened
+	// TODO: Make this configurable
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
 		// vscode.workspace.onDidChangeTextDocument(e => updateNodeForDocument(e.document)),

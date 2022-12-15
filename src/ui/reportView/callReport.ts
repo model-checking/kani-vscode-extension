@@ -9,9 +9,14 @@ import * as vscode from 'vscode';
 
 import { checkCargoExist, getRootDir } from '../../utils';
 
-// Call the visualize flag on the harness and render the html page
+/**
+ * Call the visualize flag on the harness and render the html page
+ *
+ * @param commandURI - vscode command that is being executed
+ * @param harnessObj - metadata about the harness
+ */
 export async function callViewerReport(
-	message: string,
+	commandURI: string,
 	harnessObj: { harnessName: string; harnessFile: string },
 ): Promise<void> {
 	let finalCommand: string = '';
@@ -24,28 +29,10 @@ export async function callViewerReport(
 	// Detect source file
 	const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
-	if (platform === 'darwin') {
-		const isCargo = checkCargoExist();
-		if (!isCargo) {
-			const command: string = message === 'Kani.runViewerReport' ? 'kani' : 'cargo kani';
-			finalCommand = `${command} ${harnessFile} --harness ${harnessName} --visualize`;
-			searchDir = path.join(getRootDir());
-		} else {
-			const command: string = message === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
-			finalCommand = `${command} --harness ${harnessName} --visualize`;
-			searchDir = path.join(getRootDir(), 'target');
-		}
-	} else if (platform === 'linux') {
-		const isCargo = checkCargoExist();
-		if (!isCargo) {
-			const command: string = message === 'Kani.runViewerReport' ? 'kani' : 'cargo kani';
-			finalCommand = `${command} ${harnessFile} --harness ${harnessName} --visualize`;
-			searchDir = path.join(getRootDir());
-		} else {
-			const command: string = message === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
-			finalCommand = `${command} --harness ${harnessName} --visualize`;
-			searchDir = path.join(getRootDir(), 'target');
-		}
+	if (platform === 'darwin' || platform == 'linux') {
+		const responseObject = createCommand(commandURI, harnessFile, harnessName);
+		finalCommand = responseObject.finalCommand;
+		searchDir = responseObject.searchDir;
 	}
 
 	terminal.sendText(finalCommand);
@@ -73,6 +60,26 @@ export async function callViewerReport(
 	// If they do then, listen to the port yourself
 	// Kill Terminal after viewing the report
 	terminal.show();
+}
+
+// Check if cargo toml exists and create corresponding kani command
+function createCommand(commandURI: string, harnessFile: string, harnessName: string) {
+	// Check if cargo toml exists
+	const isCargo = checkCargoExist();
+	let finalCommand: string = '';
+	let searchDir: string = '';
+
+	if (!isCargo) {
+		const command: string = commandURI === 'Kani.runViewerReport' ? 'kani' : 'cargo kani';
+		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --visualize`;
+		searchDir = path.join(getRootDir());
+	} else {
+		const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
+		finalCommand = `${command} --harness ${harnessName} --visualize`;
+		searchDir = path.join(getRootDir(), 'target');
+	}
+
+	return { finalCommand, searchDir };
 }
 
 // 	Find the path of the report from the harness name

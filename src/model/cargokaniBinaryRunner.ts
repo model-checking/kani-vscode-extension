@@ -10,26 +10,40 @@ import { responseParserInterface } from './kaniOutputParser';
 
 const execAsync = promisify(exec);
 
-// Run the cargo kani command output, and return the parsed output in a object
+/**
+ * Run the cargo kani command output, and return the parsed output in a object
+ *
+ * @param harnessName - Name of the harness, to be passed as the argument
+ * @param harnessCommand - The command to execute
+ * @returns Processed Kani output, which is passed to the UI
+ *
+ */
 export function runCargoKaniCommand(harnessName: string, harnessCommand: string) {
-	// const outputTempFile = getRootDir() + '/target/' + `${harnessName}.tmp`;
 	const rootDir = getRootDir();
 	const outputTempFile = `${rootDir}/target/${harnessName}.tmp`;
 	return runCommandStoreOutput(harnessCommand, outputTempFile);
 }
 
-// Run command to write the output to temp file and return the read response object
-async function runCommandStoreOutput(command: string, outputFilePath: string): Promise<KaniResponse> {
-    try {
-        // This async call may fail.
-        const output = await execAsync(command);
+/**
+ * Run command to write the output to temp file and return the read response object
+ *
+ * @param command - The command to execute
+ * @param outputFilePath - Path to temp file that contains kani output
+ * @returns Processed Kani output from the filepath provided
+ */
+async function runCommandStoreOutput(
+	command: string,
+	outputFilePath: string,
+): Promise<KaniResponse> {
+	try {
+		// This async call may fail.
+		const output = await execAsync(command);
 		writeFileSync(outputFilePath, output.stdout);
 		return readFromTempFile(outputFilePath);
-    }
-	catch (error) {
+	} catch (error) {
 		const response: KaniResponse = {
-			failedProperty: "",
-			failedMessages: ""
+			failedProperty: '',
+			failedMessages: '',
 		};
 		return response;
 	}

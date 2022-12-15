@@ -24,7 +24,12 @@ export const checkTextForProofs = (text: string): boolean => {
 	return count(text) > 0;
 };
 
-// Find kani proof and bolero proofs and extract metadata out of them from source text
+/**
+ * Find kani proof and bolero proofs and extract metadata out of them from source text
+ *
+ * @param text - raw source text from a file
+ * @param events - events that trigger parsing and extracting the harness metadata
+ */
 export const parseRustfile = (
 	text: string,
 	events: {
@@ -113,8 +118,13 @@ export const parseRustfile = (
 	}
 };
 
-// Given a bolero test case, extract the unwind integer value
-// TODO: ensure that unwind value is within limits
+/**
+ * Given a bolero test case, extract the unwind integer value
+ * TODO: ensure that unwind value is within limits
+ *
+ * @param harnessLineRaw - unprocessed line from the source text
+ * @returns - Unwind value as integer
+ */
 export function extractUnwindValueFromTest(harnessLineRaw: string): number {
 	let unwindValue = NaN;
 	const harnessLineSplit = harnessLineRaw.split('\n');
@@ -126,29 +136,32 @@ export function extractUnwindValueFromTest(harnessLineRaw: string): number {
 	return unwindValue;
 }
 
-// Given a source line, extract the function name from the bolero test case
-export function extractFunctionLineFromTest(harnessLineRaw: string): string {
-	let harnessLine = '';
-	const harnessLineSplit = harnessLineRaw.split('\n');
-	if (searchKaniConfig(harnessLineSplit)) {
-		harnessLine = cleanFunctionLine(harnessLineSplit);
-	} else {
-		return '';
-	}
-	return harnessLine;
-}
+/**
+ * Given any array of lines of code containing kani annotations, extract the integer corresponding
+ * to the unwind value and return
+ *
+ * @param harnessLineSplit
+ * @returns unwind value
+ */
+export function extractUnwindValue(harnessLineSplit: string[]): number {
+	for (let x of harnessLineSplit) {
+		x = x.trim();
 
-// Util function to search for kani annotation as a substring in the array of regex matches
-export function searchKaniConfig(harnessLineSplit: string[]): boolean {
-	for (const line of harnessLineSplit) {
-		if (line.includes(kaniConfig)) {
-			return true;
+		if (x.includes('kani::unwind(')) {
+			const unwindValue = parseInt(x.match(/\d+/)![0]);
+			return unwindValue;
 		}
 	}
-	return false;
+
+	return NaN;
 }
 
-// Return unwind value given a string containing the bolero proof and it's matching harness case
+/**
+ * Return unwind value given a string containing the bolero proof and it's matching harness case
+ *
+ * @param harnessLineRaw
+ * @returns - unwind value
+ */
 export function extractUnwindValueFromLine(harnessLineRaw: string): number {
 	let unwindValue = NaN;
 	let harnessLine = '';
@@ -162,7 +175,29 @@ export function extractUnwindValueFromLine(harnessLineRaw: string): number {
 	return unwindValue;
 }
 
-// Extract function name from the line
+/**
+ *  Given a source line, extract the function name from the bolero test case
+ *
+ * @param harnessLineRaw - unprocessed line from the source text
+ * @returns - name of the function containing proof annotation
+ */
+export function extractFunctionLineFromTest(harnessLineRaw: string): string {
+	let harnessLine = '';
+	const harnessLineSplit = harnessLineRaw.split('\n');
+	if (searchKaniConfig(harnessLineSplit)) {
+		harnessLine = cleanFunctionLine(harnessLineSplit);
+	} else {
+		return '';
+	}
+	return harnessLine;
+}
+
+/**
+ * Extract function name from the line
+ *
+ * @param harnessLineRaw
+ * @returns - function name
+ */
 export function extractFunctionLine(harnessLineRaw: string): string {
 	let harnessLine = '';
 	if (!harnessLineRaw.startsWith('fn')) {
@@ -176,7 +211,12 @@ export function extractFunctionLine(harnessLineRaw: string): string {
 	return harnessLine;
 }
 
-// Clean out noise from the raw line and return the function name
+/**
+ * Clean out noise from the raw line and return the function name
+ *
+ * @param harnessLineSplit
+ * @returns - function name
+ */
 export function cleanFunctionLine(harnessLineSplit: string[]): string {
 	for (let x of harnessLineSplit) {
 		x = x.trim();
@@ -202,22 +242,12 @@ export function cleanFunctionLine(harnessLineSplit: string[]): string {
 	return harnessLineSplit.join('');
 }
 
-// Given any array of lines of code containing kani annotations, extract the integer corresponding
-// to the unwind value and return
-export function extractUnwindValue(harnessLineSplit: string[]): number {
-	for (let x of harnessLineSplit) {
-		x = x.trim();
-
-		if (x.includes('kani::unwind(')) {
-			const unwindValue = parseInt(x.match(/\d+/)![0]);
-			return unwindValue;
-		}
-	}
-
-	return NaN;
-}
-
-// extract the harness name given the processed source line
+/**
+ * Extract the harness name given the processed source line
+ *
+ * @param harnessLine
+ * @returns - harness name
+ */
 export function getHarnessNameFromHarnessLine(harnessLine: string): string {
 	const harnessLineSplit: string[] = harnessLine.split(' ');
 
@@ -241,7 +271,12 @@ export function getHarnessNameFromHarnessLine(harnessLine: string): string {
 	return harnessName;
 }
 
-// util function to return matched regex patterns
+/**
+ * util function to return matched regex patterns
+ *
+ * @param test - Match Array from RegEx
+ * @returns Tuple from unprocessed line that matches regex and corresponding harness
+ */
 export function getHarnessInformationFromTest(test: RegExpMatchArray): [string, string] {
 	if (!test || test.length < 2) {
 		throw new Error('Regex Match incorrect');
@@ -250,4 +285,14 @@ export function getHarnessInformationFromTest(test: RegExpMatchArray): [string, 
 	const mapLineValue: string = test.at(0) as string;
 
 	return [harnessLineRaw, mapLineValue];
+}
+
+// Util function to search for kani annotation as a substring in the array of regex matches
+function searchKaniConfig(harnessLineSplit: string[]): boolean {
+	for (const line of harnessLineSplit) {
+		if (line.includes(kaniConfig)) {
+			return true;
+		}
+	}
+	return false;
 }

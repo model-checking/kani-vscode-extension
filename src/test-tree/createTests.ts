@@ -1,7 +1,7 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
-import { Uri } from 'vscode';
+import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
 import {
@@ -20,6 +20,11 @@ export const testData = new WeakMap<vscode.TestItem, KaniData>();
 // const colorFG = '\u001b[31m';
 // const resetFG = '\u001b[39m';
 
+/**
+ * Get rust crates from all the workspaces open on vscode
+ *
+ * @returns List of workspace folders if they are rust crates
+ */
 export function getWorkspaceTestPatterns() {
 	if (!vscode.workspace.workspaceFolders) {
 		return [];
@@ -32,6 +37,12 @@ export function getWorkspaceTestPatterns() {
 }
 
 // Find all the files in the crate that contain kani or bolero proofs
+/**
+ *
+ * @param controller - Test Controller that contains all test cases and files
+ * @param pattern - Glob pattern for rust files that helps find all relevant files
+ * @param rootItem - Root node of the test tree
+ */
 export async function findInitialFiles(
 	controller: vscode.TestController,
 	pattern: vscode.GlobPattern,
@@ -52,7 +63,14 @@ export async function findInitialFiles(
 	}
 }
 
-// if a processed file contains kani proofs, return file, else, create a test file and return it
+/**
+ * If a processed file contains kani proofs, return file, else, create a test file and return it
+ *
+ * @param controller - Test Controller that contains all test cases and files
+ * @param uri
+ * @param rootItem
+ * @returns - Test File and it's metadata as a record
+ */
 export function getOrCreateFile(
 	controller: vscode.TestController,
 	uri: Uri,
@@ -76,10 +94,12 @@ export function getOrCreateFile(
 	return { file, data };
 }
 
-/*
-	A test file is a collection of harnesses that belong to the same rust file
- 	This allows users to run proofs organized by files as well as individual test cases
-*/
+/**
+ * A test file is a collection of harnesses that belong to the same rust file
+ * This allows users to run proofs organized by files as well as individual test cases
+ *
+ * @class TestFile
+ */
 export class TestFile {
 	public didResolve = false;
 
@@ -87,7 +107,7 @@ export class TestFile {
 		controller: vscode.TestController,
 		item: vscode.TestItem,
 		treeRoot?: vscode.TestItem,
-	) {
+	): Promise<void> {
 		try {
 			const content = await getContentFromFilesystem(item.uri!);
 			item.error = undefined;
@@ -108,7 +128,7 @@ export class TestFile {
 		controller: vscode.TestController,
 		content: string,
 		item: vscode.TestItem,
-	) {
+	): void {
 		const ancestors = [{ item, children: [] as vscode.TestItem[] }];
 
 		const ascend = (depth: number) => {
@@ -149,7 +169,7 @@ export class TestFile {
 		controller: vscode.TestController,
 		currentFile: vscode.TestItem,
 		rootItem: vscode.TestItem,
-	) {
+	): void {
 		if (this.didResolve) {
 			rootItem.children.add(currentFile);
 			controller.items.add(rootItem);
@@ -169,7 +189,7 @@ export class TestCase {
 		readonly harness_unwind_value?: number,
 	) {}
 
-	getLabel() {
+	getLabel(): string {
 		return `${this.harness_name}`;
 	}
 
@@ -205,8 +225,9 @@ export class TestCase {
 					this.harness_name,
 					failedMessage,
 				);
+
+				// Create failure case and return UI
 				const messageWithLink = currentCase.handleFailure();
-				// console.log(messageWithLink);
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
 			}
@@ -230,7 +251,6 @@ export class TestCase {
 					failedMessage,
 				);
 				const messageWithLink = currentCase.handleFailure();
-				// console.log(messageWithLink);
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
 			}
@@ -238,7 +258,7 @@ export class TestCase {
 	}
 
 	// Run kani on the file, crate with given arguments
-	async evaluate(rsFile: string, harness_name: string, args?: number) {
+	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			//TODO: Change this to running harness
 			if (args === undefined || NaN) {
@@ -249,10 +269,12 @@ export class TestCase {
 				return outputKani;
 			}
 		}
+
+		return 0;
 	}
 
 	// Run kani on bolero test case, file, crate with given arguments
-	async evaluateTest(harness_name: string, harness_args?: number) {
+	async evaluateTest(harness_name: string, harness_args?: number): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (harness_args === undefined || NaN) {
 				const outputKaniTest = await runCargoKaniTest(harness_name);
@@ -262,12 +284,13 @@ export class TestCase {
 				return outputKaniTest;
 			}
 		}
+		return 0;
 	}
 }
 
-/*
-	A failed case contains additional information about the property that has failed
-*/
+/**
+ * A failed case contains additional information about the property that has failed
+ */
 class FailedCase extends TestCase {
 	private readonly failed_checks: string;
 	private readonly failed_message?: string;
@@ -285,18 +308,18 @@ class FailedCase extends TestCase {
 		}
 	}
 
-	getLabel() {
+	getLabel(): string {
 		return `${this.harness_name}`;
 	}
 
-	handleFailure(): vscode.TestMessage {
+	handleFailure(): TestMessage {
 		const finalFailureMessage = this.appendLink(this.failed_checks);
-		const messageWithLink = new vscode.TestMessage(finalFailureMessage);
+		const messageWithLink = new TestMessage(finalFailureMessage);
 		return messageWithLink;
 	}
 
 	// Add link and present to the user as the diff message
-	appendLink(failedChecks: string) {
+	appendLink(failedChecks: string): MarkdownString {
 		const sample = this.makeMarkdown(failedChecks);
 		// vscode.commands.executeCommand('Kani.runViewerReport', this.harness_name);
 		const args = [{ harnessName: this.harness_name, harnessFile: this.file_name }];
@@ -311,7 +334,7 @@ class FailedCase extends TestCase {
 	}
 
 	// create the failure ui in markdown text with link
-	makeMarkdown(failedChecks: string) {
+	makeMarkdown(failedChecks: string): MarkdownString {
 		const placeholderMarkdown: vscode.MarkdownString = new vscode.MarkdownString('', true);
 		placeholderMarkdown.supportHtml = true;
 		placeholderMarkdown.isTrusted = true;

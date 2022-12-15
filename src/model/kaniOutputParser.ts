@@ -1,6 +1,6 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { KaniResponse } from "../constants";
+import { KaniResponse } from '../constants';
 
 // Failed property location information
 interface Location {
@@ -10,9 +10,15 @@ interface Location {
 	function: string;
 }
 
-/*
-	Object to store metadata about the failed property
-*/
+/**
+ * Metadata about the property that needs to be processed before presenting to the UI
+ *
+ * @param checkNumber - Index of the property
+ * @param propertyName - Name of property
+ * @param status - verification status (i.e success|failure)
+ * @param description - Description of failure from Kani
+ * @param location - Location information from Kani on the failed property
+ */
 class CheckInstance {
 	checkNumber: number;
 	propertyName: string;
@@ -110,7 +116,7 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 	const failureResponse: KaniResponse = {
 		failedProperty: responseMessage,
 		failedMessages: displayMessage,
-	}
+	};
 	return failureResponse;
 }
 

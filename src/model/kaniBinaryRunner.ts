@@ -1,24 +1,24 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import { exec } from 'child_process';
-import { readFileSync } from 'fs';
 
 import * as vscode from 'vscode';
 
-import { KaniArguments , KaniConstants, KaniResponse } from '../constants';
+import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { getRootDir } from '../utils';
 import { runCargoKaniCommand } from './cargokaniBinaryRunner';
 import { responseParserInterface } from './kaniOutputParser';
 
 const execAsync = exec;
 
-// Run Kani as a command line binary
-export async function runKani(rsFile: string | unknown): Promise<any> {
-	const kaniOutput = await catchOutput(`${KaniConstants.KaniExecutableName} ${rsFile}`);
-	return kaniOutput;
-}
-
-// Run Kani as a command line binary
+/**
+ * Run Kani as a command line binary
+ *
+ * @param rsFile - Path to the file that is to be verified
+ * @param harnessName - name of the harness that is to be verified
+ * @param args - arguments to Kani if provided
+ * @returns verification status (i.e success or failure)
+ */
 export async function runKaniHarness(
 	rsFile: string,
 	harnessName: string,
@@ -35,7 +35,14 @@ export async function runKaniHarness(
 	return kaniOutput;
 }
 
-// Run cargo Kani --tests as a command line binary
+/**
+ * Run cargo Kani --tests as a command line binary for harness declared
+ * under #[test]
+ *
+ * @param harnessName - name of the harness that is to be verified
+ * @param args - arguments to Kani if provided
+ * @returns verification status (i.e success or failure)
+ */
 export async function runCargoKaniTest(harnessName: string, args?: number): Promise<any> {
 	const crateURI = getRootDir();
 	// console.log(crateURI);
@@ -50,13 +57,18 @@ export async function runCargoKaniTest(harnessName: string, args?: number): Prom
 	return kaniOutput;
 }
 
-// Run cargo Kani --tests as a command line binary and capture failed checks
+/**
+ * Run cargo Kani --tests as a command line binary and capture failed checks
+ *
+ * @param harnessName - name of the harness that is to be verified
+ * @param args - arguments to Kani if provided
+ * @returns processed response from Kani
+ */
 export function runCargoKaniTestForFailedChecks(
 	harnessName: string,
 	args?: number,
 ): Promise<KaniResponse> {
 	const crateURI = getRootDir();
-	// console.log(crateURI);
 	let harnessCommand = '';
 	if (args === undefined || NaN) {
 		harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
@@ -67,28 +79,15 @@ export function runCargoKaniTestForFailedChecks(
 	return kaniOutput;
 }
 
-// Run Cargo Kani as a command line binary for --test proofs
-export function runKaniHarnessTestOnTerminal(harnessName: string) {
-	const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
-	const harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
-	terminal.sendText(harnessCommand);
-	terminal.show();
-}
-
-export function runKaniHarnessTest(harnessName: string) {
-	runKaniHarnessTestOnTerminal(harnessName);
-}
-
-// Run Kani and return the checks that failed as a lazy process
-export async function captureFailedChecksForTests(
-	harnessName: string,
-	harnessCommand: string,
-): Promise<KaniResponse> {
-	const kaniOutput: KaniResponse = await runCargoKaniCommand(harnessName, harnessCommand);
-	return kaniOutput;
-}
-
-// Run Kani and return the checks that failed as a lazy process
+/**
+ *
+ * Return failed checks as a lazy process when run by test case
+ *
+ * @param rsFile - Path to the file that is to be verified
+ * @param harnessName - name of the harness that is to be verified
+ * @param args - arguments to Kani if provided
+ * @returns
+ */
 export async function captureFailedChecks(
 	rsFile: string,
 	harnessName: string,
@@ -124,19 +123,13 @@ export async function runCommandPure(command: string): Promise<void> {
 	terminal.show();
 }
 
-// Generic function to run a command (Kani | Cargo Kani)
-export async function runCommandTemps(): Promise<void> {
-	if (vscode.workspace.workspaceFolders !== undefined) {
-		const f: string = vscode.workspace.workspaceFolders[0].uri.fsPath;
-		const metadataPath = `lib.kani-metadata.json`;
-		const jsonFileName = `${f}/src/${metadataPath}`;
-
-		const finaldata = readJSONSync(jsonFileName);
-
-		finaldata.proof_harnesses.forEach((harness: { prettyName: any }) => {
-			console.log(harness.prettyName);
-		});
-	}
+// Run Kani and return the checks that failed as a lazy process
+async function captureFailedChecksForTests(
+	harnessName: string,
+	harnessCommand: string,
+): Promise<KaniResponse> {
+	const kaniOutput: KaniResponse = await runCargoKaniCommand(harnessName, harnessCommand);
+	return kaniOutput;
 }
 
 // Run a command and capture the command line output into a string
@@ -181,11 +174,4 @@ async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 			}
 		});
 	});
-}
-
-// Read file as a json
-function readJSONSync(filename: string) {
-	const result = readFileSync(filename, 'utf-8');
-	const jsonData = JSON.parse(result);
-	return jsonData;
 }

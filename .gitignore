@@ -57,3 +57,4 @@ tsconfig.lsif.json
 .vscode-test/
 out/
 *.d.ts
+.clang-format
