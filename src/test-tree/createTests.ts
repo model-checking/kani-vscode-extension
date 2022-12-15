@@ -348,7 +348,7 @@ class FailedCase extends TestCase {
 
 		for (const line of lines) {
 			placeholderMarkdown.appendMarkdown(line);
-			placeholderMarkdown.appendMarkdown('<br />');
+			placeholderMarkdown.appendMarkdown('<br>');
 		}
 
 		return placeholderMarkdown;
