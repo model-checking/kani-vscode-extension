@@ -17,7 +17,7 @@ export function checkFileForProofs(content: string): boolean {
 
 // Match source text for Kani annotations
 export const checkTextForProofs = (text: string): boolean => {
-	const count = (str: string) => {
+	const count = (str: string): number => {
 		return ((str || '').match(proofRe) || []).length;
 	};
 
@@ -35,7 +35,7 @@ export const parseRustfile = (
 	events: {
 		onTest(range: vscode.Range, name: string, harnessType?: boolean, harnessArgs?: number): void;
 	},
-) => {
+): void => {
 	const allProofs = text.matchAll(proofRe);
 	const allTests = text.matchAll(testRe);
 	const harnessMap = new Map<string, string>();
@@ -140,7 +140,7 @@ export function extractUnwindValueFromTest(harnessLineRaw: string): number {
  * Given any array of lines of code containing kani annotations, extract the integer corresponding
  * to the unwind value and return
  *
- * @param harnessLineSplit
+ * @param harnessLineSplit - Array of source lines that belong to the harness
  * @returns unwind value
  */
 export function extractUnwindValue(harnessLineSplit: string[]): number {
@@ -159,7 +159,7 @@ export function extractUnwindValue(harnessLineSplit: string[]): number {
 /**
  * Return unwind value given a string containing the bolero proof and it's matching harness case
  *
- * @param harnessLineRaw
+ * @param harnessLineRaw - Unprocessed source line
  * @returns - unwind value
  */
 export function extractUnwindValueFromLine(harnessLineRaw: string): number {
@@ -195,7 +195,7 @@ export function extractFunctionLineFromTest(harnessLineRaw: string): string {
 /**
  * Extract function name from the line
  *
- * @param harnessLineRaw
+ * @param harnessLineRaw - unprocessed line from the source text
  * @returns - function name
  */
 export function extractFunctionLine(harnessLineRaw: string): string {
@@ -214,7 +214,7 @@ export function extractFunctionLine(harnessLineRaw: string): string {
 /**
  * Clean out noise from the raw line and return the function name
  *
- * @param harnessLineSplit
+ * @param harnessLineSplit - Array of source lines that belong to the harness
  * @returns - function name
  */
 export function cleanFunctionLine(harnessLineSplit: string[]): string {
@@ -245,7 +245,7 @@ export function cleanFunctionLine(harnessLineSplit: string[]): string {
 /**
  * Extract the harness name given the processed source line
  *
- * @param harnessLine
+ * @param harnessLine - Post processed and cleaned source line
  * @returns - harness name
  */
 export function getHarnessNameFromHarnessLine(harnessLine: string): string {

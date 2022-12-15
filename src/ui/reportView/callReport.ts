@@ -9,6 +9,11 @@ import * as vscode from 'vscode';
 
 import { checkCargoExist, getRootDir } from '../../utils';
 
+interface htmlMetaData {
+	finalCommand: string;
+	searchDir: string;
+}
+
 /**
  * Call the visualize flag on the harness and render the html page
  *
@@ -63,7 +68,7 @@ export async function callViewerReport(
 }
 
 // Check if cargo toml exists and create corresponding kani command
-function createCommand(commandURI: string, harnessFile: string, harnessName: string) {
+function createCommand(commandURI: string, harnessFile: string, harnessName: string): htmlMetaData {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
 	let finalCommand: string = '';

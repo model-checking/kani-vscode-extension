@@ -54,7 +54,7 @@ export function responseParserInterface(responseString: string): KaniResponse {
 	return responseParser(responseString);
 }
 
-function responseParser(responseString: string) {
+function responseParser(responseString: string): KaniResponse {
 	const splittedResponse = responseString.split('\n\n');
 	const temp = getResultsSubArray(splittedResponse);
 	return temp;

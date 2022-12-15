@@ -17,8 +17,6 @@ export type KaniData = TestFile | TestCase | string;
 
 // WeakMap as recommended by VSCode Guidelines to store additional info
 export const testData = new WeakMap<vscode.TestItem, KaniData>();
-// const colorFG = '\u001b[31m';
-// const resetFG = '\u001b[39m';
 
 interface TestFileMetaData {
 	file: vscode.TestItem;
@@ -30,6 +28,7 @@ interface TestFileMetaData {
  *
  * @returns List of workspace folders if they are rust crates
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function getWorkspaceTestPatterns() {
 	if (!vscode.workspace.workspaceFolders) {
 		return [];
@@ -72,8 +71,8 @@ export async function findInitialFiles(
  * If a processed file contains kani proofs, return file, else, create a test file and return it
  *
  * @param controller - Test Controller that contains all test cases and files
- * @param uri
- * @param rootItem
+ * @param uri - get uri of the file (if processed already)
+ * @param rootItem - root node of the test tree
  * @returns - Test File and it's metadata as a record
  */
 export function getOrCreateFile(
@@ -103,7 +102,7 @@ export function getOrCreateFile(
  * A test file is a collection of harnesses that belong to the same rust file
  * This allows users to run proofs organized by files as well as individual test cases
  *
- * @class TestFile
+ * class - TestFile
  */
 export class TestFile {
 	public didResolve = false;
@@ -136,6 +135,7 @@ export class TestFile {
 	): void {
 		const ancestors = [{ item, children: [] as vscode.TestItem[] }];
 
+		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 		const ascend = (depth: number) => {
 			while (ancestors.length > depth) {
 				const finished = ancestors.pop()!;

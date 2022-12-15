@@ -21,7 +21,7 @@ module.exports = {
     ],
     rules: {
         curly: 2,
-        "tsdoc/syntax": "off",
+        "tsdoc/syntax": "warn",
         'no-async-promise-executor': 'off',
         '@typescript-eslint/no-misused-promises': 'off',
         '@typescript-eslint/prefer-regexp-exec': 'off',
@@ -38,7 +38,7 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
-        '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'error',
         'sort-imports': 'off',
         '@typescript-eslint/no-namespace': 'off',
         'no-inner-declarations': 'off',

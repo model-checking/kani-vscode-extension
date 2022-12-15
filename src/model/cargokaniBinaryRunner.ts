@@ -18,7 +18,10 @@ const execAsync = promisify(exec);
  * @returns Processed Kani output, which is passed to the UI
  *
  */
-export function runCargoKaniCommand(harnessName: string, harnessCommand: string): Promise<KaniResponse> {
+export function runCargoKaniCommand(
+	harnessName: string,
+	harnessCommand: string,
+): Promise<KaniResponse> {
 	const rootDir = getRootDir();
 	const outputTempFile = `${rootDir}/target/${harnessName}.tmp`;
 	return runCommandStoreOutput(harnessCommand, outputTempFile);

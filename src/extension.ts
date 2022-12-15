@@ -19,7 +19,7 @@ import { startWatchingWorkspace } from './ui/watchWorkspace';
 import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
 
 // Entry point of the extension
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
 		vscode.window.showErrorMessage('Cannot find Cargo.toml to run Cargo Kani on crate');
 	}
@@ -35,16 +35,19 @@ export async function activate(context: vscode.ExtensionContext) {
 	/**
 	 * Run Handler is the controlled callback function that runs whenever a test case is clicked
 	 *
-	 * @param request
-	 * @param cancellation
+	 * @param request - Run Request from VSCode, an event token that is passed upon when a test case is clicked
+	 * @param cancellation - Cancellation even token that is passed when the stop button is clicked
 	 */
-	const runHandler = (request: vscode.TestRunRequest, cancellation: vscode.CancellationToken) => {
+	const runHandler = (
+		request: vscode.TestRunRequest,
+		cancellation: vscode.CancellationToken,
+	): void => {
 		const queue: { test: vscode.TestItem; data: TestCase }[] = [];
 		const run = controller.createTestRun(request);
 		// map of file uris to statements on each line:
 		const coveredLines = new Map<string, (vscode.StatementCoverage | undefined)[]>();
 
-		const discoverTests = async (tests: Iterable<vscode.TestItem>) => {
+		const discoverTests = async (tests: Iterable<vscode.TestItem>): Promise<void> => {
 			for (const test of tests) {
 				// check if each test is in exclude list
 				if (request.exclude?.includes(test)) {
@@ -95,7 +98,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		 * Run the test queue serially
 		 * TODO: Parallelize test runs if they don't have race conditions
 		 */
-		const runTestQueue = async () => {
+		const runTestQueue = async (): Promise<void> => {
 			for (const { test, data } of queue) {
 				run.appendOutput(`Running ${test.id}\r\n`);
 				if (cancellation.isCancellationRequested) {
@@ -121,7 +124,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		 *  Map from line uri to coverage info
 		 */
 		run.coverageProvider = {
-			provideFileCoverage() {
+			provideFileCoverage(): vscode.FileCoverage[] {
 				const coverage: vscode.FileCoverage[] = [];
 				for (const [uri, statements] of coveredLines) {
 					coverage.push(
@@ -147,7 +150,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	 * 2. Check if they contain proofs
 	 * 3. Update test tree with test cases from relevant files
 	 */
-	controller.refreshHandler = async () => {
+	controller.refreshHandler = async (): Promise<void> => {
 		await Promise.all(
 			getWorkspaceTestPatterns().map(({ pattern }) => findInitialFiles(controller, pattern)),
 		);
@@ -162,7 +165,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Add crate watcher to vscode subscriptions
 	context.subscriptions.push(...startWatchingWorkspace(controller, treeRoot));
 
-	controller.resolveHandler = async (item) => {
+	controller.resolveHandler = async (item): Promise<void> => {
 		if (!item) {
 			context.subscriptions.push(...startWatchingWorkspace(controller));
 			return;
@@ -194,7 +197,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 
 	// Callback function to Find or create files, update test tree and present to user upon trigger
-	async function updateNodeForDocument(e: vscode.TextDocument) {
+	async function updateNodeForDocument(e: vscode.TextDocument): Promise<void> {
 		if (e.uri.scheme !== 'file') {
 			return;
 		}

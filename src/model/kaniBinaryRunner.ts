@@ -94,7 +94,7 @@ export async function captureFailedChecks(
 	args?: number,
 ): Promise<KaniResponse> {
 	let harnessCommand = '';
-	if (args === undefined || NaN) {
+	if (args === undefined) {
 		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
@@ -133,14 +133,14 @@ async function captureFailedChecksForTests(
 }
 
 // Run a command and capture the command line output into a string
-async function catchOutput(command: string) {
+async function catchOutput(command: string): Promise<number> {
 	const process = await execLog(command);
 	// console.log(process);
 	return process;
 }
 
 // exectute the command as a command line argument
-async function execLog(command: string) {
+async function execLog(command: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		execAsync(command, (error, stdout, stderr) => {
 			if (error) {

@@ -5,7 +5,7 @@ import * as parser from '../../ui/sourceCodeParser';
 const proofRe = /kani::proof.*((.|\n)*?){/gm;
 const testRe = /#\[test].*((.|\n)*?){/gm;
 
-const parseRustfile = (text: string) => {
+const parseRustfile = (text: string): any => {
 	const allProofs = text.matchAll(proofRe);
 	const allTests = text.matchAll(testRe);
 	const harnessMap = new Map<string, string>();
@@ -46,10 +46,10 @@ const parseRustfile = (text: string) => {
 	return [harnessList, unwindMap];
 };
 
-export function getHarnessListFromParsing(text: string) {
+export function getHarnessListFromParsing(text: string): Set<string> {
 	return parseRustfile(text).at(0);
 }
 
-export function getUnwindMapFromParsing(text: string) {
+export function getUnwindMapFromParsing(text: string): Map<string, number> {
 	return parseRustfile(text).at(1);
 }
