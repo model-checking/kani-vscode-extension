@@ -4,8 +4,6 @@ A Visual Studio Code test extension that allows users to run their [Kani Rust Ve
 
 ## Usage
 
-Here's how the kani extension looks like -
-
 ![Kani Usage](resources/screenshots/kani-demo.png)
 
 1.  Open a rust crate or workspace in Visual Studio Code
