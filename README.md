@@ -37,7 +37,6 @@ This extension is still in beta and has not yet been published on the marketplac
 1.  In the file dialog that opens, navigate to the location where you downloaded the `.vsix` file and select it.
 1.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed successfully.
 
-You can install an extension from the `.vsix` file opening the `.vsix` file directly from the file explorer as shown in the image below.
 
 ![Kani install vsix](resources/screenshots/install-kani-extension.png)
 
