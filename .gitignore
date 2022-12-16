@@ -53,3 +53,8 @@ tsconfig.lsif.json
 *.lsif
 *.db
 .clang-format
+*.vsix
+.vscode-test/
+out/
+*.d.ts
+.clang-format

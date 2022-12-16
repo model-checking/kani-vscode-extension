@@ -13,6 +13,8 @@ expected
 gitattributes
 gitignore
 gitmodules
+.prettierrc
+makefile
 ignore
 scripts/copyright-exclude
 .json
