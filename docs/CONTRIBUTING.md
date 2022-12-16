@@ -43,10 +43,6 @@ GitHub provides additional document on [forking a repository](https://help.githu
 ## Finding contributions to work on
 Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any 'help wanted' issues is a great place to start.
 
-## Code of Conduct
-This project has adopted the [Rust Code Of Conduct](https://www.rust-lang.org/policies/code-of-conduct).
-See [here](./CODE_OF_CONDUCT.md) for more details.
-
 ## Security issue notifications
 If you think you have discovered a security issue please write to us at kani-verifier-security@amazon.com; do **NOT** open a public issue.
 Sensitive information can be encrypted using our [PGP key](https://github.com/model-checking/kani/blob/main/kani-verifier-security.public.key).
