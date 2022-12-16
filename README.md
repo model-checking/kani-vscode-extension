@@ -2,9 +2,21 @@
 
 A Visual Studio Code test extension that allows users to run their [Kani Rust Verifier](https://github.com/model-checking/kani) proofs and view traces natively in vscode.
 
+Note - This extension is still in beta and yet to be ready to be published on the marketplace. If you wish to use it now, you can download the binary from the [github page](https://github.com/model-checking/kani-vscode-extension) and install it manually.
+
+## Usage
+
+Here's how the kani extension looks like -
+
+![Kani Usage](resources/screenshots/kani-demo.png)
+
+1.  Open a rust crate or workspace in Visual Studio Code
+2.  Navigate to the testing panel and expand on the Kani Proofs tree where the proofs are stored
+3.  Click on the play button beside the harness or the filename or the crate to run Kani on the respective test case.
+
 ## Features
 
--   Run proofs natively just like any other test
+-   Run proofs natively the same way you run your test
 -   View verification result and failed properties
 -   View counter example report for failed proofs
 
@@ -23,47 +35,23 @@ instructions for manual installation.
 
 ### Install through Binary
 
-1.  Download the Kani extension binary from the github page.
-2.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
-3.  Select the `Extensions: Install from VSIX...` command.
-4.  In the file dialog that opens, navigate to the locatioon where you downloaded the `.vsix` file and select it.
-5.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed succesfully.
+Download the Kani extension binary from the github page.
 
-Alternatively, you can install an extension from a `.vsix` file opening the `.vsix` file directly from the file explorer.
+You can install an extension from the `.vsix` file opening the `.vsix` file directly from the file explorer as shown in the image below.
+
+![Kani install vsix](resources/screenshots/install-kani-extension.png)
+
+Alternatiely,
+
+1.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
+2.  Select the `Extensions: Install from VSIX...` command.
+3.  In the file dialog that opens, navigate to the locatioon where you downloaded the `.vsix` file and select it.
+4.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed succesfully.
 
 You can then enable the extension by going to the extension page on the `Extensions` view in VSCode and and clicking on the `enable` button.
 
+If you want to build from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
 
-### Manual Installation
-
-On MacOS, use the [homebrew](https://brew.sh/) package manager to install with
-
-```
-brew install node
-git clone https://github.com/model-checking/kani-vscode-extension kani-extension
-cd kani-extension
-npm install
-make
-make install
-```
-
-The [homebrew](https://brew.sh/) page gives instructions for
-installing `brew`.
-The command `brew install node` installs the [Node.js](https://nodejs.org)
-runtime for [JavaScript](https://en.wikipedia.org/wiki/JavaScript),
-including the [npm](https://docs.npmjs.com/about-npm) package manager.
-The command `npm install` installs the dependencies listed in
-packages.json into the directory `node_modules`.
-The command `make` builds the extension into a file
-named `kani-extension-VERSION.vsix` where `VERSION` is the version number
-given in package.json.
-The command `make install` runs `code` from the command line to
-install the extension in Code.
-
-On other platforms, you can download a Node.js installer for your platform
-from the [Node.js download page](https://nodejs.org/en/download),
-and the remaining instructions should work.
-On Ubuntu, you can install Node.js with just `apt install nodejs`.
 
 ### Packaging
 
@@ -73,45 +61,17 @@ To create a VSIX package of the previously built sources, create the package thr
 npx vsce package
 ```
 
-### Coding Conventions
-
-We use ESLint with the TypeScript plugin to ensure code consistency across the whole source. Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extension in VSCode to have live feedback. Alternatively, you can check your code from the command line by running `npm run lint`.
-
-
 ## Troubleshooting
 
 ### Stuck at *Verifying...*
 
-Under certain circumstances, the extension appears to be stuck at *Verifying...*. This occurs due to a stack overflow or some other underlying verification issue.
+There is a known [issue](https://github.com/model-checking/kani-vscode-extension/issues/6) where the extension appears to get stuck if the stack size is too small.
+If you experience this issue, you can increase the stack size or stop the verification. We are working to removing the need to increase the stack size.
 
-To overcome this issue, set the environment variable `COMPlus_DefaultStackSize` to a sufficiently large value before starting VSCode. For example:
-
-```sh
-# Increase the stack size
-export COMPlus_DefaultStackSize=100000
-# Launch VSCode
-code
-```
-
-OR
-
-stop the verification using the stop button on the testing panel.
-
-## Usage
-
-1.  Open a rust crate or workspace in Visual Studio Code
-2.  Navigate to the testing panel and expand on the Kani Proofs tree where the proofs are stored
-3.  Click on the play button beside the harness or the filename or the crate to run Kani on the respective test case.
-
-## Release Notes
-
-### 0.0.1
-
--   Initial release (Work in progress)
 
 ## Security
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+See [SECURITY](.github/SECURITY.md) for more information.
 
 ## License
 
