@@ -33,7 +33,9 @@ At that point, users will install the debugger just like any other extension
 in the marketplace from within Code itself.  For now, follow these
 instructions for manual installation.
 
-### Install through Binary
+### Install through the Binary
+
+The first step would be to install [kani](https://github.com/model-checking/kani#installation) seperately on your local machine before installing the extension.
 
 Download the Kani extension binary from the github page.
 
@@ -68,6 +70,19 @@ npx vsce package
 There is a known [issue](https://github.com/model-checking/kani-vscode-extension/issues/6) where the extension appears to get stuck if the stack size is too small.
 If you experience this issue, you can increase the stack size or stop the verification. We are working to removing the need to increase the stack size.
 
+Here is the workaround for the issue,
+The user can set the environment variable `COMPlus_DefaultStackSize` to a sufficiently large value before starting VSCode. For example:
+
+```sh
+# Increase the stack size
+export COMPlus_DefaultStackSize=100000
+# Launch VSCode
+code
+```
+
+OR
+
+stop the verification using the stop button on the testing panel.
 
 ## Security
 

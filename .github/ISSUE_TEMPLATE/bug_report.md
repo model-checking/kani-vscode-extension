@@ -8,7 +8,7 @@ If this is a security issue, please report it following the
 [security reporting procedure](https://github.com/model-checking/kani/security/policy).
 -->
 
-Screenshot of the issue or description: *explanation*
+Screenshot or description of the issue: *explanation*
 
 I expected to see this happen: *explanation*
 
