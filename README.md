@@ -2,8 +2,6 @@
 
 A Visual Studio Code test extension that allows users to run their [Kani Rust Verifier](https://github.com/model-checking/kani) proofs and view traces natively in vscode.
 
-Note - This extension is still in beta and yet to be ready to be published on the marketplace. If you wish to use it now, you can download the binary from the [github page](https://github.com/model-checking/kani-vscode-extension) and install it manually.
-
 ## Usage
 
 Here's how the kani extension looks like -
@@ -27,11 +25,7 @@ Here's how the kani extension looks like -
 
 ## Installation
 
-We expect this proof debugger to be released as an extension in the
-[Visual Studio Code Marketplace](https://marketplace.visualstudio.com/VSCode).
-At that point, users will install the debugger just like any other extension
-in the marketplace from within Code itself.  For now, follow these
-instructions for manual installation.
+This extension is still in beta and yet to be ready to be published on the marketplace. If you wish to use it now, you can download the binary from the [github page](https://github.com/model-checking/kani-vscode-extension) and install it manually.
 
 ### Install through the Binary
 
