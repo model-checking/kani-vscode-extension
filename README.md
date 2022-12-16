@@ -30,7 +30,7 @@ This extension is still in beta and yet to be ready to be published on the marke
 ### Install through the Binary
 
 The first step would be to install [kani](https://github.com/model-checking/kani#installation) seperately on your local machine before installing the extension.
-
+Download the binary [from our release page](https://github.com/model-checking/kani-vscode-extension/releases/).
 
 1.  Download the Kani extension binary from the github page.
 2.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
