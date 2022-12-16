@@ -40,7 +40,6 @@ This extension is still in beta and has not yet been published on the marketplac
 
 ![Kani install vsix](resources/screenshots/install-kani-extension.png)
 
-You can then enable the extension by going to the extension page on the `Extensions` view in VSCode and and clicking on the `enable` button.
 
 If you want to build and package from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
 
