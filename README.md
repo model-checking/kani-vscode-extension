@@ -35,13 +35,13 @@ instructions for manual installation.
 
 ### Install through Binary
 
-Download the Kani extension binary from the github page.
+Download the binary [from our release page](https://github.com/model-checking/kani-vscode-extension/releases/)
 
 You can install an extension from the `.vsix` file opening the `.vsix` file directly from the file explorer as shown in the image below.
 
 ![Kani install vsix](resources/screenshots/install-kani-extension.png)
 
-Alternatiely,
+Alternatively,
 
 1.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
 2.  Select the `Extensions: Install from VSIX...` command.
