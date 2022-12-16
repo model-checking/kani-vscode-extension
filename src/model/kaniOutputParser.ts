@@ -36,7 +36,7 @@ class CheckInstance {
 	 * Structured Response for the Diff Output
 	 */
 	public createFailureMessage(): string {
-		const responseMessage = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}`;
+		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}`;
 		return responseMessage;
 	}
 
@@ -44,7 +44,7 @@ class CheckInstance {
 	 * Output text for the message
 	 */
 	public createDisplayMessage(): string {
-		const responseMessage = `${this.description}`;
+		const responseMessage: string = `${this.description}`;
 		return responseMessage;
 	}
 }
@@ -55,9 +55,9 @@ export function responseParserInterface(responseString: string): KaniResponse {
 }
 
 function responseParser(responseString: string): KaniResponse {
-	const splittedResponse = responseString.split('\n\n');
-	const temp = getResultsSubArray(splittedResponse);
-	return temp;
+	const splittedResponse: string[] = responseString.split('\n\n');
+	const responseObject: KaniResponse = getResultsSubArray(splittedResponse);
+	return responseObject;
 }
 
 // Search for specific results and return the diff messages
@@ -67,8 +67,8 @@ function getResultsSubArray(splittedResponse: string[]): KaniResponse {
 	const a: any = splittedResponse.find((element) => element.includes('RESULTS'));
 	const b: any = splittedResponse.find((element) => element.includes('SUMMARY'));
 
-	const checkResponse = splittedResponse.indexOf(a);
-	const summaryResponse = splittedResponse.indexOf(b);
+	const checkResponse: number = splittedResponse.indexOf(a);
+	const summaryResponse: number = splittedResponse.indexOf(b);
 
 	// Get a subarray of the checks together
 	const checksArray: Array<string> = [];
@@ -88,7 +88,7 @@ function captureChecksArray(checksArray: Array<string>): KaniResponse {
 
 function cleanChecksArray(checksArray: Array<string>): Array<string> {
 	if (checksArray.length > 0 && checksArray[0].includes('RESULTS:\n')) {
-		const cleanFirstCheck = checksArray[0].replace('RESULTS:\n', '');
+		const cleanFirstCheck: string = checksArray[0].replace('RESULTS:\n', '');
 		checksArray[0] = cleanFirstCheck;
 	}
 	return checksArray;
@@ -98,7 +98,7 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 	let responseMessage = ``;
 	let displayMessage = ``;
 	for (let i = 0; i < checksArray.length; i++) {
-		const checkInstance = checksArray[i].split('\n');
+		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
 		if (checkInstanceObject.status !== 'SUCCESS') {
 			responseMessage += checkInstanceObject.createFailureMessage();
@@ -122,11 +122,11 @@ function convertChecktoObject(checkInstance: Array<string>): CheckInstance {
 
 	for (let i = 0; i < checkInstance.length; i++) {
 		if (i === 0) {
-			const property = checkInstance[i].split(': ');
+			const property: string[] = checkInstance[i].split(': ');
 			checkNumber = parseInt(property[0].replace(/^\D+/g, ''));
 			propertyName = property[1];
 		} else {
-			const responseVariable = splitString(checkInstance[i]);
+			const responseVariable: Variable = splitString(checkInstance[i]);
 			switch (responseVariable.field) {
 				case 'Status':
 					status = responseVariable.message;
@@ -143,7 +143,7 @@ function convertChecktoObject(checkInstance: Array<string>): CheckInstance {
 		}
 	}
 
-	const checkInstanceObject = new CheckInstance(
+	const checkInstanceObject: CheckInstance = new CheckInstance(
 		checkNumber!,
 		propertyName!,
 		status!,
@@ -162,7 +162,7 @@ interface Variable {
 // Return {field: message} from [..field: message]
 function splitString(stringliteral: string): Variable {
 	stringliteral = stringliteral.trim();
-	const field = stringliteral.slice(0, stringliteral.indexOf(':')).split(' ')[1];
-	const message = stringliteral.slice(stringliteral.indexOf(':') + 1).trim();
+	const field: string = stringliteral.slice(0, stringliteral.indexOf(':')).split(' ')[1];
+	const message: string = stringliteral.slice(stringliteral.indexOf(':') + 1).trim();
 	return { field, message };
 }

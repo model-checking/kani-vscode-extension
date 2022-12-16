@@ -33,7 +33,7 @@ export const checkTextForProofs = (text: string): boolean => {
 export const parseRustfile = (
 	text: string,
 	events: {
-		onTest(range: vscode.Range, name: string, harnessType?: boolean, harnessArgs?: number): void;
+		onTest(range: vscode.Range, name: string, harnessType: boolean, harnessArgs?: number): void;
 	},
 ): void => {
 	const allProofs = text.matchAll(proofRe);
@@ -48,10 +48,10 @@ export const parseRustfile = (
 	// Bolero proofs
 	// TODO: Needs refactoring
 	for (const test of allTests) {
-		const [harnessLineRaw, mapLineValue] = getHarnessInformationFromTest(test);
-		const unwindValue = extractUnwindValueFromTest(harnessLineRaw);
-		let harnessLine = extractFunctionLineFromTest(harnessLineRaw);
-		const harnessName = getHarnessNameFromHarnessLine(harnessLine);
+		const [harnessLineRaw, mapLineValue]: [string, string] = getHarnessInformationFromTest(test);
+		const unwindValue: number = extractUnwindValueFromTest(harnessLineRaw);
+		let harnessLine: string = extractFunctionLineFromTest(harnessLineRaw);
+		const harnessName: string = getHarnessNameFromHarnessLine(harnessLine);
 		harnessLine = harnessLine.replace(/\s+/g, '').concat('{');
 		testList.add(harnessName);
 		harnessList.add(harnessName);
@@ -64,10 +64,10 @@ export const parseRustfile = (
 
 	// Kani proofs
 	for (const test of allProofs) {
-		const [harnessLineRaw, mapLineValue] = getHarnessInformationFromTest(test);
-		const unwindValue = extractUnwindValueFromLine(harnessLineRaw);
-		let harnessLine = extractFunctionLine(harnessLineRaw);
-		const harnessName = getHarnessNameFromHarnessLine(harnessLine);
+		const [harnessLineRaw, mapLineValue]: [string, string] = getHarnessInformationFromTest(test);
+		const unwindValue: number = extractUnwindValueFromLine(harnessLineRaw);
+		let harnessLine: string = extractFunctionLine(harnessLineRaw);
+		const harnessName: string = getHarnessNameFromHarnessLine(harnessLine);
 		harnessLine = harnessLine.replace(/\s+/g, '');
 		harnessList.add(harnessName);
 		harnessMap.set(harnessLine, harnessName);
@@ -82,16 +82,16 @@ export const parseRustfile = (
 		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
 			// Get the current line from source and check if
 			// the maps contain the line or not
-			const line = lines[lineNo];
-			let strippedLine = line.replace(/\s+/g, '');
+			const line: string = lines[lineNo];
+			let strippedLine: string = line.replace(/\s+/g, '');
 			for (const fnMod of functionModifiers) {
 				if (strippedLine.startsWith(fnMod)) {
 					strippedLine = strippedLine.replace(fnMod, '');
 				}
 			}
 			if (harnessMap.has(strippedLine)) {
-				const name = harnessMap.get(strippedLine)!;
-				const unwind = unwindMap.get(strippedLine)!;
+				const name: string = harnessMap.get(strippedLine)!;
+				const unwind: number = unwindMap.get(strippedLine)!;
 				// Range should cover the entire harness
 				const range = new vscode.Range(
 					new vscode.Position(lineNo, 0),
@@ -126,7 +126,7 @@ export const parseRustfile = (
  * @returns - Unwind value as integer
  */
 export function extractUnwindValueFromTest(harnessLineRaw: string): number {
-	let unwindValue = NaN;
+	let unwindValue: number = NaN;
 	const harnessLineSplit = harnessLineRaw.split('\n');
 	if (searchKaniConfig(harnessLineSplit)) {
 		unwindValue = extractUnwindValue(harnessLineSplit);
@@ -148,7 +148,7 @@ export function extractUnwindValue(harnessLineSplit: string[]): number {
 		x = x.trim();
 
 		if (x.includes('kani::unwind(')) {
-			const unwindValue = parseInt(x.match(/\d+/)![0]);
+			const unwindValue: number = parseInt(x.match(/\d+/)![0]);
 			return unwindValue;
 		}
 	}
@@ -163,7 +163,7 @@ export function extractUnwindValue(harnessLineSplit: string[]): number {
  * @returns - unwind value
  */
 export function extractUnwindValueFromLine(harnessLineRaw: string): number {
-	let unwindValue = NaN;
+	let unwindValue: number = NaN;
 	let harnessLine = '';
 	if (!harnessLineRaw.startsWith('fn')) {
 		if (harnessLineRaw.charAt(0) === '\n') {
@@ -182,7 +182,7 @@ export function extractUnwindValueFromLine(harnessLineRaw: string): number {
  * @returns - name of the function containing proof annotation
  */
 export function extractFunctionLineFromTest(harnessLineRaw: string): string {
-	let harnessLine = '';
+	let harnessLine: string = '';
 	const harnessLineSplit = harnessLineRaw.split('\n');
 	if (searchKaniConfig(harnessLineSplit)) {
 		harnessLine = cleanFunctionLine(harnessLineSplit);
@@ -199,7 +199,7 @@ export function extractFunctionLineFromTest(harnessLineRaw: string): string {
  * @returns - function name
  */
 export function extractFunctionLine(harnessLineRaw: string): string {
-	let harnessLine = '';
+	let harnessLine: string = '';
 	if (!harnessLineRaw.startsWith('fn')) {
 		if (harnessLineRaw.charAt(0) === '\n') {
 			harnessLine = harnessLineRaw.replace('\n', '').concat('{');
@@ -230,9 +230,9 @@ export function cleanFunctionLine(harnessLineSplit: string[]): string {
 			x.startsWith('const') ||
 			x.startsWith('unsafe')
 		) {
-			const functionNameSplit = x.split('fn');
+			const functionNameSplit: string[] = x.split('fn');
 			if (functionNameSplit.length >= 2) {
-				const functionName = 'fn ' + functionNameSplit[1].trim();
+				const functionName: string = 'fn ' + functionNameSplit[1].trim();
 				return functionName;
 			} else {
 				return '';
@@ -251,20 +251,21 @@ export function cleanFunctionLine(harnessLineSplit: string[]): string {
 export function getHarnessNameFromHarnessLine(harnessLine: string): string {
 	const harnessLineSplit: string[] = harnessLine.split(' ');
 
-	if (harnessLineSplit === undefined || harnessLineSplit.length < 2) {
-		return '';
-	}
-	if (harnessLineSplit.at(1) === undefined) {
+	if (
+		harnessLineSplit === undefined ||
+		harnessLineSplit.length < 2 ||
+		harnessLineSplit.at(1) === undefined
+	) {
 		return '';
 	}
 
-	const harnessNamePostFunction = harnessLineSplit.at(1);
+	const harnessNamePostFunction: string | undefined = harnessLineSplit.at(1);
 
 	if (harnessNamePostFunction === undefined || harnessNamePostFunction.split('(').length === 0) {
 		return '';
 	}
 
-	const harnessName = harnessNamePostFunction.split('(').at(0);
+	const harnessName: string | undefined = harnessNamePostFunction.split('(').at(0);
 	if (harnessName === undefined) {
 		return '';
 	}

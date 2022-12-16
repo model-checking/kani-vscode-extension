@@ -7,6 +7,7 @@ import { setTimeout } from 'timers/promises';
 
 import * as vscode from 'vscode';
 
+import { KaniArguments, KaniConstants } from '../../constants';
 import { checkCargoExist, getRootDir } from '../../utils';
 
 interface htmlMetaData {
@@ -22,20 +23,21 @@ interface htmlMetaData {
  */
 export async function callViewerReport(
 	commandURI: string,
-	harnessObj: { harnessName: string; harnessFile: string },
+	harnessObj: { harnessName: string; harnessFile: string, harnessType: boolean },
 ): Promise<void> {
 	let finalCommand: string = '';
 	let searchDir: string = '';
 
-	const platform = process.platform;
-	const harnessName = harnessObj.harnessName;
-	const harnessFile = harnessObj.harnessFile;
+	const platform: NodeJS.Platform = process.platform;
+	const harnessName: string = harnessObj.harnessName;
+	const harnessFile: string = harnessObj.harnessFile;
+	const harnessType: boolean = harnessObj.harnessType;
 
 	// Detect source file
 	const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
 	if (platform === 'darwin' || platform == 'linux') {
-		const responseObject = createCommand(commandURI, harnessFile, harnessName);
+		const responseObject: htmlMetaData = createCommand(commandURI, harnessFile, harnessName, harnessType);
 		finalCommand = responseObject.finalCommand;
 		searchDir = responseObject.searchDir;
 	}
@@ -46,20 +48,21 @@ export async function callViewerReport(
 	// First, fix this command
 	const filename: string = harnessName;
 
+	// Replace timeout with await for the final commmand to finish running
 	await setTimeout(5000);
-	const pythonCommand = `python3 -m http.server --directory`;
+	const pythonCommand: string = `python3 -m http.server --directory`;
 
-	const filePath = findPath(searchDir, filename);
+	const filePath: string = findPath(searchDir, filename);
 	if (!filePath) {
 		console.error(' Could not find the filepath for the report ');
 	}
-	const HTMLfilePath = path.join(filePath, 'html');
+	const HTMLfilePath: string = path.join(filePath, 'html');
 
 	// const url = 'http://stackoverflow.com';
 	// require('child_process').exec(`open ${url}`);
 
 	// const HTMLfilePathFull = path.join(HTMLfilePath, 'index.html');
-	const fullReportCommand = pythonCommand + ` ` + HTMLfilePath;
+	const fullReportCommand: string = pythonCommand + ` ` + HTMLfilePath;
 	terminal.sendText(fullReportCommand);
 
 	// If they do then, listen to the port yourself
@@ -68,7 +71,7 @@ export async function callViewerReport(
 }
 
 // Check if cargo toml exists and create corresponding kani command
-function createCommand(commandURI: string, harnessFile: string, harnessName: string): htmlMetaData {
+function createCommand(commandURI: string, harnessFile: string, harnessName: string, harnessType: boolean): htmlMetaData {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
 	let finalCommand: string = '';
@@ -79,9 +82,14 @@ function createCommand(commandURI: string, harnessFile: string, harnessName: str
 		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --visualize`;
 		searchDir = path.join(getRootDir());
 	} else {
-		const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
-		finalCommand = `${command} --harness ${harnessName} --visualize`;
-		searchDir = path.join(getRootDir(), 'target');
+		if(harnessType) {
+			const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
+			finalCommand = `${command} --harness ${harnessName} --visualize`;
+			searchDir = path.join(getRootDir(), 'target');
+		} else {
+			finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --visualize`;
+			searchDir = path.join(getRootDir(), 'target');
+		}
 	}
 
 	return { finalCommand, searchDir };

@@ -5,6 +5,7 @@ import { Uri } from 'vscode';
 
 import { gatherTestItems } from './test-tree/buildTree';
 import {
+	KaniData,
 	TestCase,
 	TestFile,
 	findInitialFiles,
@@ -24,13 +25,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.window.showErrorMessage('Cannot find Cargo.toml to run Cargo Kani on crate');
 	}
 
-	const controller = vscode.tests.createTestController('Kani Proofs', 'Kani Proofs');
+	const controller: vscode.TestController = vscode.tests.createTestController(
+		'Kani Proofs',
+		'Kani Proofs',
+	);
 
 	// create a uri for the root folder
 	context.subscriptions.push(controller);
 	const crateURI: Uri = getRootDirURI();
-	// console.log(crateURI);
-	const treeRoot = controller.createTestItem('Kani proofs', 'Kani Proofs', crateURI);
+	const treeRoot: vscode.TestItem = controller.createTestItem(
+		'Kani proofs',
+		'Kani Proofs',
+		crateURI,
+	);
 
 	/**
 	 * Run Handler is the controlled callback function that runs whenever a test case is clicked
@@ -43,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		cancellation: vscode.CancellationToken,
 	): void => {
 		const queue: { test: vscode.TestItem; data: TestCase }[] = [];
-		const run = controller.createTestRun(request);
+		const run: vscode.TestRun = controller.createTestRun(request);
 		// map of file uris to statements on each line:
 		const coveredLines = new Map<string, (vscode.StatementCoverage | undefined)[]>();
 
@@ -54,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					continue;
 				}
 				// data is test data
-				const data = testData.get(test);
+				const data: KaniData | undefined = testData.get(test);
 				// console.log("Data for each test is", data);
 				// check if this is an object of class testcase (that we wrote)
 				if (data instanceof TestCase) {
@@ -78,7 +85,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				// to prevent re-processing the lines
 				if (test.uri && !coveredLines.has(test.uri.toString())) {
 					try {
-						const lines = (await getContentFromFilesystem(test.uri)).split('\n');
+						const lines: string[] = (await getContentFromFilesystem(test.uri)).split('\n');
 						coveredLines.set(
 							test.uri.toString(),
 							lines.map((lineText, lineNo) =>
@@ -108,7 +115,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					await data.run(test, run);
 				}
 
-				const lineNo = test.range!.start.line;
+				const lineNo: number = test.range!.start.line;
 				const fileCoverage = coveredLines.get(test.uri!.toString());
 				if (fileCoverage) {
 					fileCoverage[lineNo]!.executionCount++;
@@ -170,7 +177,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			context.subscriptions.push(...startWatchingWorkspace(controller));
 			return;
 		}
-		const data = testData.get(item);
+		const data: KaniData | undefined = testData.get(item);
 		if (data instanceof TestFile) {
 			await data.updateFromDisk(controller, item);
 			data.addToCrate(controller, item, treeRoot);

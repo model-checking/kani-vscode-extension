@@ -6,13 +6,13 @@ export interface KaniResponse {
 }
 
 export namespace KaniConstants {
-	export const KaniExecutableName = `kani`;
-	export const CargoKaniExecutableName = `cargo kani`;
+	export const KaniExecutableName: string = `kani`;
+	export const CargoKaniExecutableName: string = `cargo kani`;
 }
 
 export namespace KaniArguments {
-	export const unwindFlag = `--unwind`;
-	export const harnessFlag = `--harness`;
-	export const testsFlag = `--tests`;
-	export const outputFormatFlag = `--output-format`;
+	export const unwindFlag: string = `--unwind`;
+	export const harnessFlag: string = `--harness`;
+	export const testsFlag: string = `--tests`;
+	export const outputFormatFlag: string = `--output-format`;
 }

@@ -40,34 +40,15 @@ export async function runKaniHarness(
  * under #[test]
  *
  * @param harnessName - name of the harness that is to be verified
+ * @param failedCheck - If the verification has already failed, then process the kani output lazily
  * @param args - arguments to Kani if provided
  * @returns verification status (i.e success or failure)
  */
-export async function runCargoKaniTest(harnessName: string, args?: number): Promise<any> {
-	const crateURI = getRootDir();
-	// console.log(crateURI);
-	let harnessCommand = '';
-	if (args === undefined || NaN) {
-		harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
-	} else {
-		harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
-	}
-	console.log(harnessCommand);
-	const kaniOutput = await catchOutput(harnessCommand);
-	return kaniOutput;
-}
-
-/**
- * Run cargo Kani --tests as a command line binary and capture failed checks
- *
- * @param harnessName - name of the harness that is to be verified
- * @param args - arguments to Kani if provided
- * @returns processed response from Kani
- */
-export function runCargoKaniTestForFailedChecks(
+export async function runCargoKaniTest(
 	harnessName: string,
+	failedCheck?: boolean,
 	args?: number,
-): Promise<KaniResponse> {
+): Promise<any> {
 	const crateURI = getRootDir();
 	let harnessCommand = '';
 	if (args === undefined || NaN) {
@@ -75,8 +56,13 @@ export function runCargoKaniTestForFailedChecks(
 	} else {
 		harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
-	const kaniOutput = captureFailedChecksForTests(harnessName, harnessCommand);
-	return kaniOutput;
+	if (failedCheck) {
+		const kaniOutput: KaniResponse = await captureFailedChecksForTests(harnessName, harnessCommand);
+		return kaniOutput;
+	} else {
+		const kaniOutput: number = await catchOutput(harnessCommand);
+		return kaniOutput;
+	}
 }
 
 /**

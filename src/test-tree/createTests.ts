@@ -4,12 +4,7 @@ import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import {
-	captureFailedChecks,
-	runCargoKaniTest,
-	runCargoKaniTestForFailedChecks,
-	runKaniHarness,
-} from '../model/kaniBinaryRunner';
+import { captureFailedChecks, runCargoKaniTest, runKaniHarness } from '../model/kaniBinaryRunner';
 import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 
@@ -53,7 +48,7 @@ export async function findInitialFiles(
 	rootItem?: vscode.TestItem,
 ): Promise<void> {
 	for (const file of await vscode.workspace.findFiles(pattern)) {
-		const fileHasProofs = checkFileForProofs(await getContentFromFilesystem(file));
+		const fileHasProofs: boolean = checkFileForProofs(await getContentFromFilesystem(file));
 		if (fileHasProofs) {
 			if (rootItem) {
 				getOrCreateFile(controller, file, rootItem);
@@ -85,9 +80,13 @@ export function getOrCreateFile(
 		return { file: existing, data: testData.get(existing) as TestFile };
 	}
 
-	const file = controller.createTestItem(uri.toString(), uri.path.split('/').pop()!, uri);
+	const file: vscode.TestItem = controller.createTestItem(
+		uri.toString(),
+		uri.path.split('/').pop()!,
+		uri,
+	);
 
-	const data = new TestFile();
+	const data: TestFile = new TestFile();
 	testData.set(file, data);
 	file.canResolveChildren = true;
 
@@ -113,7 +112,7 @@ export class TestFile {
 		treeRoot?: vscode.TestItem,
 	): Promise<void> {
 		try {
-			const content = await getContentFromFilesystem(item.uri!);
+			const content: string = await getContentFromFilesystem(item.uri!);
 			item.error = undefined;
 			this.updateFromContents(controller, content, item);
 			if (treeRoot && this.didResolve) {
@@ -152,10 +151,10 @@ export class TestFile {
 				if (!item.uri || !item.uri.fsPath) {
 					throw new Error('No item or item path found');
 				}
-				const data = new TestCase(item.uri.fsPath, name, harnessType, args);
-				const id = `${item.uri}/${data.getLabel()}`;
+				const data: TestCase = new TestCase(item.uri.fsPath, name, harnessType, args);
+				const id: string = `${item.uri}/${data.getLabel()}`;
 
-				const tcase = controller.createTestItem(id, data.getLabel(), item.uri);
+				const tcase: vscode.TestItem = controller.createTestItem(id, data.getLabel(), item.uri);
 				testData.set(tcase, data);
 				tcase.range = range;
 				parent.children.push(tcase);
@@ -182,15 +181,21 @@ export class TestFile {
 	}
 }
 
-/*
-	Test Case contains metadata about the harness and can run the kani verification process
-	on the given harness.
-*/
+/**
+ * Test Case contains metadata about the harness and can run the kani verification process
+ * on the given harness.
+ *
+ * @param file_name - name of the harness that is to be verified
+ * @param harness_name - name of harness to be verified
+ * @param harness_type - True of proof, false if bolero harness
+ * @param harness_type - unwind value of the harness
+ * @returns verification status (i.e success or failure)
+ */
 export class TestCase {
 	constructor(
 		readonly file_name: string,
 		readonly harness_name: string,
-		readonly harness_type?: boolean,
+		readonly harness_type: boolean,
 		readonly harness_unwind_value?: number,
 	) {}
 
@@ -200,14 +205,14 @@ export class TestCase {
 
 	// Run Kani on the harness, create links and pass/fail ui, present to the user
 	async run(item: vscode.TestItem, options: vscode.TestRun): Promise<void> {
-		const start = Date.now();
+		const start: number = Date.now();
 		if (this.harness_type) {
-			const actual = await this.evaluate(
+			const actual: number = await this.evaluate(
 				this.file_name,
 				this.harness_name,
 				this.harness_unwind_value,
 			);
-			const duration = Date.now() - start;
+			const duration: number = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
 			} else {
@@ -222,17 +227,18 @@ export class TestCase {
 					this.harness_name,
 					this.harness_unwind_value,
 				);
-				const failedChecks = responseObject.failedProperty;
-				const failedMessage = responseObject.failedMessages;
+				const failedChecks: string = responseObject.failedProperty;
+				const failedMessage: string = responseObject.failedMessages;
 				const currentCase = new FailedCase(
 					failedChecks,
 					this.file_name,
 					this.harness_name,
+					this.harness_type,
 					failedMessage,
 				);
 
 				// Create failure case and return UI
-				const messageWithLink = currentCase.handleFailure();
+				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
 			}
@@ -243,19 +249,21 @@ export class TestCase {
 				options.passed(item, duration);
 			} else {
 				const location = new vscode.Location(item.uri!, item.range!);
-				const responseObject: KaniResponse = await runCargoKaniTestForFailedChecks(
+				const responseObject: KaniResponse = await runCargoKaniTest(
 					this.harness_name,
+					true,
 					this.harness_unwind_value,
 				);
-				const failedChecks = responseObject.failedProperty;
-				const failedMessage = responseObject.failedMessages;
+				const failedChecks: string = responseObject.failedProperty;
+				const failedMessage: string = responseObject.failedMessages;
 				const currentCase = new FailedCase(
 					failedChecks,
 					this.file_name,
 					this.harness_name,
+					this.harness_type,
 					failedMessage,
 				);
-				const messageWithLink = currentCase.handleFailure();
+				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
 			}
@@ -282,10 +290,10 @@ export class TestCase {
 	async evaluateTest(harness_name: string, harness_args?: number): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (harness_args === undefined || NaN) {
-				const outputKaniTest = await runCargoKaniTest(harness_name);
+				const outputKaniTest: number = await runCargoKaniTest(harness_name, false);
 				return outputKaniTest;
 			} else {
-				const outputKaniTest = await runCargoKaniTest(harness_name, harness_args);
+				const outputKaniTest: number = await runCargoKaniTest(harness_name, false, harness_args);
 				return outputKaniTest;
 			}
 		}
@@ -304,9 +312,10 @@ class FailedCase extends TestCase {
 		failed_checks: string,
 		file_name: string,
 		harness_name: string,
+		harness_type: boolean,
 		failed_message?: string,
 	) {
-		super(file_name, harness_name);
+		super(file_name, harness_name, harness_type);
 		this.failed_checks = failed_checks;
 		if (failed_message) {
 			this.failed_message = failed_message;
@@ -318,23 +327,21 @@ class FailedCase extends TestCase {
 	}
 
 	handleFailure(): TestMessage {
-		const finalFailureMessage = this.appendLink(this.failed_checks);
+		const finalFailureMessage: MarkdownString = this.appendLink(this.failed_checks);
 		const messageWithLink = new TestMessage(finalFailureMessage);
 		return messageWithLink;
 	}
 
 	// Add link and present to the user as the diff message
 	appendLink(failedChecks: string): MarkdownString {
-		const sample = this.makeMarkdown(failedChecks);
+		const sample: MarkdownString = this.makeMarkdown(failedChecks);
 		// vscode.commands.executeCommand('Kani.runViewerReport', this.harness_name);
-		const args = [{ harnessName: this.harness_name, harnessFile: this.file_name }];
+		const args = [{ harnessName: this.harness_name, harnessFile: this.file_name, harnessType: this.harness_type }];
 		const stageCommandUri = Uri.parse(
 			`command:Kani.runViewerReport?${encodeURIComponent(JSON.stringify(args))}`,
 		);
-		// console.log(stageCommandUri);
 		sample.appendMarkdown(`[View Report for ${this.harness_name}](${stageCommandUri})`);
 
-		// console.log(sample.value);
 		return sample;
 	}
 
@@ -343,6 +350,10 @@ class FailedCase extends TestCase {
 		const placeholderMarkdown: vscode.MarkdownString = new vscode.MarkdownString('', true);
 		placeholderMarkdown.supportHtml = true;
 		placeholderMarkdown.isTrusted = true;
+
+		if(failedChecks === undefined) {
+			return placeholderMarkdown;
+		}
 
 		const lines = failedChecks.split('\n');
 

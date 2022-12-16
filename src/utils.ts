@@ -11,7 +11,7 @@ const textDecoder = new TextDecoder('utf-8');
 // Get the raw text from a given file given it's path uri
 export const getContentFromFilesystem = async (uri: Uri): Promise<string> => {
 	try {
-		const rawContent = await workspace.fs.readFile(uri);
+		const rawContent: Uint8Array = await workspace.fs.readFile(uri);
 		return textDecoder.decode(rawContent);
 	} catch (e) {
 		console.warn(`Error providing tests for ${uri.fsPath}`, e);
@@ -43,7 +43,7 @@ export function getRootDir(): string {
 
 // Check if the current crate has cargo.toml or not for switching between kani and cargo kani
 export function checkCargoExist(): boolean {
-	const rootDir = getRootDir();
+	const rootDir: string = getRootDir();
 	if (fs.existsSync(path.join(rootDir, 'Cargo.toml'))) {
 		return true;
 	} else {

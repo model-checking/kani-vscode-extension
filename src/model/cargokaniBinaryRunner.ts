@@ -22,8 +22,8 @@ export function runCargoKaniCommand(
 	harnessName: string,
 	harnessCommand: string,
 ): Promise<KaniResponse> {
-	const rootDir = getRootDir();
-	const outputTempFile = `${rootDir}/target/${harnessName}.tmp`;
+	const rootDir: string = getRootDir();
+	const outputTempFile: string = `${rootDir}/target/${harnessName}.tmp`;
 	return runCommandStoreOutput(harnessCommand, outputTempFile);
 }
 
@@ -54,7 +54,7 @@ async function runCommandStoreOutput(
 
 // Read cargo kani output from temp file and store it in the response object
 function readFromTempFile(inputFilePath: string): KaniResponse {
-	const kaniOutput = readFileSync(inputFilePath).toString();
+	const kaniOutput: string = readFileSync(inputFilePath).toString();
 	const failureResponse: KaniResponse = responseParserInterface(kaniOutput);
 	return failureResponse;
 }

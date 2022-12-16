@@ -20,7 +20,7 @@ export function startWatchingWorkspace(
 	treeRoot?: vscode.TestItem,
 ): vscode.FileSystemWatcher[] {
 	const watcher = getWorkspaceTestPatterns().map(({ workspaceFolder, pattern }) => {
-		const watcher = vscode.workspace.createFileSystemWatcher(pattern);
+		const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 
 		watcher.onDidCreate((uri) => getOrCreateFile(controller, uri));
 		watcher.onDidChange((uri) => {
