@@ -25,7 +25,7 @@ Here's how the kani extension looks like -
 
 ## Installation
 
-This extension is still in beta and yet to be ready to be published on the marketplace. If you wish to use it now, you can download the binary from the [github page](https://github.com/model-checking/kani-vscode-extension) and install it manually.
+This extension is still in beta and has not yet been published on the marketplace. If you wish to use it now, you can download the binary from the [github page](https://github.com/model-checking/kani-vscode-extension) and install it manually.
 
 ### Install through the Binary
 
