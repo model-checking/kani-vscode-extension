@@ -29,14 +29,13 @@ This extension is still in beta and yet to be ready to be published on the marke
 
 ### Install through the Binary
 
-The first step would be to install [kani](https://github.com/model-checking/kani#installation) seperately on your local machine before installing the extension.
-Download the binary [from our release page](https://github.com/model-checking/kani-vscode-extension/releases/).
-
-1.  Download the Kani extension binary from the github page.
-2.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
-3.  Select the `Extensions: Install from VSIX...` command.
-4.  In the file dialog that opens, navigate to the locatioon where you downloaded the `.vsix` file and select it.
-5.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed succesfully.
+1.  Install kani [following these instructions](https://github.com/model-checking/kani#installation)
+1. If you have not already done so, [install VSCode](https://code.visualstudio.com/download).
+1.  Download the Kani extension binary [from our release page](https://github.com/model-checking/kani-vscode-extension/releases/).
+1.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
+1.  Select the `Extensions: Install from VSIX...` command.
+1.  In the file dialog that opens, navigate to the location where you downloaded the `.vsix` file and select it.
+1.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed successfully.
 
 You can install an extension from the `.vsix` file opening the `.vsix` file directly from the file explorer as shown in the image below.
 
