@@ -21,6 +21,14 @@ given in package.json.
 The command `make install` runs `code` from the command line to
 install the extension in Code.
 
+### Packaging
+
+To create a VSIX package of the previously built sources, create the package through the CLI:
+
+```sh
+npx vsce package
+```
+
 ### Coding Conventions
 
 We use ESLint with the TypeScript plugin to ensure code consistency across the whole source. Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extension in VSCode to have live feedback. Alternatively, you can check your code from the command line by running `npm run lint`.

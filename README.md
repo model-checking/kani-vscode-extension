@@ -44,16 +44,7 @@ You can install an extension from the `.vsix` file opening the `.vsix` file dire
 
 You can then enable the extension by going to the extension page on the `Extensions` view in VSCode and and clicking on the `enable` button.
 
-If you want to build from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
-
-
-### Packaging
-
-To create a VSIX package of the previously built sources, create the package through the CLI:
-
-```sh
-npx vsce package
-```
+If you want to build and package from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
 
 ## Troubleshooting
 
