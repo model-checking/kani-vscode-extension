@@ -31,18 +31,16 @@ This extension is still in beta and yet to be ready to be published on the marke
 
 The first step would be to install [kani](https://github.com/model-checking/kani#installation) seperately on your local machine before installing the extension.
 
-Download the Kani extension binary from the github page.
+
+1.  Download the Kani extension binary from the github page.
+2.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
+3.  Select the `Extensions: Install from VSIX...` command.
+4.  In the file dialog that opens, navigate to the locatioon where you downloaded the `.vsix` file and select it.
+5.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed succesfully.
 
 You can install an extension from the `.vsix` file opening the `.vsix` file directly from the file explorer as shown in the image below.
 
 ![Kani install vsix](resources/screenshots/install-kani-extension.png)
-
-Alternatiely,
-
-1.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
-2.  Select the `Extensions: Install from VSIX...` command.
-3.  In the file dialog that opens, navigate to the locatioon where you downloaded the `.vsix` file and select it.
-4.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed succesfully.
 
 You can then enable the extension by going to the extension page on the `Extensions` view in VSCode and and clicking on the `enable` button.
 
@@ -86,3 +84,8 @@ See [SECURITY](.github/SECURITY.md) for more information.
 
 This code is distributed under the terms of both the MIT license and the Apache License (Version 2.0).
 See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) for details.
+
+## Code of conduct
+
+This project has adopted the [Rust Code Of Conduct](https://www.rust-lang.org/policies/code-of-conduct).
+See [CODE OF CONDUCT](CODE_OF_CONDUCT.md) for details.
