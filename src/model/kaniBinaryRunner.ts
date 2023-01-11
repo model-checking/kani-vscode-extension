@@ -129,16 +129,23 @@ async function catchOutput(command: string): Promise<number> {
 async function execLog(command: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		execAsync(command, (error, stdout, stderr) => {
-			if (error) {
+			if (stderr) {
+				// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
+				// a rustc error or an unhandled kani error
+				vscode.window.showErrorMessage('Kani Executable Crashed due to an underlying rustc error ->\n' + stderr);
+				reject();
+			}
+			else if (error) {
 				if (error.code === 1) {
 					// verification failed
-					// console.log("error code 1", stderr);
 					resolve(1);
 				} else {
-					vscode.window.showErrorMessage('Kani Executable Crashed');
+					// Error is an object created by nodejs created when nodejs cannot execute the command
+					vscode.window.showErrorMessage(`Kani Extension could not execute command ${command} due to error ->\n` + error);
 					reject();
 				}
-			} else {
+			}
+			 else {
 				// verification successful
 				resolve(0);
 			}
