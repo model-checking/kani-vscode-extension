@@ -12,7 +12,7 @@ import { responseParserInterface } from './kaniOutputParser';
 const execAsync = exec;
 
 /**
- * Run Kani as a command line binary
+ * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani
  *
  * @param rsFile - Path to the file that is to be verified
  * @param harnessName - name of the harness that is to be verified
@@ -31,7 +31,12 @@ export async function runKaniHarnessInterface(
 		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
 	const kaniOutput = await catchOutput(harnessCommand);
+
+	// output = 2 indicates there is an underlying error , example import error from rustc. Before crashing the extension completely, we try running cargo kani over the harness
 	if(kaniOutput == 2) {
+
+		vscode.window.showWarningMessage(`Switching to cargo kani as proof runner due to Kani error`);
+
 		const crateURI = getRootDir();
 		let harnessCommand = '';
 
@@ -124,8 +129,22 @@ export async function captureFailedChecks(
 	} else {
 		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
-	const kaniOutput: KaniResponse = await createFailedDiffMessage(harnessCommand);
-	return kaniOutput;
+	const kaniOutput = await createFailedDiffMessage(harnessCommand);
+	if(kaniOutput.failedProperty == "error") {
+		const crateURI = getRootDir();
+		let harnessCommand = '';
+
+		if (args === undefined || NaN) {
+			harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} --output-format terse`;
+		} else {
+			harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args} --output-format terse`;
+		}
+		const kaniOutput = await createFailedDiffMessage(harnessCommand);
+		return kaniOutput;
+	}
+	else{
+		return kaniOutput;
+	}
 }
 
 // Generic function to run a command (Kani | Cargo Kani)
@@ -207,8 +226,8 @@ async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 				resolve(responseObject);
 			} else {
 				// Error Case
-				vscode.window.showErrorMessage('Kani Executable Crashed');
-				reject(`Kani Error`);
+				vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
+				resolve({failedProperty: "error", failedMessages: "error"})
 			}
 		});
 	});
