@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { captureFailedChecks, runCargoKaniTest, runKaniHarness } from '../model/kaniBinaryRunner';
+import { captureFailedChecks, runCargoKaniTest, runKaniHarness, runKaniHarnessInterface } from '../model/kaniBinaryRunner';
 import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 
@@ -275,10 +275,10 @@ export class TestCase {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			//TODO: Change this to running harness
 			if (args === undefined || NaN) {
-				const outputKani: number = await runKaniHarness(rsFile!, harness_name);
+				const outputKani: number = await runKaniHarnessInterface(rsFile!, harness_name);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarness(rsFile!, harness_name, args);
+				const outputKani: number = await runKaniHarnessInterface(rsFile!, harness_name, args);
 				return outputKani;
 			}
 		}
