@@ -1,18 +1,27 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
 import process = require('process');
-import { setTimeout } from 'timers/promises';
 
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
 import { checkCargoExist, getRootDir } from '../../utils';
 
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execPromise = promisify(exec);
+
 interface htmlMetaData {
 	finalCommand: string;
 	searchDir: string;
+}
+
+interface visualizeOutput {
+	statusCode: number;
+	serverCommand: string;
 }
 
 /**
@@ -36,37 +45,31 @@ export async function callViewerReport(
 	// Detect source file
 	const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
+	// Generate the final visualize command for the supported platforms
 	if (platform === 'darwin' || platform == 'linux') {
 		const responseObject: htmlMetaData = createCommand(commandURI, harnessFile, harnessName, harnessType);
-		finalCommand = responseObject.finalCommand;
+		const crateURI = getRootDir();
+		finalCommand = `cd ${crateURI} && ` + responseObject.finalCommand;
 		searchDir = responseObject.searchDir;
 	}
 
-	terminal.sendText(finalCommand);
+	// Wait for the the visualize command to finish generating the report
+	const processOutput = await runVisualizeCommand(finalCommand);
+	if(processOutput.statusCode === 1 || processOutput.serverCommand === ''){
+		// Could not run the visualize command, throw an error
+		vscode.window.showErrorMessage("Could not generate report");
+		return;
+	}
 
-	// Ask if they want to run this command
-	// First, fix this command
+	// Check if the HTML path that is to be served to the user exists as expected
 	const filename: string = harnessName;
-
-	// Replace timeout with await for the final commmand to finish running
-	await setTimeout(5000);
-	const pythonCommand: string = `python3 -m http.server --directory`;
-
-	const filePath: string = findPath(searchDir, filename);
-	if (!filePath) {
+	const filePath: string = await findPath(searchDir, filename);
+	if (!filePath || filePath === '') {
 		console.error(' Could not find the filepath for the report ');
 	}
-	const HTMLfilePath: string = path.join(filePath, 'html');
 
-	// const url = 'http://stackoverflow.com';
-	// require('child_process').exec(`open ${url}`);
-
-	// const HTMLfilePathFull = path.join(HTMLfilePath, 'index.html');
-	const fullReportCommand: string = pythonCommand + ` ` + HTMLfilePath;
-	terminal.sendText(fullReportCommand);
-
-	// If they do then, listen to the port yourself
-	// Kill Terminal after viewing the report
+	// Send the command to the user which asks them if they want to view the report on the browser
+	terminal.sendText(processOutput.serverCommand);
 	terminal.show();
 }
 
@@ -96,7 +99,7 @@ function createCommand(commandURI: string, harnessFile: string, harnessName: str
 }
 
 // 	Find the path of the report from the harness name
-function findPath(dir: string, filename: string): string {
+async function findPath(dir: string, filename: string): Promise<string> {
 	const files: string[] = fs.readdirSync(dir);
 
 	for (const file of files) {
@@ -112,5 +115,46 @@ function findPath(dir: string, filename: string): string {
 		}
 	}
 
+	return '';
+}
+
+/**
+ * Run the visualize command to generate the report, parse the output to return the python server command and status
+ *
+ * @param command - the cargo kani | kani command to run --visualize
+ * returns - A promise of the python command and the status code; Promise<visualizeOutput>
+ */
+async function runVisualizeCommand(command: string): Promise<visualizeOutput> {
+	try{
+		const {stdout, stderr} = await execPromise(command);
+		const serveReportCommand = await parseReportOutput(stdout);
+		// console.error(`stderr: ${stderr}`);
+
+		return {statusCode: 0, serverCommand: serveReportCommand};
+	} catch (error) {
+		console.error(`exec error: ${error}`);
+		return {statusCode: 0, serverCommand: ''};
+	}
+}
+
+/**
+ * Search for the python command contained in Kani's output and throw it onto the user's terminal
+ *
+ * @param stdout - kani stdout output that contains the full python command to be run by the terminal
+ * returns - python command that looks like "python3 -m http.server --path path"
+ */
+async function parseReportOutput(stdout: string): Promise<string> {
+	const kaniOutput = stdout;
+	const kaniOutputArray = kaniOutput.split("\n");
+	const searchString = "python3";
+
+	for(const outputString of kaniOutputArray){
+		if(outputString.includes(searchString)){
+			const command =  outputString.split(searchString)[1];
+			return searchString + command;
+		}
+	}
+
+	// No command found from Kani
 	return '';
 }
