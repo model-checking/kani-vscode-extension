@@ -1,6 +1,5 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
 import process = require('process');
@@ -126,6 +125,7 @@ async function findPath(dir: string, filename: string): Promise<string> {
  */
 async function runVisualizeCommand(command: string): Promise<visualizeOutput> {
 	try{
+		vscode.window.showWarningMessage("Generating viewer report");
 		const {stdout, stderr} = await execPromise(command);
 		const serveReportCommand = await parseReportOutput(stdout);
 		// console.error(`stderr: ${stderr}`);
