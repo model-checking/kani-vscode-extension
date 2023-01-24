@@ -9,7 +9,7 @@ module.exports = {
         node: true,
         mocha: true,
     },
-    plugins: ['@typescript-eslint', 'header', 'no-null', 'eslint-plugin-tsdoc'],
+    plugins: ['@typescript-eslint', 'header', 'no-null', 'eslint-plugin-tsdoc', 'prettier'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/eslint-recommended',
@@ -24,6 +24,7 @@ module.exports = {
         "tsdoc/syntax": "warn",
         'no-async-promise-executor': 'off',
         '@typescript-eslint/no-misused-promises': 'off',
+        '@typescript-eslint/typedef': 'warn',
         '@typescript-eslint/prefer-regexp-exec': 'off',
         'no-async-promise-executors': 'off',
         '@typescript-eslint/consistent-type-assertions': 'off',

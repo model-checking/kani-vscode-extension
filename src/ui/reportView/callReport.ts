@@ -31,7 +31,7 @@ interface visualizeOutput {
  */
 export async function callViewerReport(
 	commandURI: string,
-	harnessObj: { harnessName: string; harnessFile: string, harnessType: boolean },
+	harnessObj: { harnessName: string; harnessFile: string; harnessType: boolean },
 ): Promise<void> {
 	let finalCommand: string = '';
 	let searchDir: string = '';
@@ -46,25 +46,31 @@ export async function callViewerReport(
 
 	// Generate the final visualize command for the supported platforms
 	if (platform === 'darwin' || platform == 'linux') {
-		const responseObject: htmlMetaData = createCommand(commandURI, harnessFile, harnessName, harnessType);
-		const crateURI = getRootDir();
-		finalCommand = `cd ${crateURI} && ` + responseObject.finalCommand;
+		const responseObject: htmlMetaData = createCommand(
+			commandURI,
+			harnessFile,
+			harnessName,
+			harnessType,
+		);
+		const crateURI: string = getRootDir();
+		finalCommand = `cd ${crateURI} && ${responseObject.finalCommand}`;
 		searchDir = responseObject.searchDir;
 	}
 
 	// Wait for the the visualize command to finish generating the report
-	const processOutput = await runVisualizeCommand(finalCommand);
-	if(processOutput.statusCode === 1 || processOutput.serverCommand === ''){
+	const processOutput: visualizeOutput = await runVisualizeCommand(finalCommand);
+	if (processOutput.statusCode == 1 || processOutput.serverCommand == '') {
 		// Could not run the visualize command, throw an error
-		vscode.window.showErrorMessage("Could not generate report");
+		vscode.window.showErrorMessage('Could not generate report');
 		return;
 	}
 
 	// Check if the HTML path that is to be served to the user exists as expected
 	const filename: string = harnessName;
 	const filePath: string = await findPath(searchDir, filename);
-	if (!filePath || filePath === '') {
-		console.error(' Could not find the filepath for the report ');
+	if (filePath === '') {
+		vscode.window.showErrorMessage('Could not find the filepath for the report');
+		return;
 	}
 
 	// Send the command to the user which asks them if they want to view the report on the browser
@@ -73,7 +79,12 @@ export async function callViewerReport(
 }
 
 // Check if cargo toml exists and create corresponding kani command
-function createCommand(commandURI: string, harnessFile: string, harnessName: string, harnessType: boolean): htmlMetaData {
+function createCommand(
+	commandURI: string,
+	harnessFile: string,
+	harnessName: string,
+	harnessType: boolean,
+): htmlMetaData {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
 	let finalCommand: string = '';
@@ -84,7 +95,7 @@ function createCommand(commandURI: string, harnessFile: string, harnessName: str
 		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --visualize`;
 		searchDir = path.join(getRootDir());
 	} else {
-		if(harnessType) {
+		if (harnessType) {
 			const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
 			finalCommand = `${command} --harness ${harnessName} --visualize`;
 			searchDir = path.join(getRootDir(), 'target');
@@ -121,19 +132,19 @@ async function findPath(dir: string, filename: string): Promise<string> {
  * Run the visualize command to generate the report, parse the output to return the python server command and status
  *
  * @param command - the cargo kani | kani command to run --visualize
- * returns - A promise of the python command and the status code; Promise<visualizeOutput>
+ * @returns - A promise of the python command and the status code; Promise<visualizeOutput>
  */
 async function runVisualizeCommand(command: string): Promise<visualizeOutput> {
-	try{
-		vscode.window.showWarningMessage("Generating viewer report");
-		const {stdout, stderr} = await execPromise(command);
-		const serveReportCommand = await parseReportOutput(stdout);
-		// console.error(`stderr: ${stderr}`);
+	try {
+		vscode.window.showWarningMessage('Generating viewer report');
+		const { stdout, stderr } = await execPromise(command);
+		const serveReportCommand: string = await parseReportOutput(stdout);
+		console.error(`stderr: ${stderr}`);
 
-		return {statusCode: 0, serverCommand: serveReportCommand};
+		return { statusCode: 0, serverCommand: serveReportCommand };
 	} catch (error) {
 		console.error(`exec error: ${error}`);
-		return {statusCode: 0, serverCommand: ''};
+		return { statusCode: 1, serverCommand: '' };
 	}
 }
 
@@ -141,16 +152,16 @@ async function runVisualizeCommand(command: string): Promise<visualizeOutput> {
  * Search for the python command contained in Kani's output and throw it onto the user's terminal
  *
  * @param stdout - kani stdout output that contains the full python command to be run by the terminal
- * returns - python command that looks like "python3 -m http.server --path path"
+ * @returns - python command that looks like "python3 -m http.server --path path"
  */
 async function parseReportOutput(stdout: string): Promise<string> {
-	const kaniOutput = stdout;
-	const kaniOutputArray = kaniOutput.split("\n");
-	const searchString = "python3";
+	const kaniOutput: string = stdout;
+	const kaniOutputArray: string[] = kaniOutput.split('\n');
+	const searchString: string = 'python3';
 
-	for(const outputString of kaniOutputArray){
-		if(outputString.includes(searchString)){
-			const command =  outputString.split(searchString)[1];
+	for (const outputString of kaniOutputArray) {
+		if (outputString.includes(searchString)) {
+			const command: string = outputString.split(searchString)[1];
 			return searchString + command;
 		}
 	}

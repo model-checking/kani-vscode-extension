@@ -3,3 +3,4 @@ node_modules/**
 **/*.gen.ts
 dist/**
 types/*.d.ts
+.eslintrc.js
