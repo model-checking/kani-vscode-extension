@@ -58,18 +58,14 @@ export async function callViewerReport(
 	}
 
 	// Wait for the the visualize command to finish generating the report
-	const processOutput: visualizeOutput = await runVisualizeCommand(finalCommand);
-	if (processOutput.statusCode == 1 || processOutput.serverCommand == '') {
+	const processOutput: visualizeOutput = await runVisualizeCommand(finalCommand, harnessName);
+	if (processOutput.statusCode == 1) {
 		// Could not run the visualize command, throw an error
-		vscode.window.showErrorMessage('Could not generate report');
+		vscode.window.showErrorMessage('Could not generate report due to execution error');
 		return;
-	}
-
-	// Check if the HTML path that is to be served to the user exists as expected
-	const filename: string = harnessName;
-	const filePath: string = await findPath(searchDir, filename);
-	if (filePath === '') {
-		vscode.window.showErrorMessage('Could not find the filepath for the report');
+	} else if (processOutput.statusCode == 2) {
+		// Could run the command, but the file generated could not be verified or was generated at wrong location
+		vscode.window.showErrorMessage('Could not verify report path, error from Kani');
 		return;
 	}
 
@@ -108,37 +104,20 @@ function createCommand(
 	return { finalCommand, searchDir };
 }
 
-// 	Find the path of the report from the harness name
-async function findPath(dir: string, filename: string): Promise<string> {
-	const files: string[] = fs.readdirSync(dir);
-
-	for (const file of files) {
-		const filePath: string = path.join(dir, file);
-
-		if (fs.statSync(filePath).isDirectory()) {
-			console.log(filePath);
-			if (file.includes(filename)) {
-				return filePath;
-			}
-		} else {
-			continue;
-		}
-	}
-
-	return '';
-}
-
 /**
  * Run the visualize command to generate the report, parse the output to return the python server command and status
  *
  * @param command - the cargo kani | kani command to run --visualize
  * @returns - A promise of the python command and the status code; Promise<visualizeOutput>
  */
-async function runVisualizeCommand(command: string): Promise<visualizeOutput> {
+async function runVisualizeCommand(command: string, harnessName: string): Promise<visualizeOutput> {
 	try {
-		vscode.window.showWarningMessage('Generating viewer report');
+		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
 		const { stdout, stderr } = await execPromise(command);
 		const serveReportCommand: string = await parseReportOutput(stdout);
+		if (serveReportCommand === '') {
+			return { statusCode: 2, serverCommand: '' };
+		}
 		console.error(`stderr: ${stderr}`);
 
 		return { statusCode: 0, serverCommand: serveReportCommand };
@@ -162,10 +141,37 @@ async function parseReportOutput(stdout: string): Promise<string> {
 	for (const outputString of kaniOutputArray) {
 		if (outputString.includes(searchString)) {
 			const command: string = outputString.split(searchString)[1];
+
+			// Check if the HTML path that is to be served to the user exists as expected
+			const filePathExists: boolean = await checkPathExists(command);
+			if (!filePathExists) {
+				return '';
+			}
 			return searchString + command;
 		}
 	}
 
 	// No command found from Kani
 	return '';
+}
+
+// 	Util function to find the path of the report from the harness name
+async function checkPathExists(serverCommand: string): Promise<boolean> {
+	// Kani returns a structured string, using that structure
+	// to find the filepath embedded in the command string
+	const lastSlashIndex: number = serverCommand.lastIndexOf('/');
+
+	if (lastSlashIndex !== -1) {
+		const match: string = serverCommand.substring(lastSlashIndex);
+		if (match) {
+			// Even if the path can be extracted from Kani's output, it's not
+			// necessary that the html file was created, so this needs to be checked
+			const exists: boolean = fs.existsSync(match[0]);
+			return exists;
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
 }
