@@ -155,7 +155,7 @@ async function parseReportOutput(stdout: string): Promise<string> {
 	return '';
 }
 
-// 	Util function to find the path of the report from the harness name
+// Util function to find the path of the report from the harness name
 async function checkPathExists(serverCommand: string): Promise<boolean> {
 	// Kani returns a structured string, using that structure
 	// to find the filepath embedded in the command string
