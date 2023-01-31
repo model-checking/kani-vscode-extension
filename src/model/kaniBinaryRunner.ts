@@ -33,8 +33,7 @@ export async function runKaniHarnessInterface(
 	const kaniOutput = await catchOutput(harnessCommand);
 
 	// output = 2 indicates there is an underlying error , example import error from rustc. Before crashing the extension completely, we try running cargo kani over the harness
-	if(kaniOutput == 2) {
-
+	if (kaniOutput == 2) {
 		vscode.window.showWarningMessage(`Switching to cargo kani as proof runner due to Kani error`);
 
 		const crateURI = getRootDir();
@@ -52,7 +51,6 @@ export async function runKaniHarnessInterface(
 	}
 	return kaniOutput;
 }
-
 
 /**
  * Run Kani as a command line binary
@@ -130,7 +128,7 @@ export async function captureFailedChecks(
 		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	const kaniOutput = await createFailedDiffMessage(harnessCommand);
-	if(kaniOutput.failedProperty == "error") {
+	if (kaniOutput.failedProperty == 'error') {
 		const crateURI = getRootDir();
 		let harnessCommand = '';
 
@@ -141,8 +139,7 @@ export async function captureFailedChecks(
 		}
 		const kaniOutput = await createFailedDiffMessage(harnessCommand);
 		return kaniOutput;
-	}
-	else{
+	} else {
 		return kaniOutput;
 	}
 }
@@ -187,29 +184,30 @@ async function catchOutput(command: string, cargoKaniMode: boolean = false): Pro
 async function execLog(command: string, cargoKaniMode: boolean = false): Promise<number> {
 	return new Promise((resolve, reject) => {
 		execAsync(command, (error, stdout, stderr) => {
-			if(stderr && !stdout) {
-				if(cargoKaniMode) {
+			if (stderr && !stdout) {
+				if (cargoKaniMode) {
 					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
 					// a rustc error or an unhandled kani error
-					vscode.window.showErrorMessage(`Kani Executable Crashed due to an underlying rustc error ->\n ${stderr}`);
+					vscode.window.showErrorMessage(
+						`Kani Executable Crashed due to an underlying rustc error ->\n ${stderr}`,
+					);
 					reject();
+				} else {
+					resolve(2);
 				}
-				else{
-					resolve(2)
-				}
-			}
-			else if (error) {
+			} else if (error) {
 				if (error.code === 1) {
 					// verification failed
 					// console.log("error code 1", stderr);
 					resolve(1);
 				} else {
 					// Error is an object created by nodejs created when nodejs cannot execute the command
-					vscode.window.showErrorMessage(`Kani Extension could not execute command ${command} due to error ->\n ${error}`);
+					vscode.window.showErrorMessage(
+						`Kani Extension could not execute command ${command} due to error ->\n ${error}`,
+					);
 					reject();
 				}
-			}
-			else {
+			} else {
 				// verification successful
 				resolve(0);
 			}
@@ -227,7 +225,7 @@ async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 			} else {
 				// Error Case
 				vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
-				resolve({failedProperty: "error", failedMessages: "error"})
+				resolve({ failedProperty: 'error', failedMessages: 'error' });
 			}
 		});
 	});

@@ -4,7 +4,12 @@ import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { captureFailedChecks, runCargoKaniTest, runKaniHarness, runKaniHarnessInterface } from '../model/kaniBinaryRunner';
+import {
+	captureFailedChecks,
+	runCargoKaniTest,
+	runKaniHarness,
+	runKaniHarnessInterface,
+} from '../model/kaniBinaryRunner';
 import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 
@@ -327,7 +332,8 @@ class FailedCase extends TestCase {
 	}
 
 	handleFailure(): TestMessage {
-		const finalFailureMessage: MarkdownString = this.appendLink(this.failed_checks);
+		const failureMessage: MarkdownString = this.appendLink(this.failed_checks);
+		const finalFailureMessage: MarkdownString = this.appendConcretePlaybackLink(failureMessage);
 		const messageWithLink = new TestMessage(finalFailureMessage);
 		return messageWithLink;
 	}
@@ -335,12 +341,37 @@ class FailedCase extends TestCase {
 	// Add link and present to the user as the diff message
 	appendLink(failedChecks: string): MarkdownString {
 		const sample: MarkdownString = this.makeMarkdown(failedChecks);
-		// vscode.commands.executeCommand('Kani.runViewerReport', this.harness_name);
-		const args = [{ harnessName: this.harness_name, harnessFile: this.file_name, harnessType: this.harness_type }];
+		const args = [
+			{
+				harnessName: this.harness_name,
+				harnessFile: this.file_name,
+				harnessType: this.harness_type,
+			},
+		];
 		const stageCommandUri = Uri.parse(
 			`command:Kani.runViewerReport?${encodeURIComponent(JSON.stringify(args))}`,
 		);
 		sample.appendMarkdown(`[View Report for ${this.harness_name}](${stageCommandUri})`);
+
+		return sample;
+	}
+
+	// Add link and present to the user as the diff message
+	appendConcretePlaybackLink(sample: MarkdownString): MarkdownString {
+		sample.appendMarkdown('<br>');
+		const args = [
+			{
+				harnessName: this.harness_name,
+				harnessFile: this.file_name,
+				harnessType: this.harness_type,
+			},
+		];
+		const concretePlaybackUri: Uri = Uri.parse(
+			`command:Kani.runConcretePlayback?${encodeURIComponent(JSON.stringify(args))}`,
+		);
+		sample.appendMarkdown(
+			`[Run Concrete Playback for ${this.harness_name}](${concretePlaybackUri})`,
+		);
 
 		return sample;
 	}
@@ -351,11 +382,11 @@ class FailedCase extends TestCase {
 		placeholderMarkdown.supportHtml = true;
 		placeholderMarkdown.isTrusted = true;
 
-		if(failedChecks === undefined) {
+		if (failedChecks === undefined) {
 			return placeholderMarkdown;
 		}
 
-		const lines = failedChecks.split('\n');
+		const lines: string[] = failedChecks.split('\n');
 
 		for (const line of lines) {
 			placeholderMarkdown.appendMarkdown(line);
