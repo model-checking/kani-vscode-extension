@@ -325,7 +325,8 @@ class FailedCase extends TestCase {
 	}
 
 	handleFailure(): TestMessage {
-		const finalFailureMessage: MarkdownString = this.appendLink(this.failed_checks);
+		const failureMessage: MarkdownString = this.appendLink(this.failed_checks);
+		const finalFailureMessage: MarkdownString = this.appendConcretePlaybackLink(failureMessage);
 		const messageWithLink = new TestMessage(finalFailureMessage);
 		return messageWithLink;
 	}
@@ -349,6 +350,26 @@ class FailedCase extends TestCase {
 		return sample;
 	}
 
+	// Add link and present to the user as the diff message
+	appendConcretePlaybackLink(sample: MarkdownString): MarkdownString {
+		sample.appendMarkdown('<br>');
+		const args = [
+			{
+				harnessName: this.harness_name,
+				harnessFile: this.file_name,
+				harnessType: this.harness_type,
+			},
+		];
+		const concretePlaybackUri: Uri = Uri.parse(
+			`command:Kani.runConcretePlayback?${encodeURIComponent(JSON.stringify(args))}`,
+		);
+		sample.appendMarkdown(
+			`[Run Concrete Playback for ${this.harness_name}](${concretePlaybackUri})`,
+		);
+
+		return sample;
+	}
+
 	// create the failure ui in markdown text with link
 	makeMarkdown(failedChecks: string): MarkdownString {
 		const placeholderMarkdown: vscode.MarkdownString = new vscode.MarkdownString('', true);
@@ -359,7 +380,7 @@ class FailedCase extends TestCase {
 			return placeholderMarkdown;
 		}
 
-		const lines = failedChecks.split('\n');
+		const lines: string[] = failedChecks.split('\n');
 
 		for (const line of lines) {
 			placeholderMarkdown.appendMarkdown(line);
