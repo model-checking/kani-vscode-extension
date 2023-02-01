@@ -1,15 +1,11 @@
-import * as fs from 'fs';
-import * as path from 'path';
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 import process = require('process');
 
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
 import { checkCargoExist, getRootDir } from '../../utils';
-
-const { exec } = require('child_process');
-const { promisify } = require('util');
-const execPromise = promisify(exec);
 
 /**
  * Call the visualize flag on the harness and render the html page
@@ -34,7 +30,12 @@ export async function callConcretePlayback(
 
 	// Generate the final visualize command for the supported platforms
 	if (platform === 'darwin' || platform == 'linux') {
-		const responseObject: string = createCommand(commandURI, harnessFile, harnessName, harnessType);
+		const responseObject: string = createConcretePlaybackCommand(
+			commandURI,
+			harnessFile,
+			harnessName,
+			harnessType,
+		);
 		const crateURI: string = getRootDir();
 		finalCommand = `cd ${crateURI} && ${responseObject}`;
 	}
@@ -45,7 +46,7 @@ export async function callConcretePlayback(
 }
 
 // Check if cargo toml exists and create corresponding kani command
-function createCommand(
+function createConcretePlaybackCommand(
 	commandURI: string,
 	harnessFile: string,
 	harnessName: string,
