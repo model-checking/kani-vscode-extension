@@ -61,11 +61,15 @@ export async function callViewerReport(
 	const processOutput: visualizeOutput = await runVisualizeCommand(finalCommand, harnessName);
 	if (processOutput.statusCode == 1) {
 		// Could not run the visualize command, throw an error
-		vscode.window.showErrorMessage('Could not generate report due to execution error');
+		vscode.window.showErrorMessage(
+			`Could not generate report due to execution error -> ${processOutput.serverCommand}`,
+		);
 		return;
 	} else if (processOutput.statusCode == 2) {
 		// Could run the command, but the file generated could not be verified or was generated at wrong location
-		vscode.window.showErrorMessage('Could not verify report path, error from Kani');
+		vscode.window.showErrorMessage(
+			`Could not verify report path, error from Kani -> ${processOutput.serverCommand}`,
+		);
 		return;
 	}
 
@@ -116,14 +120,14 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		const { stdout, stderr } = await execPromise(command);
 		const serveReportCommand: string = await parseReportOutput(stdout);
 		if (serveReportCommand === '') {
-			return { statusCode: 2, serverCommand: '' };
+			return { statusCode: 2, serverCommand: stderr };
 		}
 		console.error(`stderr: ${stderr}`);
 
 		return { statusCode: 0, serverCommand: serveReportCommand };
 	} catch (error) {
 		console.error(`exec error: ${error}`);
-		return { statusCode: 1, serverCommand: '' };
+		return { statusCode: 1, serverCommand: error as string };
 	}
 }
 
