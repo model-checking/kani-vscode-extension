@@ -340,7 +340,7 @@ class FailedCase extends TestCase {
 		const stageCommandUri = Uri.parse(
 			`command:Kani.runViewerReport?${encodeURIComponent(JSON.stringify(args))}`,
 		);
-		sample.appendMarkdown(`[View Report for ${this.harness_name}](${stageCommandUri})`);
+		sample.appendMarkdown(`[Generate report for ${this.harness_name}](${stageCommandUri})`);
 
 		return sample;
 	}
