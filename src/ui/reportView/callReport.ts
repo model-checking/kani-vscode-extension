@@ -24,7 +24,7 @@ interface visualizeResult {
 	command?: string;
 }
 
-interface visualizeOutput {
+interface reportMetadata {
 	statusCode: number;
 	result?: visualizeResult;
 	error?: string;
@@ -65,16 +65,16 @@ export async function callViewerReport(
 	}
 
 	// Wait for the visualize command to finish generating the report
-	const processOutput: visualizeOutput = await runVisualizeCommand(finalCommand, harnessName);
+	const processOutput: reportMetadata = await runVisualizeCommand(finalCommand, harnessName);
 	if (processOutput.statusCode != 0) {
 		showVisualizeError(processOutput);
 		return;
 	}
-	showVisualizeOutput(terminal, processOutput);
+	showreportMetadata(terminal, processOutput);
 }
 
 // Show an error depending on the code we received
-function showVisualizeError(output: visualizeOutput): void {
+function showVisualizeError(output: reportMetadata): void {
 	switch (output.statusCode) {
 		// Could not run the visualize command
 		case 1:
@@ -85,7 +85,7 @@ function showVisualizeError(output: visualizeOutput): void {
 		// Could run the command, but the file generated could not be verified or was generated at wrong location
 		case 2:
 			vscode.window.showErrorMessage(
-				`Could not find path to the report file`,
+				`Could not find path to the report file: ${output.error}`,
 			);
 			break;
 	}
@@ -94,7 +94,7 @@ function showVisualizeError(output: visualizeOutput): void {
 
 // Shows an option to open the report in a browser. The process depends on
 // whether the extension executes on a local or remote environment.
-async function showVisualizeOutput(terminal: vscode.Terminal, output: visualizeOutput): Promise<void> {
+async function showreportMetadata(terminal: vscode.Terminal, output: reportMetadata): Promise<void> {
 	if (output.result?.isLocal) {
 		// Shows a message with a button. Clicking the button opens the report
 		// in a browser.
@@ -151,13 +151,13 @@ function createCommand(
  * @param command - the cargo kani | kani command to run --visualize
  * @returns - the result of executing the visualize command and parsing the output
  */
-async function runVisualizeCommand(command: string, harnessName: string): Promise<visualizeOutput> {
+async function runVisualizeCommand(command: string, harnessName: string): Promise<reportMetadata> {
 	try {
 		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
 		const { stdout, stderr } = await execPromise(command);
 		const parseResult = await parseReportOutput(stdout);
 		if (parseResult === undefined) {
-			return { statusCode: 2, result: undefined };
+			return { statusCode: 2, result: undefined, error: stderr };
 		}
 		console.error(`stderr: ${stderr}`);
 
@@ -179,11 +179,11 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 async function parseReportOutput(stdout: string): Promise<visualizeResult | undefined> {
 	const kaniOutput: string = stdout;
 	const kaniOutputArray: string[] = kaniOutput.split('\n');
-	const searchString: string = 'Report written to:';
+	const searchString: string = 'Report written to: ';
 
 	for (const outputString of kaniOutputArray) {
 		if (outputString.startsWith(searchString)) {
-			const reportPath: string = outputString.split(' ')[3]
+			const reportPath: string = outputString.substring(searchString.length)
 
 			// Check if the path exists as expected
 			const filePathExists: boolean = await checkPathExists(reportPath);
