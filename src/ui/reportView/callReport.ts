@@ -74,7 +74,7 @@ export async function callViewerReport(
 }
 
 // Show an error depending on the code we received
-function showVisualizeError(output: visualizeOutput) {
+function showVisualizeError(output: visualizeOutput): void {
 	switch (output.statusCode) {
 		// Could not run the visualize command
 		case 1:
@@ -94,7 +94,7 @@ function showVisualizeError(output: visualizeOutput) {
 
 // Shows an option to open the report in a browser. The process depends on
 // whether the extension executes on a local or remote environment.
-async function showVisualizeOutput(terminal: vscode.Terminal, output: visualizeOutput) {
+async function showVisualizeOutput(terminal: vscode.Terminal, output: visualizeOutput): Promise<void> {
 	if (output.result?.isLocal) {
 		// Shows a message with a button. Clicking the button opens the report
 		// in a browser.
@@ -103,14 +103,14 @@ async function showVisualizeOutput(terminal: vscode.Terminal, output: visualizeO
 			'Open in Browser'
 		);
 		if (response == 'Open in Browser') {
-			const uriPath = vscode.Uri.file(output.result?.path!);
+			const uriPath = vscode.Uri.file(output.result?.path ?? '');
 			vscode.env.openExternal(uriPath);
 		}
 	} else {
 		// Sends a command to the terminal that will start an HTTP server.
 		// VSCode automatically detects this and shows a message that allows
 		// you to open the report in a browser.
-		terminal.sendText(output.result?.command!);
+		terminal.sendText(output.result?.command ?? '');
 		terminal.show();
 	}
 }
