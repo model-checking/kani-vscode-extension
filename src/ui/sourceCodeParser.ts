@@ -3,8 +3,6 @@
 import * as vscode from 'vscode';
 
 // Parse for kani::proof helper function
-// TODO: This is a temporary solution and will be replaced by a tree parser.
-// TODO: Needs organizing
 const proofRe = /kani::proof.*((.|\n)*?){/gm;
 const testRe = /#\[test].*((.|\n)*?){/gm;
 const kaniConfig = '#[cfg_attr(kani';
@@ -46,7 +44,6 @@ export const parseRustfile = (
 	const unwindMap = new Map<string, number>();
 
 	// Bolero proofs
-	// TODO: Needs refactoring
 	for (const test of allTests) {
 		const [harnessLineRaw, mapLineValue]: [string, string] = getHarnessInformationFromTest(test);
 		const unwindValue: number = extractUnwindValueFromTest(harnessLineRaw);
@@ -120,7 +117,6 @@ export const parseRustfile = (
 
 /**
  * Given a bolero test case, extract the unwind integer value
- * TODO: ensure that unwind value is within limits
  *
  * @param harnessLineRaw - unprocessed line from the source text
  * @returns - Unwind value as integer
@@ -207,7 +203,6 @@ export function extractFunctionLine(harnessLineRaw: string): string {
 	}
 	const harnessLineSplit = harnessLine.split('\n');
 	harnessLine = cleanFunctionLine(harnessLineSplit);
-	// TODO: Extract the features? Or maybe shift to the API model to avoid doubling work
 	return harnessLine;
 }
 

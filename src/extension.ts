@@ -65,8 +65,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				// console.log("Data for each test is", data);
 				// check if this is an object of class testcase (that we wrote)
 				if (data instanceof TestCase) {
-					// TestRun is the queue to which we add a test
-					// TODO: Can we parallelize this queue somehow?
 					run.enqueued(test);
 					// This queue takes a tuple of test and it's data
 					queue.push({ test, data });
@@ -101,10 +99,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			}
 		};
 
-		/**
-		 * Run the test queue serially
-		 * TODO: Parallelize test runs if they don't have race conditions
-		 */
 		const runTestQueue = async (): Promise<void> => {
 			for (const { test, data } of queue) {
 				run.appendOutput(`Running ${test.id}\r\n`);
@@ -191,7 +185,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Run Cargo Kani
 	const runcargoKani = vscode.commands.registerCommand('Kani.runcargoKani', async () => {
-		//TODO: Always point to the root of the cargo crate (or source file) before running cargo kani
 		showInformationMessage('Kani.runcargoKani');
 	});
 
@@ -223,7 +216,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 
 	// Update the test tree with proofs whenever a test case is opened
-	// TODO: Make this configurable
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
 		// vscode.workspace.onDidChangeTextDocument(e => updateNodeForDocument(e.document)),

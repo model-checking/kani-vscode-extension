@@ -4,7 +4,12 @@ import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { captureFailedChecks, runCargoKaniTest, runKaniHarness, runKaniHarnessInterface } from '../model/kaniBinaryRunner';
+import {
+	captureFailedChecks,
+	runCargoKaniTest,
+	runKaniHarness,
+	runKaniHarnessInterface,
+} from '../model/kaniBinaryRunner';
 import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 
@@ -56,7 +61,6 @@ export async function findInitialFiles(
 				getOrCreateFile(controller, file);
 			}
 		} else {
-			//TODO: Handle cases where rust files dont have proofs
 			console.log(fileHasProofs, file);
 		}
 	}
@@ -216,11 +220,6 @@ export class TestCase {
 			if (actual === 0) {
 				options.passed(item, duration);
 			} else {
-				// const message = vscode.TestMessage.diff(`Expected ${item.label}`, String(this.expected), String(actual));
-				// message.location = new vscode.Location(item.uri!, item.range!);
-
-				//TODO: Add Property that failed as the info to be displayed
-				//TODO: This is where the debugger will be plugged in, eventually
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await captureFailedChecks(
 					this.file_name,
@@ -273,7 +272,6 @@ export class TestCase {
 	// Run kani on the file, crate with given arguments
 	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			//TODO: Change this to running harness
 			if (args === undefined || NaN) {
 				const outputKani: number = await runKaniHarnessInterface(rsFile!, harness_name);
 				return outputKani;
@@ -336,7 +334,13 @@ class FailedCase extends TestCase {
 	appendLink(failedChecks: string): MarkdownString {
 		const sample: MarkdownString = this.makeMarkdown(failedChecks);
 		// vscode.commands.executeCommand('Kani.runViewerReport', this.harness_name);
-		const args = [{ harnessName: this.harness_name, harnessFile: this.file_name, harnessType: this.harness_type }];
+		const args = [
+			{
+				harnessName: this.harness_name,
+				harnessFile: this.file_name,
+				harnessType: this.harness_type,
+			},
+		];
 		const stageCommandUri = Uri.parse(
 			`command:Kani.runViewerReport?${encodeURIComponent(JSON.stringify(args))}`,
 		);
@@ -351,7 +355,7 @@ class FailedCase extends TestCase {
 		placeholderMarkdown.supportHtml = true;
 		placeholderMarkdown.isTrusted = true;
 
-		if(failedChecks === undefined) {
+		if (failedChecks === undefined) {
 			return placeholderMarkdown;
 		}
 
