@@ -1,12 +1,109 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+import assert from "assert";
+
+import Parser from "tree-sitter";
 import * as vscode from 'vscode';
+
+import { countOccurrences} from '../utils';
 
 // Parse for kani::proof helper function
 const proofRe = /kani::proof.*((.|\n)*?){/gm;
 const testRe = /#\[test].*((.|\n)*?){/gm;
 const kaniConfig = '#[cfg_attr(kani';
 const functionModifiers = ['pub', 'async', 'unsafe', 'const', 'extern'];
+const target = "attribute_item";
+const Rust = require("tree-sitter-rust");
+const parser = new Parser();
+parser.setLanguage(Rust);
+
+// use the tree sitter to get attributes
+function getAttributeFromRustFile(file: string): any {
+	const tree = parser.parse(file);
+	const nodes = tree.rootNode.namedChildren;
+
+	const harnesses = searchParseTreeForFunctions(tree.rootNode);
+ 	const search_results = searchParseTree(tree.rootNode);
+	return search_results;
+}
+
+// Search if there exists a kani attribute
+function searchParseTree(node: any) : any {
+
+	// check for the kani::proof attribute
+	const results = [];
+	if (node.type === target) {
+		if(countOccurrences(node.text, "kani::proof") == 1)
+		{
+			results.push(node);
+		}
+	  } else if (node.namedChildren) {
+		for (let i = 0; i < node.namedChildren.length; i++) {
+		  const result = searchParseTree(node.namedChildren[i]);
+		  if (result.length != 0) {
+			results.push(...result);
+		  }
+		}
+	  }
+	return results;
+}
+
+// Do DFS to get all harnesses
+function searchParseTreeForFunctions(node: any) : any[] {
+
+	const results: any[] = [];
+	if(!node.namedChildren) {
+		return results;
+	}
+	const harness_results = findHarnesses(node.namedChildren);
+	if(harness_results.length > 0)
+	{
+		results.push(...harness_results);
+	}
+	for (let i = 0; i < node.namedChildren.length; i++) {
+		if(node.namedChildren[i].namedChildren){
+			const result = searchParseTreeForFunctions(node.namedChildren[i]);
+			if (result.length != 0) {
+				results.push(...result);
+			}
+		}
+	}
+	return results;
+}
+
+function findHarnesses(strList: any[]): any {
+	const result: any[] = [];
+	for (let i = 0; i < strList.length; i++) {
+		if (strList[i].type == "attribute_item" && strList[i].text.includes("kani::proof")) {
+			for (let j = i; j < strList.length; j++) {
+				if (strList[j].type == "function_item") {
+					result.push(strList[j]);
+					break;
+				}
+			}
+		}
+	}
+	return result;
+}
+
+// Search if there exists a kani attribute
+function checkforKani(node: any) : boolean {
+
+	// check for the kani::proof attribute
+	if (node.type === target && countOccurrences(node.text, "kani::proof") == 1) {
+		return true;
+	} else if (node.namedChildren) {
+		for (let i = 0; i < node.namedChildren.length; i++) {
+		  	if(checkforKani(node.namedChildren[i])) {
+				return true;
+			}
+			else {
+				continue;
+			}
+		}
+	}
+	return false;
+}
 
 // Return True if proofs exist in the file, False if not
 export function checkFileForProofs(content: string): boolean {
@@ -14,12 +111,9 @@ export function checkFileForProofs(content: string): boolean {
 }
 
 // Match source text for Kani annotations
-export const checkTextForProofs = (text: string): boolean => {
-	const count = (str: string): number => {
-		return ((str || '').match(proofRe) || []).length;
-	};
-
-	return count(text) > 0;
+export const checkTextForProofs = (content: string): boolean => {
+	const tree = parser.parse(content);
+	return checkforKani(tree.rootNode);
 };
 
 /**

@@ -50,3 +50,17 @@ export function checkCargoExist(): boolean {
 		return false;
 	}
 }
+
+export function countOccurrences(str: string, target: string): number {
+	let count = 0;
+	let startIndex = 0;
+	while (startIndex < str.length) {
+	  const index = str.indexOf(target, startIndex);
+	  if (index === -1) {
+		break;
+	  }
+	  count++;
+	  startIndex = index + target.length;
+	}
+	return count;
+}
