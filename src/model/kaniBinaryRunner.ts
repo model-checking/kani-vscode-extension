@@ -7,15 +7,11 @@ import * as vscode from 'vscode';
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { getRootDir } from '../utils';
 import { runCargoKaniCommand } from './cargokaniBinaryRunner';
-import { CommandArgs } from './kaniCommand';
+import { CommandArgs, getKaniPath, options } from './kaniCommand';
 import { responseParserInterface } from './kaniOutputParser';
 
 const execAsync = exec;
 const execAsyncFile = execFile;
-
-const options = {
-	shell: false, // Disable the "Shell" option
-};
 
 /**
  * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani
@@ -181,13 +177,38 @@ async function captureFailedChecksForProof(
 // Run a command and capture the command line output into a string
 async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<number> {
 	const process = await execLog(command);
+	const process2 = await execLog2(command);
+	console.log(process2);
 	return process;
+}
+
+// exectute the command as a command line argument
+async function execLog2(command: string, cargoKaniMode: boolean = false): Promise<any> {
+
+	getKaniPath()
+	.then((cargoPath: any) => {
+		console.log(`Cargo path: ${cargoPath}`);
+		// Use cargoPath to run the cargo command
+
+		const command2 = `${cargoPath}`
+		const commandargs =  [`/home/ubuntu/Demo-Kani-IDE/src/lib.rs`, `--harness` ,`function_1`];
+		console.log(command2);
+
+		execAsyncFile(command2, commandargs, options, (error, stdout, stderr) => {
+			if(stdout) {
+				console.log("can run execFile");
+			}
+			else {
+				console.log("error running execFile");
+			}
+		});
+	});
 }
 
 // exectute the command as a command line argument
 async function execLog(command: string, cargoKaniMode: boolean = false): Promise<number> {
 	return new Promise((resolve, reject) => {
-		execAsyncFile(command, options, (error, stdout, stderr) => {
+		execAsync(command, (error, stdout, stderr) => {
 			if(stderr && !stdout) {
 				if(cargoKaniMode) {
 					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
