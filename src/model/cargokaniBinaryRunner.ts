@@ -1,6 +1,6 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { promisify } from 'util';
 
@@ -9,6 +9,7 @@ import { getRootDir } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 
 const execAsync = promisify(exec);
+const execAsyncFile = promisify(execFile);
 
 /**
  * Run the cargo kani command output, and return the parsed output in a object

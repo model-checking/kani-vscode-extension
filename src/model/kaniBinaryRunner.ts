@@ -1,15 +1,21 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { getRootDir } from '../utils';
 import { runCargoKaniCommand } from './cargokaniBinaryRunner';
+import { CommandArgs } from './kaniCommand';
 import { responseParserInterface } from './kaniOutputParser';
 
 const execAsync = exec;
+const execAsyncFile = execFile;
+
+const options = {
+	shell: false, // Disable the "Shell" option
+};
 
 /**
  * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani
@@ -179,14 +185,13 @@ async function captureFailedChecksForProof(
 // Run a command and capture the command line output into a string
 async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<number> {
 	const process = await execLog(command);
-	// console.log(process);
 	return process;
 }
 
 // exectute the command as a command line argument
 async function execLog(command: string, cargoKaniMode: boolean = false): Promise<number> {
 	return new Promise((resolve, reject) => {
-		execAsync(command, (error, stdout, stderr) => {
+		execAsyncFile(command, options, (error, stdout, stderr) => {
 			if(stderr && !stdout) {
 				if(cargoKaniMode) {
 					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
@@ -201,7 +206,6 @@ async function execLog(command: string, cargoKaniMode: boolean = false): Promise
 			else if (error) {
 				if (error.code === 1) {
 					// verification failed
-					// console.log("error code 1", stderr);
 					resolve(1);
 				} else {
 					// Error is an object created by nodejs created when nodejs cannot execute the command
@@ -220,7 +224,7 @@ async function execLog(command: string, cargoKaniMode: boolean = false): Promise
 // Return Diff Message that is displayed when verification fails
 async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 	return new Promise((resolve, reject) => {
-		execAsync(command, (error, stdout, stderr) => {
+		execAsyncFile(command, options, (error, stdout, stderr) => {
 			if (stdout) {
 				const responseObject: KaniResponse = responseParserInterface(stdout);
 				resolve(responseObject);
