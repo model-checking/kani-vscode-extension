@@ -9,9 +9,6 @@ import { getRootDir } from '../utils';
 import { runCargoKaniCommand } from './cargokaniBinaryRunner';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
-const execAsync = exec;
-const execAsyncFile = execFile;
-
 /**
  * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani
  *
@@ -41,9 +38,9 @@ export async function runKaniHarnessInterface(
 		let harnessCommand = '';
 
 		if (args === undefined || NaN) {
-			harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
 		} else {
-			harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 		}
 
 		// Cargo Kani Output
@@ -95,12 +92,12 @@ export async function runCargoKaniTest(
 	const crateURI = getRootDir();
 	let harnessCommand = '';
 	if (args === undefined || NaN) {
-		harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
-		harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	if (failedCheck) {
-		const kaniOutput: KaniResponse = await captureFailedChecksForProof(harnessName, harnessCommand);
+		const kaniOutput: KaniResponse = await createFailedDiffMessage(harnessCommand);
 		return kaniOutput;
 	} else {
 		const kaniOutput: number = await catchOutput(harnessCommand);
@@ -134,9 +131,9 @@ export async function captureFailedChecks(
 		let harnessCommand = '';
 
 		if (args === undefined || NaN) {
-			harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} --output-format terse`;
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} --output-format terse`;
 		} else {
-			harnessCommand = `cd ${crateURI} && ${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args} --output-format terse`;
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args} --output-format terse`;
 		}
 		const kaniOutput = await createFailedDiffMessage(harnessCommand);
 		return kaniOutput;

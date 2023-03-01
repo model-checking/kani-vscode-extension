@@ -50,21 +50,21 @@ export async function runKaniCommand(
 	const args = commmandSplit.args;
 	let kaniBinaryPath = '';
 
-	if (command == 'cargo kani') {
+	if (command == 'cargo' || command == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		const options = {
 			shell: false,
 			cwd: directory,
 		};
 
-		executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
+		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
 	} else if (command == 'kani') {
 		kaniBinaryPath = await getKaniPath(command);
 		const options = {
 			shell: false,
 		};
 
-		executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
+		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
 	} else {
 		return false;
 	}
@@ -77,23 +77,45 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 	const kaniCommand = commmandSplit.commandPath;
 	const args = commmandSplit.args;
 
-	const options = {
-		shell: false,
-	};
 
-	return new Promise((resolve, reject) => {
-		execFile(kaniCommand, args, options, (error, stdout, stderr) => {
-			if (stdout) {
-				console.log(stdout);
-				const responseObject: KaniResponse = responseParserInterface(stdout);
-				resolve(responseObject);
-			} else {
-				// Error Case
-				vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
-				resolve({ failedProperty: 'error', failedMessages: 'error' });
-			}
+	if (commmandSplit.commandPath == 'cargo' || commmandSplit.commandPath == 'cargo kani') {
+		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const options = {
+			shell: false,
+			cwd: directory,
+		};
+
+		return new Promise((resolve, reject) => {
+			execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+				if (stdout) {
+					const responseObject: KaniResponse = responseParserInterface(stdout);
+					resolve(responseObject);
+				}
+			});
 		});
-	});
+	}
+	else if(commmandSplit.commandPath == 'kani') {
+		const kaniBinaryPath = await getKaniPath('kani');
+		const options = {
+			shell: false,
+		};
+
+		return new Promise((resolve, reject) => {
+			execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+				if (stdout) {
+					const responseObject: KaniResponse = responseParserInterface(stdout);
+					resolve(responseObject);
+				}
+			});
+		});
+	}
+	else {
+		// Error Case
+		vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
+		return new Promise((resolve, reject) => {
+				resolve({ failedProperty: 'error', failedMessages: 'error' });
+		});
+	};
 }
 
 function executeKaniProcess(
@@ -103,6 +125,7 @@ function executeKaniProcess(
 	cargoKaniMode: boolean,
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
+        console.log(args);
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {

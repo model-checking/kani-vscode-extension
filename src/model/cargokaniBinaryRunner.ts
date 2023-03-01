@@ -1,6 +1,6 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { exec, execFile } from 'child_process';
+import { exec, execFile, execFileSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import path = require('path');
 import { promisify } from 'util';
@@ -8,7 +8,7 @@ import { promisify } from 'util';
 import { KaniResponse } from '../constants';
 import { CommandArgs, getRootDir, splitCommand } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
-import { getKaniPath } from './kaniRunner';
+import { createFailedDiffMessage, getKaniPath } from './kaniRunner';
 
 const execAsync = promisify(exec);
 const execAsyncFile = promisify(execFile);
@@ -40,20 +40,22 @@ export function runCargoKaniCommand(
 async function runCommandStoreOutput(
 	command: string,
 	outputFilePath: string,
-): Promise<KaniResponse> {
+): Promise<any> {
 	try {
 		// This async call may fail.
 		const directory = path.resolve(getRootDir());
 		const commmandSplit: CommandArgs = splitCommand(command);
+		commmandSplit.args.push("--output-format", "terse")
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		const options = {
 			shell: false,
 			cwd: directory,
 		};
 
-		const output = await execAsyncFile(kaniBinaryPath, commmandSplit.args, options);
-		writeFileSync(outputFilePath, output.stdout);
-		return readFromTempFile(outputFilePath);
+		execFile(kaniBinaryPath, commmandSplit.args, options, async (error, stdout, stderr) => {
+			const kaniOutput = await createFailedDiffMessage(command);
+			return kaniOutput;
+		});
 	} catch (error) {
 		const response: KaniResponse = {
 			failedProperty: '',

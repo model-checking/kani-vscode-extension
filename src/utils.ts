@@ -58,7 +58,16 @@ export function checkCargoExist(): boolean {
 
 export function splitCommand(command: string): CommandArgs {
 	const parts = command.trim().split(/\s+/);
-	const commandPath = parts[0];
-	const args = parts.slice(1);
-	return { commandPath, args };
+	let commandPath = parts[0];
+	if(commandPath == 'cargo') {
+		const args = parts.slice(2);
+		commandPath = 'cargo kani';
+		return { commandPath, args };
+
+	} else if (commandPath == 'kani') {
+		const args = parts.slice(1);
+		return { commandPath, args };
+	} else {
+		return { commandPath, args: [] };
+	}
 }
