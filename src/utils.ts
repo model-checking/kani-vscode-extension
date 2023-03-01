@@ -8,6 +8,11 @@ import { Uri, workspace } from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
 
+export interface CommandArgs {
+	commandPath: string;
+	args: string[];
+}
+
 // Get the raw text from a given file given it's path uri
 export const getContentFromFilesystem = async (uri: Uri): Promise<string> => {
 	try {
@@ -49,4 +54,11 @@ export function checkCargoExist(): boolean {
 	} else {
 		return false;
 	}
+}
+
+export function splitCommand(command: string): CommandArgs {
+	const parts = command.trim().split(/\s+/);
+	const commandPath = parts[0];
+	const args = parts.slice(1);
+	return { commandPath, args };
 }

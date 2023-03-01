@@ -9,7 +9,7 @@ import {
 	runCargoKaniTest,
 	runKaniHarness,
 	runKaniHarnessInterface,
-} from '../model/kaniBinaryRunner';
+} from '../model/kaniCommandCreate';
 import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 

@@ -7,8 +7,7 @@ import * as vscode from 'vscode';
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { getRootDir } from '../utils';
 import { runCargoKaniCommand } from './cargokaniBinaryRunner';
-import { CommandArgs, getKaniPath, options } from './kaniCommand';
-import { responseParserInterface } from './kaniOutputParser';
+import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 const execAsync = exec;
 const execAsyncFile = execFile;
@@ -176,81 +175,6 @@ async function captureFailedChecksForProof(
 
 // Run a command and capture the command line output into a string
 async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<number> {
-	const process = await execLog(command);
-	const process2 = await execLog2(command);
-	console.log(process2);
+	const process = await runKaniCommand(command);
 	return process;
-}
-
-// exectute the command as a command line argument
-async function execLog2(command: string, cargoKaniMode: boolean = false): Promise<any> {
-
-	getKaniPath()
-	.then((cargoPath: any) => {
-		console.log(`Cargo path: ${cargoPath}`);
-		// Use cargoPath to run the cargo command
-
-		const command2 = `${cargoPath}`
-		const commandargs =  [`/home/ubuntu/Demo-Kani-IDE/src/lib.rs`, `--harness` ,`function_1`];
-		console.log(command2);
-
-		execAsyncFile(command2, commandargs, options, (error, stdout, stderr) => {
-			if(stdout) {
-				console.log("can run execFile");
-			}
-			else {
-				console.log("error running execFile");
-			}
-		});
-	});
-}
-
-// exectute the command as a command line argument
-async function execLog(command: string, cargoKaniMode: boolean = false): Promise<number> {
-	return new Promise((resolve, reject) => {
-		execAsync(command, (error, stdout, stderr) => {
-			if(stderr && !stdout) {
-				if(cargoKaniMode) {
-					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
-					// a rustc error or an unhandled kani error
-					vscode.window.showErrorMessage(
-						`Kani Executable Crashed due to an underlying rustc error ->\n ${stderr}`,
-					);
-					reject();
-				} else {
-					resolve(2);
-				}
-			} else if (error) {
-				if (error.code === 1) {
-					// verification failed
-					resolve(1);
-				} else {
-					// Error is an object created by nodejs created when nodejs cannot execute the command
-					vscode.window.showErrorMessage(
-						`Kani Extension could not execute command ${command} due to error ->\n ${error}`,
-					);
-					reject();
-				}
-			} else {
-				// verification successful
-				resolve(0);
-			}
-		});
-	});
-}
-
-// Return Diff Message that is displayed when verification fails
-async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
-	return new Promise((resolve, reject) => {
-		execAsyncFile(command, options, (error, stdout, stderr) => {
-			if (stdout) {
-				const responseObject: KaniResponse = responseParserInterface(stdout);
-				resolve(responseObject);
-			} else {
-				// Error Case
-				vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
-				resolve({ failedProperty: 'error', failedMessages: 'error' });
-			}
-		});
-	});
 }
