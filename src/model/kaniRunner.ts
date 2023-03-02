@@ -10,7 +10,12 @@ import { KaniResponse } from '../constants';
 import { CommandArgs, getRootDir, splitCommand } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 
-// Get the path to the cargo command
+/**
+ * Get the system resolved path to the cargo-kani command
+ *
+ * @param kaniCommand - Full sanitized command created by kaniCommandCreate module
+ * @returns the path for the binary cargo-kani (either the installed binary or the development one)
+ */
 export function getKaniPath(kaniCommand: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		execFile('which', [kaniCommand], (error, stdout, stderr) => {
@@ -29,7 +34,7 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 			try {
 				const stats = fs.statSync(cargoPath);
 				if (stats.isFile() && path.basename(cargoPath) === kaniCommand) {
-					resolve(cargoPath);
+					resolve(path.resolve(cargoPath));
 				} else {
 					reject(new Error(`Invalid kani path: ${cargoPath}`));
 				}
@@ -40,12 +45,21 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 	});
 }
 
+/**
+ * Function that runs cargo kani [args]
+ *
+ * @param kaniCommand - Full sanitized command created by kaniCommandCreate module
+ * @returns the path for the binary cargo-kani (either the installed binary or the development one)
+ */
 export async function runKaniCommand(
 	harnessCommand: string,
 	cargoKaniMode: boolean = false,
 ): Promise<any> {
+	// get the full resolved path for the root directory of the crate
 	const directory = path.resolve(getRootDir());
 	const commmandSplit: CommandArgs = splitCommand(harnessCommand);
+
+	// Get cargo command and args for the command to be executed
 	const command = commmandSplit.commandPath;
 	const args = commmandSplit.args;
 	let kaniBinaryPath = '';
@@ -70,14 +84,20 @@ export async function runKaniCommand(
 	}
 }
 
-// Return Diff Message that is displayed when verification fails
-export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
+/**
+ * Function that returns the diff message to be displayed
+ *
+ * @param command - Full sanitized command created by kaniCommandCreate module
+ * @returns the path for the binary cargo-kani (either the installed binary or the development one)
+ */ export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
+	// Root dir of the crate and the command and args to be executed
 	const directory = path.resolve(getRootDir());
 	const commmandSplit: CommandArgs = splitCommand(command);
-	const kaniCommand = commmandSplit.commandPath;
+
+	// Get the args for the kani command to run
 	const args = commmandSplit.args;
 
-
+	// Check the command running and execute that with the full path and safe options
 	if (commmandSplit.commandPath == 'cargo' || commmandSplit.commandPath == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		const options = {
@@ -93,8 +113,7 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 				}
 			});
 		});
-	}
-	else if(commmandSplit.commandPath == 'kani') {
+	} else if (commmandSplit.commandPath == 'kani') {
 		const kaniBinaryPath = await getKaniPath('kani');
 		const options = {
 			shell: false,
@@ -108,16 +127,24 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 				}
 			});
 		});
-	}
-	else {
+	} else {
 		// Error Case
 		vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
 		return new Promise((resolve, reject) => {
-				resolve({ failedProperty: 'error', failedMessages: 'error' });
+			resolve({ failedProperty: 'error', failedMessages: 'error' });
 		});
-	};
+	}
 }
 
+/**
+ * Function that executes the sanitized command
+ *
+ * @param kaniBinaryPath - Full sanitized command created by kaniCommandCreate module
+ * @param args - full arg list to provide to the subprocess
+ * @param options - options to pass to the cargo-kani command i.e shell, working directory
+ * @param cargoKaniMode - If it's running in cargo-kani
+ * @returns the path for the binary cargo-kani (either the installed binary or the development one)
+ */
 function executeKaniProcess(
 	kaniBinaryPath: string,
 	args: string[],
@@ -125,7 +152,7 @@ function executeKaniProcess(
 	cargoKaniMode: boolean,
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
-        console.log(args);
+		console.log(args);
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {

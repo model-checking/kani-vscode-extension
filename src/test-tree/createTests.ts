@@ -7,7 +7,6 @@ import { KaniResponse } from '../constants';
 import {
 	captureFailedChecks,
 	runCargoKaniTest,
-	runKaniHarness,
 	runKaniHarnessInterface,
 } from '../model/kaniCommandCreate';
 import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';

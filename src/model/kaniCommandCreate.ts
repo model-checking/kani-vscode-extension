@@ -1,12 +1,9 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { exec, execFile } from 'child_process';
-
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { getRootDir } from '../utils';
-import { runCargoKaniCommand } from './cargokaniBinaryRunner';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
@@ -24,29 +21,11 @@ export async function runKaniHarnessInterface(
 ): Promise<any> {
 	let harnessCommand = '';
 	if (args !== undefined || NaN) {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	} else {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
 	const kaniOutput = await catchOutput(harnessCommand);
-
-	// output = 2 indicates there is an underlying error , example import error from rustc. Before crashing the extension completely, we try running cargo kani over the harness
-	if (kaniOutput == 2) {
-		vscode.window.showWarningMessage(`Switching to cargo kani as proof runner due to Kani error`);
-
-		const crateURI = getRootDir();
-		let harnessCommand = '';
-
-		if (args === undefined || NaN) {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
-		} else {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
-		}
-
-		// Cargo Kani Output
-		const kaniOutput: number = await catchOutput(harnessCommand, true);
-		return kaniOutput;
-	}
 	return kaniOutput;
 }
 
@@ -69,7 +48,6 @@ export async function runKaniHarness(
 	} else {
 		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
-
 	// Kani Output
 	const kaniOutput = await catchOutput(harnessCommand);
 	return kaniOutput;
@@ -159,15 +137,6 @@ export async function runCommandPure(command: string): Promise<void> {
 
 	terminal.sendText(finalCommand);
 	terminal.show();
-}
-
-// Run Kani and return the checks that failed as a lazy process
-async function captureFailedChecksForProof(
-	harnessName: string,
-	harnessCommand: string,
-): Promise<KaniResponse> {
-	const kaniOutput: KaniResponse = await runCargoKaniCommand(harnessName, harnessCommand);
-	return kaniOutput;
 }
 
 // Run a command and capture the command line output into a string
