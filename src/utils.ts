@@ -56,17 +56,34 @@ export function checkCargoExist(): boolean {
 	}
 }
 
+// Return the constructed kani invokation and the argument array
 export function splitCommand(command: string): CommandArgs {
-	const parts = command.trim().split(/\s+/);
+	const parts = parseCommand(command)
 	let commandPath = parts[0];
 	if (commandPath == 'cargo') {
-		const args = parts.slice(2);
-		commandPath = 'cargo kani';
-		return { commandPath, args };
-	} else if (commandPath == 'kani') {
+		if(parts.length > 1 && parts[1] == 'kani') {
+			const args = parts.slice(2);
+			commandPath = 'cargo kani';
+			return { commandPath, args };
+		}
+		else {
+			return { commandPath, args: [] };
+		}
+	} else if (commandPath == 'kani' && parts.length > 1) {
 		const args = parts.slice(1);
 		return { commandPath, args };
 	} else {
 		return { commandPath, args: [] };
 	}
 }
+
+// Split the command line invocation into the kani call and the argument array
+function parseCommand(command: string): string[] {
+	const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+	const parts = [];
+	let match;
+	while ((match = regex.exec(command))) {
+	  parts.push(match[1] || match[2] || match[0]);
+	}
+	return parts;
+  }

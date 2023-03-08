@@ -27,16 +27,16 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 				console.error(`stderr: ${stderr}`);
 				return;
 			}
-			const cargoPath = stdout.trim();
-			console.log(`Cargo is located at: ${cargoPath}`);
+			const cargoKaniPath = stdout.trim();
+			console.log(`Cargo is located at: ${cargoKaniPath}`);
 
 			// Check if cargo path is valid
 			try {
-				const stats = fs.statSync(cargoPath);
-				if (stats.isFile() && path.basename(cargoPath) === kaniCommand) {
-					resolve(path.resolve(cargoPath));
+				const stats = fs.statSync(cargoKaniPath);
+				if (stats.isFile() && path.basename(cargoKaniPath) === kaniCommand) {
+					resolve(path.resolve(cargoKaniPath));
 				} else {
-					reject(new Error(`Invalid kani path: ${cargoPath}`));
+					reject(new Error(`Invalid kani path: ${cargoKaniPath}`));
 				}
 			} catch (err) {
 				reject(err);
