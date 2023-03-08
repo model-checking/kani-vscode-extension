@@ -86,9 +86,7 @@ function showVisualizeError(output: reportMetadata): void {
 			break;
 		// Could run the command, but the file generated could not be verified or was generated at wrong location
 		case 2:
-			vscode.window.showErrorMessage(
-				`Could not find path to the report file: ${output.error}`,
-			);
+			vscode.window.showErrorMessage(`Could not find path to the report file: ${output.error}`);
 			break;
 	}
 	return;
@@ -102,7 +100,7 @@ async function showReportMetadata(terminal: vscode.Terminal, output: reportMetad
 		// in a browser.
 		const response = await vscode.window.showInformationMessage(
 			'Report has been generated',
-			'Open in Browser'
+			'Open in Browser',
 		);
 		if (response == 'Open in Browser') {
 			const uriPath = vscode.Uri.file(output.result?.path ?? '');
@@ -167,7 +165,7 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		return { statusCode: 0, result: parseResult };
 	} catch (error) {
 		console.error(`exec error: ${error}`);
-		return { statusCode: 1, result: undefined, error: error as string};
+		return { statusCode: 1, result: undefined, error: error as string };
 	}
 }
 
@@ -186,7 +184,7 @@ async function parseReportOutput(stdout: string): Promise<visualizeResult | unde
 
 	for (const outputString of kaniOutputArray) {
 		if (outputString.startsWith(searchString)) {
-			const reportPath: string = outputString.substring(searchString.length)
+			const reportPath: string = outputString.substring(searchString.length);
 
 			// Check if the path exists as expected
 			const filePathExists: boolean = await checkPathExists(reportPath);
@@ -197,7 +195,7 @@ async function parseReportOutput(stdout: string): Promise<visualizeResult | unde
 			// Determine if the environment is remote
 			if (process.env.SSH_CONNECTION !== undefined) {
 				// Generate the command using the path to the directory
-				const reportDir = reportPath.replace("/index.html", "");
+				const reportDir = reportPath.replace('/index.html', '');
 				return { isLocal: false, command: 'python3 -m http.server --directory ' + reportDir };
 			} else {
 				return { isLocal: true, path: reportPath };

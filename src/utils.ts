@@ -8,6 +8,11 @@ import { Uri, workspace } from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
 
+export interface CommandArgs {
+	commandPath: string;
+	args: string[];
+}
+
 // Get the raw text from a given file given it's path uri
 export const getContentFromFilesystem = async (uri: Uri): Promise<string> => {
 	try {
@@ -50,3 +55,38 @@ export function checkCargoExist(): boolean {
 		return false;
 	}
 }
+
+// Return the constructed kani invokation and the argument array
+export function splitCommand(command: string): CommandArgs {
+	const parts = parseCommand(command)
+	let commandPath = parts[0];
+	if (commandPath == 'cargo') {
+		if(parts.length > 1 && parts[1] == 'kani') {
+			const args = parts.slice(2);
+			commandPath = 'cargo kani';
+			return { commandPath, args };
+		}
+		else {
+			return { commandPath, args: [] };
+		}
+	} else if (commandPath == 'kani' && parts.length > 1) {
+		const args = parts.slice(1);
+		return { commandPath, args };
+	} else {
+		return { commandPath, args: [] };
+	}
+}
+
+/* Split the command line invocation into the kani call and the argument array
+For example - Input: '"my command" --arg1 "file with spaces.txt"';
+Output: ['my command', '--arg1', 'file with spaces.txt']
+*/
+function parseCommand(command: string): string[] {
+	const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+	const parts = [];
+	let match;
+	while ((match = regex.exec(command))) {
+	  parts.push(match[1] || match[2] || match[0]);
+	}
+	return parts;
+  }
