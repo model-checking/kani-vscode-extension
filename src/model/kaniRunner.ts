@@ -46,7 +46,7 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 }
 
 /**
- * Function that runs cargo kani [args]
+ * Function that runs `cargo kani [args]`
  *
  * @param kaniCommand - Full sanitized command created by kaniCommandCreate module
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
@@ -55,7 +55,7 @@ export async function runKaniCommand(
 	harnessCommand: string,
 	cargoKaniMode: boolean = false,
 ): Promise<any> {
-	// get the full resolved path for the root directory of the crate
+	// Get the full resolved path for the root directory of the crate
 	const directory = path.resolve(getRootDir());
 	const commmandSplit: CommandArgs = splitCommand(harnessCommand);
 
@@ -89,7 +89,8 @@ export async function runKaniCommand(
  *
  * @param command - Full sanitized command created by kaniCommandCreate module
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
- */ export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
+ */
+ export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 	// Root dir of the crate and the command and args to be executed
 	const directory = path.resolve(getRootDir());
 	const commmandSplit: CommandArgs = splitCommand(command);
@@ -129,7 +130,7 @@ export async function runKaniCommand(
 		});
 	} else {
 		// Error Case
-		vscode.window.showWarningMessage('Kani Executable Crashed while parsing error message');
+		vscode.window.showWarningMessage('Kani executable crashed while parsing error message');
 		return new Promise((resolve, reject) => {
 			resolve({ failedProperty: 'error', failedMessages: 'error' });
 		});
@@ -142,7 +143,7 @@ export async function runKaniCommand(
  * @param kaniBinaryPath - Full sanitized command created by kaniCommandCreate module
  * @param args - full arg list to provide to the subprocess
  * @param options - options to pass to the cargo-kani command i.e shell, working directory
- * @param cargoKaniMode - If it's running in cargo-kani
+ * @param cargoKaniMode - Whether it's running in `cargo-kani` or not
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
  */
 function executeKaniProcess(
