@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
-import { runCommandPure } from '../model/kaniBinaryRunner';
+import { runCommandPure } from '../model/kaniCommandCreate';
 
 /**
  * Show message to user about running kani or cargo kani as a command on the crate

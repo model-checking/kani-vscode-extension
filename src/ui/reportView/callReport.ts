@@ -12,6 +12,8 @@ import { checkCargoExist, getRootDir } from '../../utils';
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execPromise = promisify(exec);
+const warningMessage = `Report generation is an unstable feature.
+Coverage information has been disabled due recent issues involving incorrect results.`
 
 interface htmlMetaData {
 	finalCommand: string;
@@ -70,7 +72,7 @@ export async function callViewerReport(
 		showVisualizeError(processOutput);
 		return;
 	}
-	showreportMetadata(terminal, processOutput);
+	showReportMetadata(terminal, processOutput);
 }
 
 // Show an error depending on the code we received
@@ -84,9 +86,7 @@ function showVisualizeError(output: reportMetadata): void {
 			break;
 		// Could run the command, but the file generated could not be verified or was generated at wrong location
 		case 2:
-			vscode.window.showErrorMessage(
-				`Could not find path to the report file: ${output.error}`,
-			);
+			vscode.window.showErrorMessage(`Could not find path to the report file: ${output.error}`);
 			break;
 	}
 	return;
@@ -94,13 +94,13 @@ function showVisualizeError(output: reportMetadata): void {
 
 // Shows an option to open the report in a browser. The process depends on
 // whether the extension executes on a local or remote environment.
-async function showreportMetadata(terminal: vscode.Terminal, output: reportMetadata): Promise<void> {
+async function showReportMetadata(terminal: vscode.Terminal, output: reportMetadata): Promise<void> {
 	if (output.result?.isLocal) {
 		// Shows a message with a button. Clicking the button opens the report
 		// in a browser.
 		const response = await vscode.window.showInformationMessage(
 			'Report has been generated',
-			'Open in Browser'
+			'Open in Browser',
 		);
 		if (response == 'Open in Browser') {
 			const uriPath = vscode.Uri.file(output.result?.path ?? '');
@@ -129,15 +129,15 @@ function createCommand(
 
 	if (!isCargo) {
 		const command: string = commandURI === 'Kani.runViewerReport' ? 'kani' : 'cargo kani';
-		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --visualize`;
+		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --visualize`;
 		searchDir = path.join(getRootDir());
 	} else {
 		if (harnessType) {
 			const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
-			finalCommand = `${command} --harness ${harnessName} --visualize`;
+			finalCommand = `${command} --harness ${harnessName} --enable-unstable --visualize`;
 			searchDir = path.join(getRootDir(), 'target');
 		} else {
-			finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --visualize`;
+			finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --enable-unstable --visualize`;
 			searchDir = path.join(getRootDir(), 'target');
 		}
 	}
@@ -154,6 +154,7 @@ function createCommand(
 async function runVisualizeCommand(command: string, harnessName: string): Promise<reportMetadata> {
 	try {
 		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
+		vscode.window.showWarningMessage(warningMessage);
 		const { stdout, stderr } = await execPromise(command);
 		const parseResult = await parseReportOutput(stdout);
 		if (parseResult === undefined) {
@@ -164,7 +165,7 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		return { statusCode: 0, result: parseResult };
 	} catch (error) {
 		console.error(`exec error: ${error}`);
-		return { statusCode: 1, result: undefined, error: error as string};
+		return { statusCode: 1, result: undefined, error: error as string };
 	}
 }
 
@@ -183,7 +184,7 @@ async function parseReportOutput(stdout: string): Promise<visualizeResult | unde
 
 	for (const outputString of kaniOutputArray) {
 		if (outputString.startsWith(searchString)) {
-			const reportPath: string = outputString.substring(searchString.length)
+			const reportPath: string = outputString.substring(searchString.length);
 
 			// Check if the path exists as expected
 			const filePathExists: boolean = await checkPathExists(reportPath);
@@ -194,7 +195,7 @@ async function parseReportOutput(stdout: string): Promise<visualizeResult | unde
 			// Determine if the environment is remote
 			if (process.env.SSH_CONNECTION !== undefined) {
 				// Generate the command using the path to the directory
-				const reportDir = reportPath.replace("/index.html", "");
+				const reportDir = reportPath.replace('/index.html', '');
 				return { isLocal: false, command: 'python3 -m http.server --directory ' + reportDir };
 			} else {
 				return { isLocal: true, path: reportPath };
