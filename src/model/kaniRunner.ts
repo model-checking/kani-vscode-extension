@@ -62,20 +62,13 @@ export async function runKaniCommand(
 	// Get cargo command and args for the command to be executed
 	const command = commmandSplit.commandPath;
 	const args = commmandSplit.args;
-	let kaniBinaryPath = '';
+	const kaniBinaryPath = '';
 
 	if (command == 'cargo' || command == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		const options = {
 			shell: false,
 			cwd: directory,
-		};
-
-		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
-	} else if (command == 'kani') {
-		kaniBinaryPath = await getKaniPath(command);
-		const options = {
-			shell: false,
 		};
 
 		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
@@ -104,20 +97,6 @@ export async function runKaniCommand(
 		const options = {
 			shell: false,
 			cwd: directory,
-		};
-
-		return new Promise((resolve, reject) => {
-			execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
-				if (stdout) {
-					const responseObject: KaniResponse = responseParserInterface(stdout);
-					resolve(responseObject);
-				}
-			});
-		});
-	} else if (commmandSplit.commandPath == 'kani') {
-		const kaniBinaryPath = await getKaniPath('kani');
-		const options = {
-			shell: false,
 		};
 
 		return new Promise((resolve, reject) => {
