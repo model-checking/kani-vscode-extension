@@ -15,7 +15,6 @@ jobs:
 
       - name: Install tree sitter library
         run: |
-          npm cache clean --force
           npm install tree-sitter@0.16.1
           npm install tree-sitter-rust@0.16.0
 
