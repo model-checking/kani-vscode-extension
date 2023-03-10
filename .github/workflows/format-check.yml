@@ -13,6 +13,12 @@ jobs:
       - name: Execute copyright check
         run: ./scripts/run-copyright-check.sh
 
+      - name: Install tree sitter library
+        run: |
+          npm cache clean --force
+          npm install tree-sitter@0.16.1
+          npm install tree-sitter-rust@0.16.0
+
       - name: Check TS code formatting
         run: |
           npm install -g npm@latest
