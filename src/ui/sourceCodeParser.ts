@@ -1,11 +1,12 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import assert from "assert";
+import * as assert from 'assert';
 
 import Parser from "tree-sitter";
 import * as vscode from 'vscode';
 
 import { countOccurrences} from '../utils';
+import { FileMetaData, HarnessMetadata } from "./sourceMap";
 
 // Parse for kani::proof helper function
 const proofRe = /kani::proof.*((.|\n)*?){/gm;
@@ -17,39 +18,28 @@ const Rust = require("tree-sitter-rust");
 const parser = new Parser();
 parser.setLanguage(Rust);
 
+// Return True if proofs exist in the file, False if not
+export function checkFileForProofs(content: string): boolean {
+	return checkTextForProofs(content);
+}
+
+// Match source text for Kani annotations
+export const checkTextForProofs = (content: string): boolean => {
+	const tree = parser.parse(content);
+	return checkforKani(tree.rootNode);
+};
+
 // use the tree sitter to get attributes
-function getAttributeFromRustFile(file: string): any {
+function getAttributeFromRustFile(file: string): HarnessMetadata[] {
 	const tree = parser.parse(file);
 	const nodes = tree.rootNode.namedChildren;
 
 	const harnesses = searchParseTreeForFunctions(tree.rootNode);
- 	const search_results = searchParseTree(tree.rootNode);
-	return search_results;
-}
-
-// Search if there exists a kani attribute
-function searchParseTree(node: any) : any {
-
-	// check for the kani::proof attribute
-	const results = [];
-	if (node.type === target) {
-		if(countOccurrences(node.text, "kani::proof") == 1)
-		{
-			results.push(node);
-		}
-	  } else if (node.namedChildren) {
-		for (let i = 0; i < node.namedChildren.length; i++) {
-		  const result = searchParseTree(node.namedChildren[i]);
-		  if (result.length != 0) {
-			results.push(...result);
-		  }
-		}
-	  }
-	return results;
+	return harnesses;
 }
 
 // Do DFS to get all harnesses
-function searchParseTreeForFunctions(node: any) : any[] {
+function searchParseTreeForFunctions(node: any) : HarnessMetadata[] {
 
 	const results: any[] = [];
 	if(!node.namedChildren) {
@@ -71,24 +61,48 @@ function searchParseTreeForFunctions(node: any) : any[] {
 	return results;
 }
 
-function findHarnesses(strList: any[]): any {
+// Given a list of nodes, return the function subnodes as a list
+function findHarnesses(strList: any[]): HarnessMetadata[] {
 	const result: any[] = [];
+	const resultMap: HarnessMetadata[] = [];
+	const debugMap: Map<any, any> = new Map<any, any>();
 	for (let i = 0; i < strList.length; i++) {
 		if (strList[i].type == "attribute_item" && strList[i].text.includes("kani::proof")) {
+			// Capture also, items that might be related to kani i.e other attributes in the same line or different lines
+			// they will contain the words kani
+			const attributes: any[] = [];
+			const attributesMetadata: any[] = [];
 			for (let j = i; j < strList.length; j++) {
+				if (strList[j].type == "attribute_item" && strList[j].text.includes("kani") ) {
+
+					// TODO: check if test is above and if its in the form of cfg_attr()
+					if(strList[j].text != "#[kani::proof]") {
+						attributes.push(strList[j]);
+						attributesMetadata.push(strList[j].text);
+					}
+				}
+
 				if (strList[j].type == "function_item") {
-					result.push(strList[j]);
+					const functionName = strList[j].namedChildren.find((p: { type: string; }) => p.type === "identifier");
+					const unprocessedLine = strList[j].text.split("\n")[0];
+					const current_harness: HarnessMetadata = {
+						name: functionName.text,
+						fullLine: unprocessedLine,
+						endPosition: functionName.endPosition,
+						attributes: attributesMetadata,
+						args: {proof: true, test: false}
+					};
+					resultMap.push(current_harness);
 					break;
 				}
 			}
 		}
 	}
-	return result;
+	return resultMap;
 }
 
 // Search if there exists a kani attribute
 function checkforKani(node: any) : boolean {
-
 	// check for the kani::proof attribute
 	if (node.type === target && countOccurrences(node.text, "kani::proof") == 1) {
 		return true;
@@ -105,16 +119,29 @@ function checkforKani(node: any) : boolean {
 	return false;
 }
 
-// Return True if proofs exist in the file, False if not
-export function checkFileForProofs(content: string): boolean {
-	return checkTextForProofs(content);
+
+function fillMetadataForFile(harnesses: HarnessMetadata[]): void {
+	for(const harness of harnesses) {
+		fillMetadataValue(harness);
+	}
 }
 
-// Match source text for Kani annotations
-export const checkTextForProofs = (content: string): boolean => {
-	const tree = parser.parse(content);
-	return checkforKani(tree.rootNode);
-};
+function fillMetadataValue(harness: HarnessMetadata): void {
+	for(const attribute of harness.attributes) {
+		if(attribute.includes("kani::unwind")) {
+			const unwindValue = extractUnwindValueNew(attribute);
+			harness.args.unwind_value = unwindValue;
+		}
+		else if(attribute.includes("kani::solver")) {
+			const solverName = extractSolverValueNew(attribute);
+			harness.args.solver = solverName;
+		}
+		else {
+			break;
+		}
+	}
+}
+
 
 /**
  * Find kani proof and bolero proofs and extract metadata out of them from source text
@@ -130,6 +157,15 @@ export const parseRustfile = (
 ): void => {
 	const allProofs = text.matchAll(proofRe);
 	const allTests = text.matchAll(testRe);
+
+	// Create harness metadata for the entire file
+	const allAttributes: HarnessMetadata[] = getAttributeFromRustFile(text);
+	const harnessesSortedByLine: HarnessMetadata[] = [...allAttributes].sort((a,b) => a.endPosition.row - b.endPosition.row);
+
+	// Fill argument values
+	fillMetadataForFile(harnessesSortedByLine);
+	console.log(JSON.stringify(harnessesSortedByLine, undefined, 2));
+
 	const harnessMap = new Map<string, string>();
 	const map = new Map<string, string>();
 	const harnessList: Set<string> = new Set<string>([]);
@@ -175,6 +211,21 @@ export const parseRustfile = (
 			// the maps contain the line or not
 			const line: string = lines[lineNo];
 			let strippedLine: string = line.replace(/\s+/g, '');
+
+			// Add the parsed node for the current line
+			const harness = allAttributes.find((p) => p.endPosition.row === lineNo);
+			if(harness) {
+				assert.equal(harness.fullLine, line.trim());
+				const name: string = harness.name;
+				const unwind = harness.args.unwind_value;
+
+				// Range should cover the entire harness
+				const range = new vscode.Range(
+					new vscode.Position(lineNo, 0),
+					new vscode.Position(lineNo, line.length),
+				);
+			}
+
 			for (const fnMod of functionModifiers) {
 				if (strippedLine.startsWith(fnMod)) {
 					strippedLine = strippedLine.replace(fnMod, '');
@@ -186,7 +237,7 @@ export const parseRustfile = (
 				// Range should cover the entire harness
 				const range = new vscode.Range(
 					new vscode.Position(lineNo, 0),
-					new vscode.Position(lineNo, map.get(strippedLine)![0].length),
+					new vscode.Position(lineNo, line.length),
 				);
 				// Pass the harness onto the test item
 				if (testMap.has(strippedLine)) {
@@ -244,6 +295,47 @@ export function extractUnwindValue(harnessLineSplit: string[]): number {
 	}
 
 	return NaN;
+}
+
+/**
+ * Given any array of lines of code containing kani annotations, extract the integer corresponding
+ * to the unwind value and return
+ *
+ * @param harnessLineSplit - Array of source lines that belong to the harness
+ * @returns unwind value
+ */
+export function extractUnwindValueNew(harnessLine: string): number {
+
+	if (harnessLine.includes('kani::unwind(')) {
+		const unwindValue: number = parseInt(harnessLine.match(/\d+/)![0]);
+		return unwindValue;
+	}
+
+	return NaN;
+}
+
+/**
+ * Given any array of lines of code containing kani annotations, extract the integer corresponding
+ * to the unwind value and return
+ *
+ * @param harnessLineSplit - Array of source lines that belong to the harness
+ * @returns unwind value
+ */
+export function extractSolverValueNew(str: string): string {
+	const prefix = '#[kani::solver("';
+	const suffix = '")';
+	const startIndex = str.indexOf(prefix);
+	// if (startIndex === -1) {
+	// 	return "";
+	// }
+	const endIndex = str.indexOf(suffix, startIndex + prefix.length);
+	// if (endIndex === -1) {
+	// 	return "";
+	// }
+
+	const value = str.slice(startIndex + prefix.length, endIndex-1);
+
+	return value;
 }
 
 /**
