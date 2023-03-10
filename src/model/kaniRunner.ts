@@ -106,8 +106,8 @@ export async function runKaniCommand(
 			cwd: directory,
 		};
 
-		return new Promise((resolve, reject) => {
-			execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+		return new Promise((resolve, _reject) => {
+			execFile(kaniBinaryPath, args, options, (_error, stdout, _stderr) => {
 				if (stdout) {
 					const responseObject: KaniResponse = responseParserInterface(stdout);
 					resolve(responseObject);
@@ -120,8 +120,8 @@ export async function runKaniCommand(
 			shell: false,
 		};
 
-		return new Promise((resolve, reject) => {
-			execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+		return new Promise((resolve, _reject) => {
+			execFile(kaniBinaryPath, args, options, (_error, stdout, _stderr) => {
 				if (stdout) {
 					const responseObject: KaniResponse = responseParserInterface(stdout);
 					resolve(responseObject);
@@ -131,7 +131,7 @@ export async function runKaniCommand(
 	} else {
 		// Error Case
 		vscode.window.showWarningMessage('Kani executable crashed while parsing error message');
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
 			resolve({ failedProperty: 'error', failedMessages: 'error' });
 		});
 	}

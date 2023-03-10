@@ -40,7 +40,11 @@ interface reportMetadata {
  */
 export async function callViewerReport(
 	commandURI: string,
-	harnessObj: { harnessName: string; harnessFile: string; harnessType: boolean },
+	harnessObj: {
+		harnessName: string;
+		harnessFile: string;
+		harnessType: boolean;
+	},
 ): Promise<void> {
 	let finalCommand: string = '';
 	let searchDir: string = '';
@@ -196,7 +200,10 @@ async function parseReportOutput(stdout: string): Promise<visualizeResult | unde
 			if (process.env.SSH_CONNECTION !== undefined) {
 				// Generate the command using the path to the directory
 				const reportDir = reportPath.replace('/index.html', '');
-				return { isLocal: false, command: 'python3 -m http.server --directory ' + reportDir };
+				return {
+					isLocal: false,
+					command: 'python3 -m http.server --directory ' + reportDir,
+				};
 			} else {
 				return { isLocal: true, path: reportPath };
 			}

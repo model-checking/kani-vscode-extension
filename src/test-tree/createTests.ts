@@ -9,7 +9,7 @@ import {
 	runCargoKaniTest,
 	runKaniHarnessInterface,
 } from '../model/kaniCommandCreate';
-import { checkFileForProofs, parseRustfile } from '../ui/sourceCodeParser';
+import { SourceCodeParser } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
@@ -52,7 +52,7 @@ export async function findInitialFiles(
 	rootItem?: vscode.TestItem,
 ): Promise<void> {
 	for (const file of await vscode.workspace.findFiles(pattern)) {
-		const fileHasProofs: boolean = checkFileForProofs(await getContentFromFilesystem(file));
+		const fileHasProofs: boolean = SourceCodeParser.checkFileForProofs(await getContentFromFilesystem(file));
 		if (fileHasProofs) {
 			if (rootItem) {
 				getOrCreateFile(controller, file, rootItem);
@@ -148,13 +148,13 @@ export class TestFile {
 		};
 
 		// Trigger the parser and process extracted metadata to create a test case
-		parseRustfile(content, {
-			onTest: (range, name, harnessType, args) => {
+		SourceCodeParser.parseRustfile(content, {
+			onTest: (range, name, proofBoolean, args) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {
 					throw new Error('No item or item path found');
 				}
-				const data: TestCase = new TestCase(item.uri.fsPath, name, harnessType, args);
+				const data: TestCase = new TestCase(item.uri.fsPath, name, proofBoolean, args);
 				const id: string = `${item.uri}/${data.getLabel()}`;
 
 				const tcase: vscode.TestItem = controller.createTestItem(id, data.getLabel(), item.uri);
@@ -190,15 +190,15 @@ export class TestFile {
  *
  * @param file_name - name of the harness that is to be verified
  * @param harness_name - name of harness to be verified
- * @param harness_type - True of proof, false if bolero harness
- * @param harness_type - unwind value of the harness
+ * @param proof_boolean - True if proof, false if bolero harness
+ * @param harness_unwind_value - unwind value of the harness (if it exists)
  * @returns verification status (i.e success or failure)
  */
 export class TestCase {
 	constructor(
 		readonly file_name: string,
 		readonly harness_name: string,
-		readonly harness_type: boolean,
+		readonly proof_boolean: boolean,
 		readonly harness_unwind_value?: number,
 	) {}
 
@@ -209,7 +209,7 @@ export class TestCase {
 	// Run Kani on the harness, create links and pass/fail ui, present to the user
 	async run(item: vscode.TestItem, options: vscode.TestRun): Promise<void> {
 		const start: number = Date.now();
-		if (this.harness_type) {
+		if (this.proof_boolean) {
 			const actual: number = await this.evaluate(
 				this.file_name,
 				this.harness_name,
@@ -231,7 +231,7 @@ export class TestCase {
 					failedChecks,
 					this.file_name,
 					this.harness_name,
-					this.harness_type,
+					this.proof_boolean,
 					failedMessage,
 				);
 
@@ -258,7 +258,7 @@ export class TestCase {
 					failedChecks,
 					this.file_name,
 					this.harness_name,
-					this.harness_type,
+					this.proof_boolean,
 					failedMessage,
 				);
 				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
@@ -337,7 +337,7 @@ class FailedCase extends TestCase {
 			{
 				harnessName: this.harness_name,
 				harnessFile: this.file_name,
-				harnessType: this.harness_type,
+				harnessType: this.proof_boolean,
 			},
 		];
 		const stageCommandUri = Uri.parse(

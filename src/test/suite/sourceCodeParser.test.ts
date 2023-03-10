@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
 
-import { checkFileForProofs } from '../../ui/sourceCodeParser';
-import { programWithProof, rustFileWithoutProof } from '../test-programs/sampleRustString';
-import { getHarnessListFromParsing, getUnwindMapFromParsing } from '../test-programs/stubbedParser';
+import Parser from 'tree-sitter';
+
+import { SourceCodeParser } from '../../ui/sourceCodeParser';
+import { boleroProofs, findHarnessesResultBolero, findHarnessesResultKani, fullProgramSource, harnessMetadata, kaniProofs, rustFileWithoutProof } from '../test-programs/sampleRustString';
 
 const listofHarnesses: Set<string> = new Set<string>([
 	'insert_test',
@@ -13,30 +14,51 @@ const listofHarnesses: Set<string> = new Set<string>([
 	'function_abc',
 	'function_xyz',
 ]);
-const listofHarnesses2: Set<string> = new Set<string>(['']);
-
-const UnwindMap1: Map<string, number> = new Map([['{', NaN]]);
-const UnwindMap2: Map<string, number> = new Map([
-	['fnfunction_abc(){', 0],
-	['fnfunction_xyz(){', NaN],
-	['fninsert_test(){', 0],
-	['fninsert_test_2(){', 1],
-	['fnrandom_name(){', 1],
-]);
 
 suite('Verification symbol view', () => {
+
+	// Parse for kani::proof helper function
+	const Rust = require('tree-sitter-rust');
+	const parser = new Parser();
+	parser.setLanguage(Rust);
+
 	test('Test if proofs exist in file', () => {
-		assert.strictEqual(checkFileForProofs(programWithProof), true);
-		assert.strictEqual(checkFileForProofs(rustFileWithoutProof), false);
+		assert.strictEqual(SourceCodeParser.checkFileForProofs(fullProgramSource), true);
+		assert.strictEqual(SourceCodeParser.checkFileForProofs(rustFileWithoutProof), false);
 	});
 
-	test('Test if all harnesses are detected', () => {
-		assert.deepEqual(getHarnessListFromParsing(rustFileWithoutProof), listofHarnesses2);
-		assert.deepEqual(getHarnessListFromParsing(programWithProof), listofHarnesses);
+	test('Test if all kani harnesses are detected', () => {
+		const tree = parser.parse(kaniProofs);
+		assert.deepStrictEqual(SourceCodeParser.findHarnesses(tree.rootNode.namedChildren), findHarnessesResultKani);
 	});
 
-	test('Test if unwind values are detected', () => {
-		assert.deepEqual(getUnwindMapFromParsing(rustFileWithoutProof), UnwindMap1);
-		assert.deepEqual(getUnwindMapFromParsing(programWithProof), UnwindMap2);
+	test('Test if all Bolero harnesses are detected', () => {
+		const tree = parser.parse(boleroProofs);
+		assert.deepStrictEqual(SourceCodeParser.searchParseTreeForFunctions(tree.rootNode), findHarnessesResultBolero);
+	});
+
+	test('Test if all unwind values are parsed', () => {
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(0)]'), 0);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind()]'), NaN);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(1)]'), 1);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(89)]'), 89);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(abc)]'), NaN);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::solver(kissat)]'), NaN);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[cfg_attr(kani, kani::proof, kani::unwind(0))]'), 0);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[cfg_attr(kani, kani::proof, kani::unwind(89), kani::solver(kissat))]'), 89);
+		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[cfg_attr(kani, kani::proof, kani::unwind(xyz))]'), NaN);
+	});
+
+	test('Test if all solver values are parsed', () => {
+		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::solver(kissat)]'), 'kissat');
+		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::solver(abc)]'), 'abc');
+		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::solver(xyz)]'), 'xyz');
+		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::unwind(xyz)]'), '');
+		assert.strictEqual(SourceCodeParser.extractSolverValue('#[cfg_attr(kani, kani::proof, kani::unwind(89), kani::solver(kissat))]'), 'kissat');
+		assert.strictEqual(SourceCodeParser.extractSolverValue('#[cfg_attr(kani, kani::proof, kani::solver(xyz))]'), 'xyz');
+	});
+
+	test('Test if final metadata map is structured right', () => {
+		assert.deepStrictEqual(SourceCodeParser.getAttributeFromRustFile(fullProgramSource), harnessMetadata);
 	});
 });
