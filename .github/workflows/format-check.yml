@@ -14,8 +14,7 @@ jobs:
         run: ./scripts/run-copyright-check.sh
 
       - name: Setup Node.js
-        run: |
-          actions/setup-node@v1
+        run: actions/setup-node@v1
         with:
           node-version: '16.x'
 
