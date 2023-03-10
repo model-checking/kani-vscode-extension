@@ -56,6 +56,25 @@ export function checkCargoExist(): boolean {
 	}
 }
 
+export function countOccurrences(largerString: string, substring: string): number {
+	let count = 0;
+	let startIndex = 0;
+
+	while (true) {
+	  startIndex = largerString.indexOf(substring, startIndex);
+
+	  if (startIndex === -1) {
+		// Substring not found
+		break;
+	  }
+
+	  count++;
+	  startIndex += substring.length;
+	}
+
+	return count;
+  }
+
 // Return the constructed kani invokation and the argument array
 export function splitCommand(command: string): CommandArgs {
 	const parts = parseCommand(command)
