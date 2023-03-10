@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as path from 'path';
 
+// eslint-disable-next-line import/no-named-as-default
 import glob from 'glob';
 import Mocha from 'mocha';
 

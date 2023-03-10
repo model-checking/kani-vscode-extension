@@ -61,31 +61,30 @@ export function countOccurrences(largerString: string, substring: string): numbe
 	let startIndex = 0;
 
 	while (true) {
-	  startIndex = largerString.indexOf(substring, startIndex);
+		startIndex = largerString.indexOf(substring, startIndex);
 
-	  if (startIndex === -1) {
-		// Substring not found
-		break;
-	  }
+		if (startIndex === -1) {
+			// Substring not found
+			break;
+		}
 
-	  count++;
-	  startIndex += substring.length;
+		count++;
+		startIndex += substring.length;
 	}
 
 	return count;
-  }
+}
 
 // Return the constructed kani invokation and the argument array
 export function splitCommand(command: string): CommandArgs {
-	const parts = parseCommand(command)
+	const parts = parseCommand(command);
 	let commandPath = parts[0];
 	if (commandPath == 'cargo') {
-		if(parts.length > 1 && parts[1] == 'kani') {
+		if (parts.length > 1 && parts[1] == 'kani') {
 			const args = parts.slice(2);
 			commandPath = 'cargo kani';
 			return { commandPath, args };
-		}
-		else {
+		} else {
 			return { commandPath, args: [] };
 		}
 	} else if (commandPath == 'kani' && parts.length > 1) {
@@ -105,7 +104,7 @@ function parseCommand(command: string): string[] {
 	const parts = [];
 	let match;
 	while ((match = regex.exec(command))) {
-	  parts.push(match[1] || match[2] || match[0]);
+		parts.push(match[1] || match[2] || match[0]);
 	}
 	return parts;
-  }
+}

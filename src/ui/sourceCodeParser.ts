@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
 
-import Parser from "tree-sitter";
+import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
 
-import { countOccurrences} from '../utils';
-import { FileMetaData, HarnessMetadata } from "./sourceMap";
+import { countOccurrences } from '../utils';
+import { FileMetaData, HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
 const proofRe = /kani::proof.*((.|\n)*?){/gm;
 const testRe = /#\[test].*((.|\n)*?){/gm;
 const kaniConfig = '#[cfg_attr(kani';
 const functionModifiers = ['pub', 'async', 'unsafe', 'const', 'extern'];
-const target = "attribute_item";
-const Rust = require("tree-sitter-rust");
+const target = 'attribute_item';
+const Rust = require('tree-sitter-rust');
 const parser = new Parser();
 parser.setLanguage(Rust);
 
@@ -39,19 +39,17 @@ function getAttributeFromRustFile(file: string): HarnessMetadata[] {
 }
 
 // Do DFS to get all harnesses
-function searchParseTreeForFunctions(node: any) : HarnessMetadata[] {
-
+function searchParseTreeForFunctions(node: any): HarnessMetadata[] {
 	const results: any[] = [];
-	if(!node.namedChildren) {
+	if (!node.namedChildren) {
 		return results;
 	}
 	const harness_results = findHarnesses(node.namedChildren);
-	if(harness_results.length > 0)
-	{
+	if (harness_results.length > 0) {
 		results.push(...harness_results);
 	}
 	for (let i = 0; i < node.namedChildren.length; i++) {
-		if(node.namedChildren[i].namedChildren){
+		if (node.namedChildren[i].namedChildren) {
 			const result = searchParseTreeForFunctions(node.namedChildren[i]);
 			if (result.length != 0) {
 				results.push(...result);
@@ -67,30 +65,31 @@ function findHarnesses(strList: any[]): HarnessMetadata[] {
 	const resultMap: HarnessMetadata[] = [];
 	const debugMap: Map<any, any> = new Map<any, any>();
 	for (let i = 0; i < strList.length; i++) {
-		if (strList[i].type == "attribute_item" && strList[i].text.includes("kani::proof")) {
+		if (strList[i].type == 'attribute_item' && strList[i].text.includes('kani::proof')) {
 			// Capture also, items that might be related to kani i.e other attributes in the same line or different lines
 			// they will contain the words kani
 			const attributes: any[] = [];
 			const attributesMetadata: any[] = [];
 			for (let j = i; j < strList.length; j++) {
-				if (strList[j].type == "attribute_item" && strList[j].text.includes("kani") ) {
-
+				if (strList[j].type == 'attribute_item' && strList[j].text.includes('kani')) {
 					// TODO: check if test is above and if its in the form of cfg_attr()
-					if(strList[j].text != "#[kani::proof]") {
+					if (strList[j].text != '#[kani::proof]') {
 						attributes.push(strList[j]);
 						attributesMetadata.push(strList[j].text);
 					}
 				}
 
-				if (strList[j].type == "function_item") {
-					const functionName = strList[j].namedChildren.find((p: { type: string; }) => p.type === "identifier");
-					const unprocessedLine = strList[j].text.split("\n")[0];
+				if (strList[j].type == 'function_item') {
+					const functionName = strList[j].namedChildren.find(
+						(p: { type: string }) => p.type === 'identifier',
+					);
+					const unprocessedLine = strList[j].text.split('\n')[0];
 					const current_harness: HarnessMetadata = {
 						name: functionName.text,
 						fullLine: unprocessedLine,
 						endPosition: functionName.endPosition,
 						attributes: attributesMetadata,
-						args: {proof: true, test: false}
+						args: { proof: true, test: false },
 					};
 					resultMap.push(current_harness);
 					break;
@@ -102,16 +101,15 @@ function findHarnesses(strList: any[]): HarnessMetadata[] {
 }
 
 // Search if there exists a kani attribute
-function checkforKani(node: any) : boolean {
+function checkforKani(node: any): boolean {
 	// check for the kani::proof attribute
-	if (node.type === target && countOccurrences(node.text, "kani::proof") == 1) {
+	if (node.type === target && countOccurrences(node.text, 'kani::proof') == 1) {
 		return true;
 	} else if (node.namedChildren) {
 		for (let i = 0; i < node.namedChildren.length; i++) {
-		  	if(checkforKani(node.namedChildren[i])) {
+			if (checkforKani(node.namedChildren[i])) {
 				return true;
-			}
-			else {
+			} else {
 				continue;
 			}
 		}
@@ -119,29 +117,25 @@ function checkforKani(node: any) : boolean {
 	return false;
 }
 
-
 function fillMetadataForFile(harnesses: HarnessMetadata[]): void {
-	for(const harness of harnesses) {
+	for (const harness of harnesses) {
 		fillMetadataValue(harness);
 	}
 }
 
 function fillMetadataValue(harness: HarnessMetadata): void {
-	for(const attribute of harness.attributes) {
-		if(attribute.includes("kani::unwind")) {
+	for (const attribute of harness.attributes) {
+		if (attribute.includes('kani::unwind')) {
 			const unwindValue = extractUnwindValueNew(attribute);
 			harness.args.unwind_value = unwindValue;
-		}
-		else if(attribute.includes("kani::solver")) {
+		} else if (attribute.includes('kani::solver')) {
 			const solverName = extractSolverValueNew(attribute);
 			harness.args.solver = solverName;
-		}
-		else {
+		} else {
 			break;
 		}
 	}
 }
-
 
 /**
  * Find kani proof and bolero proofs and extract metadata out of them from source text
@@ -160,7 +154,9 @@ export const parseRustfile = (
 
 	// Create harness metadata for the entire file
 	const allAttributes: HarnessMetadata[] = getAttributeFromRustFile(text);
-	const harnessesSortedByLine: HarnessMetadata[] = [...allAttributes].sort((a,b) => a.endPosition.row - b.endPosition.row);
+	const harnessesSortedByLine: HarnessMetadata[] = [...allAttributes].sort(
+		(a, b) => a.endPosition.row - b.endPosition.row,
+	);
 
 	// Fill argument values
 	fillMetadataForFile(harnessesSortedByLine);
@@ -214,7 +210,7 @@ export const parseRustfile = (
 
 			// Add the parsed node for the current line
 			const harness = allAttributes.find((p) => p.endPosition.row === lineNo);
-			if(harness) {
+			if (harness) {
 				assert.equal(harness.fullLine, line.trim());
 				const name: string = harness.name;
 				const unwind = harness.args.unwind_value;
@@ -305,7 +301,6 @@ export function extractUnwindValue(harnessLineSplit: string[]): number {
  * @returns unwind value
  */
 export function extractUnwindValueNew(harnessLine: string): number {
-
 	if (harnessLine.includes('kani::unwind(')) {
 		const unwindValue: number = parseInt(harnessLine.match(/\d+/)![0]);
 		return unwindValue;
@@ -333,7 +328,7 @@ export function extractSolverValueNew(str: string): string {
 	// 	return "";
 	// }
 
-	const value = str.slice(startIndex + prefix.length, endIndex-1);
+	const value = str.slice(startIndex + prefix.length, endIndex - 1);
 
 	return value;
 }
