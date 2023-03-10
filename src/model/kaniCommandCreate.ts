@@ -30,30 +30,6 @@ export async function runKaniHarnessInterface(
 }
 
 /**
- * Run Kani as a command line binary
- *
- * @param rsFile - Path to the file that is to be verified
- * @param harnessName - name of the harness that is to be verified
- * @param args - arguments to Kani if provided
- * @returns verification status (i.e success or failure)
- */
-export async function runKaniHarness(
-	rsFile: string,
-	harnessName: string,
-	args?: number,
-): Promise<any> {
-	let harnessCommand = '';
-	if (args !== undefined || NaN) {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
-	} else {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
-	}
-	// Kani Output
-	const kaniOutput = await catchOutput(harnessCommand);
-	return kaniOutput;
-}
-
-/**
  * Run cargo Kani --tests as a command line binary for harness declared
  * under #[test]
  *
@@ -98,26 +74,14 @@ export async function captureFailedChecks(
 	args?: number,
 ): Promise<KaniResponse> {
 	let harnessCommand = '';
-	if (args === undefined) {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
+
+	if (args === undefined || NaN) {
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	const kaniOutput = await createFailedDiffMessage(harnessCommand);
-	if (kaniOutput.failedProperty == 'error') {
-		const crateURI = getRootDir();
-		let harnessCommand = '';
-
-		if (args === undefined || NaN) {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} --output-format terse`;
-		} else {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args} --output-format terse`;
-		}
-		const kaniOutput = await createFailedDiffMessage(harnessCommand);
-		return kaniOutput;
-	} else {
-		return kaniOutput;
-	}
+	return kaniOutput;
 }
 
 // Generic function to run a command (Kani | Cargo Kani)
