@@ -13,6 +13,11 @@ jobs:
       - name: Execute copyright check
         run: ./scripts/run-copyright-check.sh
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+
       - name: Check TS code formatting
         run: |
           npm install -g npm@latest
