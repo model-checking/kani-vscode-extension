@@ -212,14 +212,6 @@ export const parseRustfile = (
 			const harness = allAttributes.find((p) => p.endPosition.row === lineNo);
 			if (harness) {
 				assert.equal(harness.fullLine, line.trim());
-				const name: string = harness.name;
-				const unwind = harness.args.unwind_value;
-
-				// Range should cover the entire harness
-				const range = new vscode.Range(
-					new vscode.Position(lineNo, 0),
-					new vscode.Position(lineNo, line.length),
-				);
 			}
 
 			for (const fnMod of functionModifiers) {
