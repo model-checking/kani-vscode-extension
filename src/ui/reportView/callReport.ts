@@ -13,7 +13,7 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const execPromise = promisify(exec);
 const warningMessage = `Report generation is an unstable feature.
-Coverage information has been disabled due recent issues involving incorrect results.`
+Coverage information has been disabled due recent issues involving incorrect results.`;
 
 interface htmlMetaData {
 	finalCommand: string;
@@ -98,7 +98,10 @@ function showVisualizeError(output: reportMetadata): void {
 
 // Shows an option to open the report in a browser. The process depends on
 // whether the extension executes on a local or remote environment.
-async function showReportMetadata(terminal: vscode.Terminal, output: reportMetadata): Promise<void> {
+async function showReportMetadata(
+	terminal: vscode.Terminal,
+	output: reportMetadata,
+): Promise<void> {
 	if (output.result?.isLocal) {
 		// Shows a message with a button. Clicking the button opens the report
 		// in a browser.

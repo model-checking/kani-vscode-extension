@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
 
-import Parser from "tree-sitter";
+import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
 
 import { countOccurrences } from '../utils';
@@ -14,7 +14,6 @@ const parser = new Parser();
 parser.setLanguage(Rust);
 
 export namespace SourceCodeParser {
-
 	// Return True if proofs exist in the file, False if not
 	export function checkFileForProofs(content: string): boolean {
 		return checkTextForProofs(content);
@@ -202,7 +201,7 @@ export namespace SourceCodeParser {
 	export function extractUnwindValue(harnessLine: string): number {
 		if (harnessLine.includes('kani::unwind(')) {
 			const unwindValueAsString = harnessLine.match(/\d+/);
-			if(unwindValueAsString == undefined) {
+			if (unwindValueAsString == undefined) {
 				return NaN;
 			}
 			const unwindValue: number = parseInt(unwindValueAsString[0]);
@@ -221,14 +220,14 @@ export namespace SourceCodeParser {
 	 * @returns unwind value
 	 */
 	export function extractSolverValue(str: string): string {
-		const keyword = "::solver(";
+		const keyword = '::solver(';
 		const start = str.indexOf(keyword);
 		if (start === -1) {
-			return "";
+			return '';
 		}
-		const end = str.indexOf(")", start);
+		const end = str.indexOf(')', start);
 		if (end === -1) {
-			return "";
+			return '';
 		}
 		const substringStart = start + keyword.length;
 		return str.substring(substringStart, end);

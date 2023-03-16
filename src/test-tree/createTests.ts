@@ -52,7 +52,9 @@ export async function findInitialFiles(
 	rootItem?: vscode.TestItem,
 ): Promise<void> {
 	for (const file of await vscode.workspace.findFiles(pattern)) {
-		const fileHasProofs: boolean = SourceCodeParser.checkFileForProofs(await getContentFromFilesystem(file));
+		const fileHasProofs: boolean = SourceCodeParser.checkFileForProofs(
+			await getContentFromFilesystem(file),
+		);
 		if (fileHasProofs) {
 			if (rootItem) {
 				getOrCreateFile(controller, file, rootItem);

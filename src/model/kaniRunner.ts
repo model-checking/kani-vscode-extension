@@ -90,7 +90,7 @@ export async function runKaniCommand(
  * @param command - Full sanitized command created by kaniCommandCreate module
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
  */
- export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
+export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 	// Root dir of the crate and the command and args to be executed
 	const directory = path.resolve(getRootDir());
 	const commmandSplit: CommandArgs = splitCommand(command);
