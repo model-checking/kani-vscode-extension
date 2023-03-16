@@ -62,7 +62,6 @@ export async function runKaniCommand(
 	// Get cargo command and args for the command to be executed
 	const command = commmandSplit.commandPath;
 	const args = commmandSplit.args;
-	const kaniBinaryPath = '';
 
 	if (command == 'cargo' || command == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
@@ -132,7 +131,6 @@ function executeKaniProcess(
 	cargoKaniMode: boolean,
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
-		console.log(args);
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {

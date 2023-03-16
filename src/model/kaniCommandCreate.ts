@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
-import { getRootDir } from '../utils';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
@@ -15,7 +14,6 @@ import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
  * @returns verification status (i.e success or failure)
  */
 export async function runKaniHarnessInterface(
-	rsFile: string,
 	harnessName: string,
 	args?: number,
 ): Promise<any> {
@@ -43,7 +41,6 @@ export async function runCargoKaniTest(
 	failedCheck?: boolean,
 	args?: number,
 ): Promise<any> {
-	const crateURI = getRootDir();
 	let harnessCommand = '';
 	if (args === undefined || NaN) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
@@ -69,7 +66,6 @@ export async function runCargoKaniTest(
  * @returns
  */
 export async function captureFailedChecks(
-	rsFile: string,
 	harnessName: string,
 	args?: number,
 ): Promise<KaniResponse> {
