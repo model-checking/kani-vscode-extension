@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
-import { getRootDir } from '../utils';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
@@ -15,40 +14,15 @@ import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
  * @returns verification status (i.e success or failure)
  */
 export async function runKaniHarnessInterface(
-	rsFile: string,
 	harnessName: string,
 	args?: number,
 ): Promise<any> {
 	let harnessCommand = '';
-	if (args !== undefined || NaN) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
-	} else {
+	if (args === undefined || isNaN(args)) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
-	}
-	const kaniOutput = await catchOutput(harnessCommand);
-	return kaniOutput;
-}
-
-/**
- * Run Kani as a command line binary
- *
- * @param rsFile - Path to the file that is to be verified
- * @param harnessName - name of the harness that is to be verified
- * @param args - arguments to Kani if provided
- * @returns verification status (i.e success or failure)
- */
-export async function runKaniHarness(
-	rsFile: string,
-	harnessName: string,
-	args?: number,
-): Promise<any> {
-	let harnessCommand = '';
-	if (args !== undefined || NaN) {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	} else {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
-	// Kani Output
 	const kaniOutput = await catchOutput(harnessCommand);
 	return kaniOutput;
 }
@@ -67,9 +41,8 @@ export async function runCargoKaniTest(
 	failedCheck?: boolean,
 	args?: number,
 ): Promise<any> {
-	const crateURI = getRootDir();
 	let harnessCommand = '';
-	if (args === undefined || NaN) {
+	if (args === undefined || isNaN(args)) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
@@ -93,31 +66,18 @@ export async function runCargoKaniTest(
  * @returns
  */
 export async function captureFailedChecks(
-	rsFile: string,
 	harnessName: string,
 	args?: number,
 ): Promise<KaniResponse> {
 	let harnessCommand = '';
-	if (args === undefined) {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName}`;
+
+	if (args === undefined || isNaN(args)) {
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
-		harnessCommand = `${KaniConstants.KaniExecutableName} ${rsFile} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	const kaniOutput = await createFailedDiffMessage(harnessCommand);
-	if (kaniOutput.failedProperty == 'error') {
-		const crateURI = getRootDir();
-		let harnessCommand = '';
-
-		if (args === undefined || NaN) {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} --output-format terse`;
-		} else {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args} --output-format terse`;
-		}
-		const kaniOutput = await createFailedDiffMessage(harnessCommand);
-		return kaniOutput;
-	} else {
-		return kaniOutput;
-	}
+	return kaniOutput;
 }
 
 // Generic function to run a command (Kani | Cargo Kani)
