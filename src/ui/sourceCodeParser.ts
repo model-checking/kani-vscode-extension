@@ -59,7 +59,7 @@ export namespace SourceCodeParser {
 		return results;
 	}
 
-	// Given a list of nodes, return the function subnodes as a list
+	// Given a list of nodes, return the function subnodes as a list of harness metadata objects
 	export function findHarnesses(strList: any[]): HarnessMetadata[] {
 		const resultMap: HarnessMetadata[] = [];
 		for (let i = 0; i < strList.length; i++) {
@@ -123,13 +123,14 @@ export namespace SourceCodeParser {
 		return false;
 	}
 
-	// Search if there exists a kani attribute
+	// Fill the metadata values for unwind: and solver: etc for the entire file
 	export function fillMetadataForFile(harnesses: HarnessMetadata[]): void {
 		for (const harness of harnesses) {
 			fillMetadataValue(harness);
 		}
 	}
 
+	// Fill the metadata values for unwind: and solver: etc in the harness metadata object
 	export function fillMetadataValue(harness: HarnessMetadata): void {
 		for (const attribute of harness.attributes) {
 			if (attribute.includes('kani::unwind')) {
@@ -192,10 +193,10 @@ export namespace SourceCodeParser {
 	};
 
 	/**
-	 * Given any array of lines of code containing kani annotations, extract the integer corresponding
-	 * to the unwind value and return
+	 * Given a line of code containing the kani::unwind attribute, it returns the unwind value given
+	 * by the user.
 	 *
-	 * @param harnessLineSplit - Array of source lines that belong to the harness
+	 * @param harnessLine - Source line that belong to the harness that contains the unwind attribute
 	 * @returns unwind value
 	 */
 	export function extractUnwindValue(harnessLine: string): number {
@@ -213,8 +214,8 @@ export namespace SourceCodeParser {
 	}
 
 	/**
-	 * Given any array of lines of code containing kani annotations, extract the integer corresponding
-	 * to the unwind value and return
+	 * Given an line of code containing the kani::solver attribute, it returns the solver type given by the user
+	 *
 	 *
 	 * @param harnessLineSplit - Array of source lines that belong to the harness
 	 * @returns unwind value
