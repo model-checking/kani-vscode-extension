@@ -18,10 +18,10 @@ export async function runKaniHarnessInterface(
 	args?: number,
 ): Promise<any> {
 	let harnessCommand = '';
-	if (args !== undefined || NaN) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
-	} else {
+	if (args === undefined || isNaN(args)) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
+	} else {
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	const kaniOutput = await catchOutput(harnessCommand);
 	return kaniOutput;
@@ -42,7 +42,7 @@ export async function runCargoKaniTest(
 	args?: number,
 ): Promise<any> {
 	let harnessCommand = '';
-	if (args === undefined || NaN) {
+	if (args === undefined || isNaN(args)) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
@@ -71,7 +71,7 @@ export async function captureFailedChecks(
 ): Promise<KaniResponse> {
 	let harnessCommand = '';
 
-	if (args === undefined || NaN) {
+	if (args === undefined || isNaN(args)) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
