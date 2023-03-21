@@ -21,12 +21,6 @@ export interface AttributeMetaData {
 	proof: boolean;
 	/// Whethere the harness has been annotated with test (bolero cases)
 	test: boolean;
-	/// Optional data to store solver.
-	solver?: string;
-	/// Optional data to store unwind value.
-	unwind_value?: number;
-	/// The stubs used in this harness.
-	stubs?: Stub[];
 }
 
 export interface Stub {

@@ -32,8 +32,6 @@ export namespace SourceCodeParser {
 		const sortedHarnessByline = [...harnesses].sort(
 			(a, b) => a.endPosition.row - b.endPosition.row,
 		);
-		// Fill argument values
-		fillMetadataForFile(sortedHarnessByline);
 		return sortedHarnessByline;
 	}
 
@@ -122,27 +120,6 @@ export namespace SourceCodeParser {
 		return false;
 	}
 
-	// Fill the metadata values for unwind: and solver: etc for the entire file
-	export function fillMetadataForFile(harnesses: HarnessMetadata[]): void {
-		for (const harness of harnesses) {
-			fillMetadataValue(harness);
-		}
-	}
-
-	// Fill the metadata values for unwind: and solver: etc in the harness metadata object
-	export function fillMetadataValue(harness: HarnessMetadata): void {
-		for (const attribute of harness.attributes) {
-			if (attribute.includes('kani::unwind')) {
-				const unwindValue = extractUnwindValue(attribute);
-				harness.args.unwind_value = unwindValue;
-			}
-			if (attribute.includes('kani::solver')) {
-				const solverName = extractSolverValue(attribute);
-				harness.args.solver = solverName;
-			}
-		}
-	}
-
 	/**
 	 * Find kani proof and bolero proofs and extract metadata out of them from source text
 	 *
@@ -171,7 +148,6 @@ export namespace SourceCodeParser {
 					assert.equal(harness.fullLine, line.trim());
 
 					const name: string = harness.name;
-					const unwind = harness.args.unwind_value;
 					// Range should cover the entire harness
 					const range = new vscode.Range(
 						new vscode.Position(lineNo, 0),
@@ -180,56 +156,10 @@ export namespace SourceCodeParser {
 
 					// Check if it's a proof (true) or a bolero case (false)
 					const proofBoolean = !harness.args.test;
-
-					if (unwind == undefined) {
-						events.onTest(range, name, proofBoolean);
-					} else {
-						events.onTest(range, name, proofBoolean, unwind);
-					}
+					events.onTest(range, name, proofBoolean);
 				}
 			}
 		}
 	};
 
-	/**
-	 * Given a line of code containing the kani::unwind attribute, it returns the unwind value given
-	 * by the user.
-	 *
-	 * @param harnessLine - Source line that belong to the harness that contains the unwind attribute
-	 * @returns unwind value
-	 */
-	export function extractUnwindValue(harnessLine: string): number {
-		if (harnessLine.includes('kani::unwind(')) {
-			const unwindValueAsString = harnessLine.match(/\d+/);
-			if (unwindValueAsString == undefined) {
-				return NaN;
-			}
-			const unwindValue: number = parseInt(unwindValueAsString[0]);
-			return isNaN(unwindValue) ? NaN : unwindValue;
-		}
-
-		// Technically never called, but a good failsafe to have
-		return NaN;
-	}
-
-	/**
-	 * Given an line of code containing the kani::solver attribute, it returns the solver type given by the user
-	 *
-	 *
-	 * @param harnessLineSplit - Array of source lines that belong to the harness
-	 * @returns unwind value
-	 */
-	export function extractSolverValue(str: string): string {
-		const keyword = '::solver(';
-		const start = str.indexOf(keyword);
-		if (start === -1) {
-			return '';
-		}
-		const end = str.indexOf(')', start);
-		if (end === -1) {
-			return '';
-		}
-		const substringStart = start + keyword.length;
-		return str.substring(substringStart, end);
-	}
 }
