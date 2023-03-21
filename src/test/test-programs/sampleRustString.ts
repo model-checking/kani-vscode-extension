@@ -46,6 +46,7 @@ pub fn function_xyz() {
 #[kani::proof]
 #[kani::unwind(2)]
 #[kani::solver(kissat)]
+#[kani::should_panic]
 unsafe fn function_xyz_2() {
     assert!(1 == 2);
 }
@@ -112,6 +113,7 @@ pub fn function_xyz() {
 #[kani::proof]
 #[kani::unwind(2)]
 #[kani::solver(kissat)]
+#[kani::should_panic]
 unsafe fn function_xyz_2() {
     assert!(1 == 2);
 }
@@ -188,10 +190,10 @@ export const findHarnessesResultKani = [
 		name: 'function_xyz_2',
 		fullLine: 'unsafe fn function_xyz_2() {',
 		endPosition: {
-			row: 19,
+			row: 20,
 			column: 24,
 		},
-		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]'],
+		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]','#[kani::should_panic]'],
 		args: {
 			proof: true,
 			test: false,
@@ -201,7 +203,7 @@ export const findHarnessesResultKani = [
 		name: 'function_xyz_3',
 		fullLine: 'pub unsafe fn function_xyz_3() {',
 		endPosition: {
-			row: 25,
+			row: 26,
 			column: 28,
 		},
 		attributes: [],
@@ -214,7 +216,7 @@ export const findHarnessesResultKani = [
 		name: 'function_xyz_7',
 		fullLine: 'fn function_xyz_7() {',
 		endPosition: {
-			row: 33,
+			row: 34,
 			column: 17,
 		},
 		attributes: ['#[kani::unwind(0)]', '#[kani::solver(kissat)]'],
@@ -279,7 +281,6 @@ export const harnessMetadata = [
 		args: {
 			proof: true,
 			test: true,
-			unwind_value: 0,
 		},
 	},
 	{
@@ -293,7 +294,6 @@ export const harnessMetadata = [
 		args: {
 			proof: true,
 			test: true,
-			unwind_value: 1,
 		},
 	},
 	{
@@ -307,7 +307,6 @@ export const harnessMetadata = [
 		args: {
 			proof: true,
 			test: true,
-			unwind_value: 1,
 		},
 	},
 	{
@@ -321,7 +320,6 @@ export const harnessMetadata = [
 		args: {
 			proof: true,
 			test: false,
-			unwind_value: 0,
 		},
 	},
 	{
@@ -341,22 +339,20 @@ export const harnessMetadata = [
 		name: 'function_xyz_2',
 		fullLine: 'unsafe fn function_xyz_2() {',
 		endPosition: {
-			row: 46,
+			row: 47,
 			column: 24,
 		},
-		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]'],
+		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]', '#[kani::should_panic]'],
 		args: {
 			proof: true,
 			test: false,
-			unwind_value: 2,
-			solver: 'kissat',
 		},
 	},
 	{
 		name: 'function_xyz_3',
 		fullLine: 'pub unsafe fn function_xyz_3() {',
 		endPosition: {
-			row: 52,
+			row: 53,
 			column: 28,
 		},
 		attributes: [],
@@ -369,15 +365,13 @@ export const harnessMetadata = [
 		name: 'function_xyz_7',
 		fullLine: 'fn function_xyz_7() {',
 		endPosition: {
-			row: 60,
+			row: 61,
 			column: 17,
 		},
 		attributes: ['#[kani::unwind(0)]', '#[kani::solver(kissat)]'],
 		args: {
 			proof: true,
-			solver: 'kissat',
 			test: false,
-			unwind_value: 0,
 		},
 	},
 ];

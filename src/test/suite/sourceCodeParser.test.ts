@@ -50,46 +50,6 @@ suite('Verification symbol view', () => {
 		);
 	});
 
-	test('Test if all unwind values are parsed', () => {
-		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(0)]'), 0);
-		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind()]'), NaN);
-		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(1)]'), 1);
-		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(89)]'), 89);
-		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::unwind(abc)]'), NaN);
-		assert.strictEqual(SourceCodeParser.extractUnwindValue('#[kani::solver(kissat)]'), NaN);
-		assert.strictEqual(
-			SourceCodeParser.extractUnwindValue('#[cfg_attr(kani, kani::proof, kani::unwind(0))]'),
-			0,
-		);
-		assert.strictEqual(
-			SourceCodeParser.extractUnwindValue(
-				'#[cfg_attr(kani, kani::proof, kani::unwind(89), kani::solver(kissat))]',
-			),
-			89,
-		);
-		assert.strictEqual(
-			SourceCodeParser.extractUnwindValue('#[cfg_attr(kani, kani::proof, kani::unwind(xyz))]'),
-			NaN,
-		);
-	});
-
-	test('Test if all solver values are parsed', () => {
-		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::solver(kissat)]'), 'kissat');
-		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::solver(abc)]'), 'abc');
-		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::solver(xyz)]'), 'xyz');
-		assert.strictEqual(SourceCodeParser.extractSolverValue('#[kani::unwind(xyz)]'), '');
-		assert.strictEqual(
-			SourceCodeParser.extractSolverValue(
-				'#[cfg_attr(kani, kani::proof, kani::unwind(89), kani::solver(kissat))]',
-			),
-			'kissat',
-		);
-		assert.strictEqual(
-			SourceCodeParser.extractSolverValue('#[cfg_attr(kani, kani::proof, kani::solver(xyz))]'),
-			'xyz',
-		);
-	});
-
 	test('Test if final metadata map is structured right', () => {
 		assert.deepStrictEqual(
 			SourceCodeParser.getAttributeFromRustFile(fullProgramSource),

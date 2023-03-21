@@ -223,7 +223,6 @@ export class TestCase {
 			} else {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await captureFailedChecks(
-					this.file_name,
 					this.harness_name,
 					this.harness_unwind_value,
 				);
@@ -274,10 +273,10 @@ export class TestCase {
 	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (args === undefined || NaN) {
-				const outputKani: number = await runKaniHarnessInterface(rsFile!, harness_name);
+				const outputKani: number = await runKaniHarnessInterface(harness_name);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarnessInterface(rsFile!, harness_name, args);
+				const outputKani: number = await runKaniHarnessInterface(harness_name, args);
 				return outputKani;
 			}
 		}

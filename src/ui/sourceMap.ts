@@ -23,11 +23,6 @@ export interface AttributeMetaData {
 	test: boolean;
 }
 
-export interface Stub {
-	original: string;
-	replacement: string;
-}
-
 interface Position {
 	column: number;
 	row: number;
