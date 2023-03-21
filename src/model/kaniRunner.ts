@@ -62,20 +62,12 @@ export async function runKaniCommand(
 	// Get cargo command and args for the command to be executed
 	const command = commmandSplit.commandPath;
 	const args = commmandSplit.args;
-	let kaniBinaryPath = '';
 
 	if (command == 'cargo' || command == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		const options = {
 			shell: false,
 			cwd: directory,
-		};
-
-		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
-	} else if (command == 'kani') {
-		kaniBinaryPath = await getKaniPath(command);
-		const options = {
-			shell: false,
 		};
 
 		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
@@ -114,20 +106,6 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 				}
 			});
 		});
-	} else if (commmandSplit.commandPath == 'kani') {
-		const kaniBinaryPath = await getKaniPath('kani');
-		const options = {
-			shell: false,
-		};
-
-		return new Promise((resolve, _reject) => {
-			execFile(kaniBinaryPath, args, options, (_error, stdout, _stderr) => {
-				if (stdout) {
-					const responseObject: KaniResponse = responseParserInterface(stdout);
-					resolve(responseObject);
-				}
-			});
-		});
 	} else {
 		// Error Case
 		vscode.window.showWarningMessage('Kani executable crashed while parsing error message');
@@ -153,7 +131,6 @@ function executeKaniProcess(
 	cargoKaniMode: boolean,
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
-		console.log(args);
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {
