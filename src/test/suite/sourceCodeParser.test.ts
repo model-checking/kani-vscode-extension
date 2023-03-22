@@ -6,12 +6,14 @@ import Parser from 'tree-sitter';
 
 import { SourceCodeParser } from '../../ui/sourceCodeParser';
 import {
+	attributeMetadataUnsupported,
 	boleroProofs,
 	findHarnessesResultBolero,
 	findHarnessesResultKani,
 	fullProgramSource,
 	harnessMetadata,
 	kaniProofs,
+	kaniProofsUnsupported,
 	rustFileWithoutProof,
 } from '../test-programs/sampleRustString';
 
@@ -47,6 +49,13 @@ suite('Verification symbol view', () => {
 		assert.deepStrictEqual(
 			SourceCodeParser.searchParseTreeForFunctions(tree.rootNode),
 			findHarnessesResultBolero,
+		);
+	});
+
+	test('Test if all attributes are detected', () => {
+		assert.deepStrictEqual(
+			SourceCodeParser.getAttributeFromRustFile(kaniProofsUnsupported),
+			attributeMetadataUnsupported,
 		);
 	});
 

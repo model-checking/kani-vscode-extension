@@ -133,6 +133,25 @@ fn function_xyz_7() {
 }
 `;
 
+export const kaniProofsUnsupported = `
+#[cfg(kani)]
+#[kani::proof]
+#[kani::unwind(0)]
+#[kani::should_panic]
+#[kani::cover]
+fn function_1() {
+    assert!(1 == 2);
+}
+
+
+#[cfg(kani)]
+#[kani::proof]
+#[kani::stub]
+pub fn function_2() {
+    assert!(1 == 2);
+}
+`;
+
 export const rustFileWithoutProof = `
 #[cfg(test)]
 mod test {
@@ -374,4 +393,33 @@ export const harnessMetadata = [
 			test: false,
 		},
 	},
+];
+
+export const attributeMetadataUnsupported = [
+	{
+		name: 'function_1',
+		fullLine: 'fn function_1() {',
+		endPosition: {
+			row: 6,
+			column: 13,
+		},
+		attributes: ["#[kani::unwind(0)]", "#[kani::should_panic]", "#[kani::cover]"],
+		args: {
+			proof: true,
+			test: false,
+		},
+	},
+	{
+		name: 'function_2',
+		fullLine: 'pub fn function_2() {',
+		endPosition: {
+			row: 14,
+			column: 17,
+		},
+		attributes: ["#[kani::stub]"],
+		args: {
+			proof: true,
+			test: false,
+		},
+	}
 ];
