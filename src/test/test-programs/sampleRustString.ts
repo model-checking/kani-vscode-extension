@@ -7,7 +7,6 @@ mod test {
     #[cfg_attr(kani, kani::proof, kani::unwind(0))]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_80978342() {
-        // Make sure the two packet numbers are not the same
         assert!(1==3);
     }
 
@@ -15,7 +14,6 @@ mod test {
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
-        // Make sure the two packet numbers are not the same
         assert!(1==1);
     }
 
@@ -23,7 +21,6 @@ mod test {
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
-        // Make sure the two packet numbers are not the same
         assert!(1==2);
     }
 }
@@ -73,7 +70,6 @@ mod test {
     #[cfg_attr(kani, kani::proof, kani::unwind(0))]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_80978342() {
-        // Make sure the two packet numbers are not the same
         assert!(1==3);
     }
 
@@ -81,7 +77,6 @@ mod test {
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
-        // Make sure the two packet numbers are not the same
         assert!(1==1);
     }
 
@@ -89,7 +84,6 @@ mod test {
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
-        // Make sure the two packet numbers are not the same
         assert!(1==2);
     }
 }`;
@@ -158,21 +152,18 @@ mod test {
     #[test]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test() {
-        // Make sure the two packet numbers are not the same
         assert!(1==2);
     }
 
     #[test]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
-        // Make sure the two packet numbers are not the same
         assert!(1==1);
     }
 
     #[test]
     #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
-        // Make sure the two packet numbers are not the same
         assert!(1==1);
     }
 }
@@ -264,7 +255,7 @@ export const findHarnessesResultBolero = [
 		name: 'insert_test_2',
 		fullLine: 'fn insert_test_2() {',
 		endPosition: {
-			row: 14,
+			row: 13,
 			column: 20,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
@@ -277,7 +268,7 @@ export const findHarnessesResultBolero = [
 		name: 'random_name',
 		fullLine: 'fn random_name() {',
 		endPosition: {
-			row: 22,
+			row: 20,
 			column: 18,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
@@ -306,7 +297,7 @@ export const harnessMetadata = [
 		name: 'insert_test_2',
 		fullLine: 'fn insert_test_2() {',
 		endPosition: {
-			row: 14,
+			row: 13,
 			column: 20,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
@@ -319,7 +310,7 @@ export const harnessMetadata = [
 		name: 'random_name',
 		fullLine: 'fn random_name() {',
 		endPosition: {
-			row: 22,
+			row: 20,
 			column: 18,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
@@ -332,7 +323,7 @@ export const harnessMetadata = [
 		name: 'function_abc',
 		fullLine: 'fn function_abc() {',
 		endPosition: {
-			row: 31,
+			row: 28,
 			column: 15,
 		},
 		attributes: ['#[kani::unwind(0)]'],
@@ -345,7 +336,7 @@ export const harnessMetadata = [
 		name: 'function_xyz',
 		fullLine: 'pub fn function_xyz() {',
 		endPosition: {
-			row: 38,
+			row: 35,
 			column: 19,
 		},
 		attributes: [],
@@ -358,7 +349,7 @@ export const harnessMetadata = [
 		name: 'function_xyz_2',
 		fullLine: 'unsafe fn function_xyz_2() {',
 		endPosition: {
-			row: 47,
+			row: 44,
 			column: 24,
 		},
 		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]', '#[kani::should_panic]'],
@@ -371,7 +362,7 @@ export const harnessMetadata = [
 		name: 'function_xyz_3',
 		fullLine: 'pub unsafe fn function_xyz_3() {',
 		endPosition: {
-			row: 53,
+			row: 50,
 			column: 28,
 		},
 		attributes: [],
@@ -384,7 +375,7 @@ export const harnessMetadata = [
 		name: 'function_xyz_7',
 		fullLine: 'fn function_xyz_7() {',
 		endPosition: {
-			row: 61,
+			row: 58,
 			column: 17,
 		},
 		attributes: ['#[kani::unwind(0)]', '#[kani::solver(kissat)]'],
