@@ -15,7 +15,7 @@ import {
 } from './test-tree/createTests';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
-import { checkFileForProofs } from './ui/sourceCodeParser';
+import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
 import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
 
@@ -206,7 +206,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			return;
 		}
 
-		if (!checkFileForProofs(await getContentFromFilesystem(e.uri))) {
+		if (!SourceCodeParser.checkFileForProofs(await getContentFromFilesystem(e.uri))) {
 			return;
 		}
 

@@ -13,7 +13,7 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const execPromise = promisify(exec);
 const warningMessage = `Report generation is an unstable feature.
-Coverage information has been disabled due recent issues involving incorrect results.`
+Coverage information has been disabled due recent issues involving incorrect results.`;
 
 interface htmlMetaData {
 	finalCommand: string;
@@ -40,7 +40,11 @@ interface reportMetadata {
  */
 export async function callViewerReport(
 	commandURI: string,
-	harnessObj: { harnessName: string; harnessFile: string; harnessType: boolean },
+	harnessObj: {
+		harnessName: string;
+		harnessFile: string;
+		harnessType: boolean;
+	},
 ): Promise<void> {
 	let finalCommand: string = '';
 	let searchDir: string = '';
@@ -94,7 +98,10 @@ function showVisualizeError(output: reportMetadata): void {
 
 // Shows an option to open the report in a browser. The process depends on
 // whether the extension executes on a local or remote environment.
-async function showReportMetadata(terminal: vscode.Terminal, output: reportMetadata): Promise<void> {
+async function showReportMetadata(
+	terminal: vscode.Terminal,
+	output: reportMetadata,
+): Promise<void> {
 	if (output.result?.isLocal) {
 		// Shows a message with a button. Clicking the button opens the report
 		// in a browser.
@@ -196,7 +203,10 @@ async function parseReportOutput(stdout: string): Promise<visualizeResult | unde
 			if (process.env.SSH_CONNECTION !== undefined) {
 				// Generate the command using the path to the directory
 				const reportDir = reportPath.replace('/index.html', '');
-				return { isLocal: false, command: 'python3 -m http.server --directory ' + reportDir };
+				return {
+					isLocal: false,
+					command: 'python3 -m http.server --directory ' + reportDir,
+				};
 			} else {
 				return { isLocal: true, path: reportPath };
 			}

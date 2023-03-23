@@ -82,7 +82,7 @@ export async function runKaniCommand(
  * @param command - Full sanitized command created by kaniCommandCreate module
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
  */
- export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
+export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 	// Root dir of the crate and the command and args to be executed
 	const directory = path.resolve(getRootDir());
 	const commmandSplit: CommandArgs = splitCommand(command);
@@ -98,8 +98,8 @@ export async function runKaniCommand(
 			cwd: directory,
 		};
 
-		return new Promise((resolve, reject) => {
-			execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+		return new Promise((resolve, _reject) => {
+			execFile(kaniBinaryPath, args, options, (_error, stdout, _stderr) => {
 				if (stdout) {
 					const responseObject: KaniResponse = responseParserInterface(stdout);
 					resolve(responseObject);
@@ -109,7 +109,7 @@ export async function runKaniCommand(
 	} else {
 		// Error Case
 		vscode.window.showWarningMessage('Kani executable crashed while parsing error message');
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
 			resolve({ failedProperty: 'error', failedMessages: 'error' });
 		});
 	}
