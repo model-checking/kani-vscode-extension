@@ -1,25 +1,6 @@
+# Copyright Kani Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 name: Release Kani VSCode Extension
-
-# A new tag of the form debugger-VERSION will trigger a new release,
-# upload the package to the release page, and publish the package
-# to the Microsoft Marketplace for Visual Studio Code extensions
-# using the Model Checking publisher.
-
-# Code checkout notes:
-#   GitHub has deprecated actions/create-release
-#   https://github.com/actions/create-release
-#
-#   GitHub recommends four actions including
-#     softprops/action-gh-release is highly rated but includes deprecated code
-#       https://github.com/softprops/action-gh-release
-#     ncipollo/release-action@v1
-#       https://github.com/ncipollo/release-action
-
-# AWS credentials notes:
-#   GitHub has decprecated Node12 in favor of Node16
-#   We use the workaround recommended by the AWS credentials package, see
-#   https://github.com/aws-actions/configure-aws-credentials/issues/489
-#     #issuecomment-1278145876
 
 on:
   push:
