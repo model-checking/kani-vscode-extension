@@ -17,8 +17,13 @@ import { responseParserInterface } from './kaniOutputParser';
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
  */
 export function getKaniPath(kaniCommand: string): Promise<string> {
+
+	const options = {
+		shell: false,
+	};
+
 	return new Promise((resolve, reject) => {
-		execFile('which', [kaniCommand], (error, stdout, stderr) => {
+		execFile('which', [kaniCommand], options, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`execFile error: ${error}`);
 				return;

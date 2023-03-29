@@ -9,9 +9,9 @@ import * as vscode from 'vscode';
 import { KaniArguments, KaniConstants } from '../../constants';
 import { checkCargoExist, getRootDir } from '../../utils';
 
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const { promisify } = require('util');
-const execPromise = promisify(exec);
+const execPromise = promisify(execFile);
 const warningMessage = `Report generation is an unstable feature.
 Coverage information has been disabled due recent issues involving incorrect results.`;
 
