@@ -151,7 +151,7 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		const directory = path.resolve(getRootDir());
 		const commmandSplit: CommandArgs = splitCommand(command);
 
-		// Get cargo command and args for the command to be executed
+		// Get args for the command to be executed
 		const args = commmandSplit.args;
 
 		const options = {
