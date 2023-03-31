@@ -59,11 +59,7 @@ export async function callViewerReport(
 
 	// Generate the final visualize command for the supported platforms
 	if (platform === 'darwin' || platform == 'linux') {
-		const responseObject: htmlMetaData = createCommand(
-			commandURI,
-			harnessName,
-			harnessType,
-		);
+		const responseObject: htmlMetaData = createCommand(commandURI, harnessName, harnessType);
 		const crateURI: string = getRootDir();
 		finalCommand = `${responseObject.finalCommand}`;
 		searchDir = responseObject.searchDir;
@@ -174,8 +170,7 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		console.error(`stderr: ${stderr}`);
 
 		return { statusCode: 0, result: parseResult };
-	}
-	catch (error) {
+	} catch (error) {
 		console.error(`exec error: ${error}`);
 		return { statusCode: 1, result: undefined, error: error as string };
 	}
