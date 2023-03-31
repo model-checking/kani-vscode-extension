@@ -7,7 +7,8 @@ import process = require('process');
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
-import { checkCargoExist, getRootDir } from '../../utils';
+import { getKaniPath } from '../../model/kaniRunner';
+import { CommandArgs, checkCargoExist, getRootDir, splitCommand } from '../../utils';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');
@@ -51,7 +52,6 @@ export async function callViewerReport(
 
 	const platform: NodeJS.Platform = process.platform;
 	const harnessName: string = harnessObj.harnessName;
-	const harnessFile: string = harnessObj.harnessFile;
 	const harnessType: boolean = harnessObj.harnessType;
 
 	// Detect source file
@@ -59,14 +59,9 @@ export async function callViewerReport(
 
 	// Generate the final visualize command for the supported platforms
 	if (platform === 'darwin' || platform == 'linux') {
-		const responseObject: htmlMetaData = createCommand(
-			commandURI,
-			harnessFile,
-			harnessName,
-			harnessType,
-		);
+		const responseObject: htmlMetaData = createCommand(commandURI, harnessName, harnessType);
 		const crateURI: string = getRootDir();
-		finalCommand = `cd ${crateURI} && ${responseObject.finalCommand}`;
+		finalCommand = `${responseObject.finalCommand}`;
 		searchDir = responseObject.searchDir;
 	}
 
@@ -125,28 +120,20 @@ async function showReportMetadata(
 // Check if cargo toml exists and create corresponding kani command
 function createCommand(
 	commandURI: string,
-	harnessFile: string,
 	harnessName: string,
 	harnessType: boolean,
 ): htmlMetaData {
 	// Check if cargo toml exists
-	const isCargo = checkCargoExist();
 	let finalCommand: string = '';
 	let searchDir: string = '';
 
-	if (!isCargo) {
-		const command: string = commandURI === 'Kani.runViewerReport' ? 'kani' : 'cargo kani';
-		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --visualize`;
-		searchDir = path.join(getRootDir());
+	if (harnessType) {
+		const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
+		finalCommand = `${command} --harness ${harnessName} --enable-unstable --visualize`;
+		searchDir = path.join(getRootDir(), 'target');
 	} else {
-		if (harnessType) {
-			const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
-			finalCommand = `${command} --harness ${harnessName} --enable-unstable --visualize`;
-			searchDir = path.join(getRootDir(), 'target');
-		} else {
-			finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --enable-unstable --visualize`;
-			searchDir = path.join(getRootDir(), 'target');
-		}
+		finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --enable-unstable --visualize`;
+		searchDir = path.join(getRootDir(), 'target');
 	}
 
 	return { finalCommand, searchDir };
@@ -160,9 +147,22 @@ function createCommand(
  */
 async function runVisualizeCommand(command: string, harnessName: string): Promise<reportMetadata> {
 	try {
+		// Get the full resolved path for the root directory of the crate
+		const directory = path.resolve(getRootDir());
+		const commmandSplit: CommandArgs = splitCommand(command);
+
+		// Get args for the command to be executed
+		const args = commmandSplit.args;
+
+		const options = {
+			shell: false,
+			cwd: directory,
+		};
+
+		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
 		vscode.window.showWarningMessage(warningMessage);
-		const { stdout, stderr } = await execPromise(command);
+		const { stdout, stderr } = await execPromise(kaniBinaryPath, args, options);
 		const parseResult = await parseReportOutput(stdout);
 		if (parseResult === undefined) {
 			return { statusCode: 2, result: undefined, error: stderr };
