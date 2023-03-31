@@ -52,7 +52,6 @@ export async function callViewerReport(
 
 	const platform: NodeJS.Platform = process.platform;
 	const harnessName: string = harnessObj.harnessName;
-	const harnessFile: string = harnessObj.harnessFile;
 	const harnessType: boolean = harnessObj.harnessType;
 
 	// Detect source file
@@ -62,7 +61,6 @@ export async function callViewerReport(
 	if (platform === 'darwin' || platform == 'linux') {
 		const responseObject: htmlMetaData = createCommand(
 			commandURI,
-			harnessFile,
 			harnessName,
 			harnessType,
 		);
@@ -126,28 +124,20 @@ async function showReportMetadata(
 // Check if cargo toml exists and create corresponding kani command
 function createCommand(
 	commandURI: string,
-	harnessFile: string,
 	harnessName: string,
 	harnessType: boolean,
 ): htmlMetaData {
 	// Check if cargo toml exists
-	const isCargo = checkCargoExist();
 	let finalCommand: string = '';
 	let searchDir: string = '';
 
-	if (!isCargo) {
-		const command: string = commandURI === 'Kani.runViewerReport' ? 'kani' : 'cargo kani';
-		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --visualize`;
-		searchDir = path.join(getRootDir());
+	if (harnessType) {
+		const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
+		finalCommand = `${command} --harness ${harnessName} --enable-unstable --visualize`;
+		searchDir = path.join(getRootDir(), 'target');
 	} else {
-		if (harnessType) {
-			const command: string = commandURI === 'Kani.runViewerReport' ? 'cargo kani' : 'kani';
-			finalCommand = `${command} --harness ${harnessName} --enable-unstable --visualize`;
-			searchDir = path.join(getRootDir(), 'target');
-		} else {
-			finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --enable-unstable --visualize`;
-			searchDir = path.join(getRootDir(), 'target');
-		}
+		finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --enable-unstable --visualize`;
+		searchDir = path.join(getRootDir(), 'target');
 	}
 
 	return { finalCommand, searchDir };
