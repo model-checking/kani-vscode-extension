@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
@@ -13,11 +14,14 @@ import {
 	getWorkspaceTestPatterns,
 	testData,
 } from './test-tree/createTests';
+import { CodelensProvider } from './ui/CodeLensProvider';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
 import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
+
+let disposables: vscode.Disposable[] = [];
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -215,6 +219,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		data.addToCrate(controller, file, treeRoot);
 	}
 
+	const codelensProvider = new CodelensProvider();
+	const rustLanguageSelector = { scheme: 'file', language: 'rust' };
+
+	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
+
+	vscode.commands.registerCommand("codelens-sample.enableCodeLens", () => {
+		vscode.workspace.getConfiguration("codelens-sample").update("enableCodeLens", true, true);
+	});
+
+	vscode.commands.registerCommand("codelens-sample.disableCodeLens", () => {
+		vscode.workspace.getConfiguration("codelens-sample").update("enableCodeLens", false, true);
+	});
+
+	vscode.commands.registerCommand("codelens-sample.codelensAction", (args: any) => {
+		vscode.window.showInformationMessage(`CodeLens action clicked with args=${args}`);
+	});
+
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
@@ -224,4 +245,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runKani);
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
+}
+
+// this method is called when your extension is deactivated
+export function deactivate() {
+	if (disposables) {
+		disposables.forEach(item => item.dispose());
+	}
+	disposables = [];
 }
