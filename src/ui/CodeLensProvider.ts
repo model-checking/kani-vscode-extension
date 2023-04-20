@@ -1,6 +1,8 @@
 /* eslint-disable no-null/no-null */
 import * as vscode from 'vscode';
 
+import { extractFunctionName } from '../utils';
+
 /**
  * CodelensProvider
  */
@@ -32,18 +34,23 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 				const position = new vscode.Position(line.lineNumber, indexOf);
 				const range = document.getWordRangeAtPosition(position, new RegExp(this.regex));
 
+
+				const functionName = extractFunctionName(line.text);
+
+				// cargo test --package test-concrete --bin test-concrete -- kani_concrete_playback_check_estimate_size_14615086421508420155 --exact --nocapture
+
 				const c1 = {
 					title: "Run Kani Generated Test",
 					tooltip: "Tooltip provided by sample extension",
 					command: "codelens-sample.codelensAction",
-					arguments: ["Argument 1", false]
+					arguments: [functionName]
 				};
 
 				const c2 = {
 					title: "Debug Kani Generated Test",
 					tooltip: "Tooltip provided by sample extension",
 					command: "codelens-sample.codelensAction",
-					arguments: ["Argument 2", false]
+					arguments: [functionName]
 				};
 
 
