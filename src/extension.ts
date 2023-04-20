@@ -4,6 +4,7 @@
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
+import { runCodeLensTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -233,7 +234,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	});
 
 	vscode.commands.registerCommand("codelens-sample.codelensAction", (args: any) => {
-		vscode.window.showInformationMessage(`CodeLens action clicked with args=${args}`);
+		runCodeLensTest(args);
 	});
 
 	// Update the test tree with proofs whenever a test case is opened

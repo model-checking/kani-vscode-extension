@@ -95,6 +95,21 @@ export function splitCommand(command: string): CommandArgs {
 	}
 }
 
+export function extractFunctionName(line: string): string {
+
+	const lineSplit = line.split(' ');
+
+	for (let index = 0; index < lineSplit.length; index++) {
+		if(lineSplit[index].startsWith("kani_concrete_playback")) {
+			const functionNameRaw = lineSplit[index];
+			const functionName = functionNameRaw.split("(").at(0)!;
+			return functionName;
+		}
+	}
+
+	return '';
+}
+
 /* Split the command line invocation into the kani call and the argument array
 For example - Input: '"my command" --arg1 "file with spaces.txt"';
 Output: ['my command', '--arg1', 'file with spaces.txt']

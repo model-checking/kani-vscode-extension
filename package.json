@@ -36,21 +36,21 @@
         "title": "Enable CodeLens",
         "command": "codelens-sample.enableCodeLens",
         "category": "CodeLens Sample"
-    },
-    {
+      },
+      {
         "title": "Disable Codelens",
         "command": "codelens-sample.disableCodeLens",
         "category": "CodeLens Sample"
-    }
+      }
     ],
     "configuration": {
       "properties": {
-          "codelens-sample.enableCodeLens": {
-              "type": "boolean",
-              "default": true
-          }
+        "codelens-sample.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        }
       }
-  }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -89,6 +89,7 @@
     "esbuild": "0.16.2",
     "fs": "^0.0.1-security",
     "readline": "^1.3.0",
+    "toml": "^3.0.0",
     "tree-sitter": "0.16.1",
     "tree-sitter-rust": "^0.16.0"
   }
