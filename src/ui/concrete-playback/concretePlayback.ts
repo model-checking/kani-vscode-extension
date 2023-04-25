@@ -1,15 +1,9 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import process = require('process');
 
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
 import { checkCargoExist, getRootDir } from '../../utils';
-
-const { exec } = require('child_process');
-const { promisify } = require('util');
-const execPromise = promisify(exec);
 
 /**
  * Call the visualize flag on the harness and render the html page
@@ -22,7 +16,6 @@ export async function callConcretePlayback(
 	harnessObj: { harnessName: string; harnessFile: string; harnessType: boolean },
 ): Promise<void> {
 	let finalCommand: string = '';
-	const searchDir: string = '';
 
 	const platform: NodeJS.Platform = process.platform;
 	const harnessName: string = harnessObj.harnessName;
@@ -41,7 +34,6 @@ export async function callConcretePlayback(
 
 	// Wait for the the visualize command to finish generating the report
 	terminal.sendText(finalCommand);
-	terminal.show();
 }
 
 // Check if cargo toml exists and create corresponding kani command

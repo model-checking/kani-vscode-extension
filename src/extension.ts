@@ -16,6 +16,7 @@ import {
 	testData,
 } from './test-tree/createTests';
 import { CodelensProvider } from './ui/CodeLensProvider';
+import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';

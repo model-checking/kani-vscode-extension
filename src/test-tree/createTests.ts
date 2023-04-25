@@ -357,7 +357,7 @@ class FailedCase extends TestCase {
 			{
 				harnessName: this.harness_name,
 				harnessFile: this.file_name,
-				harnessType: this.harness_type,
+				harnessType: this.proof_boolean,
 			},
 		];
 		const concretePlaybackUri: Uri = Uri.parse(

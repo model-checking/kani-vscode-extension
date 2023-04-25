@@ -3,9 +3,6 @@ import * as vscode from 'vscode';
 
 import { extractFunctionName } from '../utils';
 
-/**
- * CodelensProvider
- */
 export class CodelensProvider implements vscode.CodeLensProvider {
 
 	private codeLenses: vscode.CodeLens[] = [];
