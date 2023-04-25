@@ -13,6 +13,7 @@ import {
 	getWorkspaceTestPatterns,
 	testData,
 } from './test-tree/createTests';
+import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
