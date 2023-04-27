@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
+import { connectToDebugger } from './debugger/debugger';
 import { runCodeLensTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
@@ -232,17 +232,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const codelensProvider = new CodelensProvider();
 	const rustLanguageSelector = { scheme: 'file', language: 'rust' };
 
-	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
+	const providerDisposable = vscode.languages.registerCodeLensProvider(
+		rustLanguageSelector,
+		codelensProvider,
+	);
 
-	vscode.commands.registerCommand("codelens-sample.enableCodeLens", () => {
-		vscode.workspace.getConfiguration("codelens-sample").update("enableCodeLens", true, true);
+	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
 	});
 
-	vscode.commands.registerCommand("codelens-sample.disableCodeLens", () => {
-		vscode.workspace.getConfiguration("codelens-sample").update("enableCodeLens", false, true);
+	vscode.commands.registerCommand('codelens-sample.disableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
 	});
 
-	vscode.commands.registerCommand("codelens-sample.codelensAction", (args: any) => {
+	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
 		runCodeLensTest(args);
 	});
 
@@ -256,12 +259,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
 	context.subscriptions.push(runningConcretePlayback);
+	context.subscriptions.push(providerDisposable);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.connectToDebugger', (programName) =>
+			connectToDebugger(programName),
+		),
+	);
 }
 
 // this method is called when your extension is deactivated
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function deactivate() {
 	if (disposables) {
-		disposables.forEach(item => item.dispose());
+		disposables.forEach((item) => item.dispose());
 	}
 	disposables = [];
 }

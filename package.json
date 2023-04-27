@@ -14,6 +14,9 @@
   "categories": [
     "Testing"
   ],
+  "permissions": [
+    "debug"
+  ],
   "activationEvents": [
     "onLanguage:rust"
   ],
