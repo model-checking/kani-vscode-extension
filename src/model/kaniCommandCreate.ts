@@ -13,10 +13,7 @@ import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
  * @param args - arguments to Kani if provided
  * @returns verification status (i.e success or failure)
  */
-export async function runKaniHarnessInterface(
-	harnessName: string,
-	args?: number,
-): Promise<any> {
+export async function runKaniHarnessInterface(harnessName: string, args?: number): Promise<any> {
 	let harnessCommand = '';
 	if (args === undefined || isNaN(args)) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;

@@ -161,5 +161,4 @@ export namespace SourceCodeParser {
 			}
 		}
 	};
-
 }

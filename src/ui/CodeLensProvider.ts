@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 import { extractFunctionName } from '../utils';
 
 export class CodelensProvider implements vscode.CodeLensProvider {
-
 	private codeLenses: vscode.CodeLens[] = [];
 	private regex: RegExp;
 	private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -18,9 +17,11 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 		});
 	}
 
-	public provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-
-		if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
+	public provideCodeLenses(
+		document: vscode.TextDocument,
+		_token: vscode.CancellationToken,
+	): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
+		if (vscode.workspace.getConfiguration('codelens-sample').get('enableCodeLens', true)) {
 			this.codeLenses = [];
 			const regex = new RegExp(this.regex);
 			const text = document.getText();
@@ -31,25 +32,23 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 				const position = new vscode.Position(line.lineNumber, indexOf);
 				const range = document.getWordRangeAtPosition(position, new RegExp(this.regex));
 
-
 				const functionName = extractFunctionName(line.text);
 
 				// cargo test --package test-concrete --bin test-concrete -- kani_concrete_playback_check_estimate_size_14615086421508420155 --exact --nocapture
 
 				const c1 = {
-					title: "Run Kani Generated Test",
-					tooltip: "Tooltip provided by sample extension",
-					command: "codelens-sample.codelensAction",
-					arguments: [functionName]
+					title: 'Run Kani Generated Test',
+					tooltip: 'Tooltip provided by sample extension',
+					command: 'codelens-sample.codelensAction',
+					arguments: [functionName],
 				};
 
 				const c2 = {
-					title: "Debug Kani Generated Test",
-					tooltip: "Tooltip provided by sample extension",
-					command: "codelens-sample.codelensAction",
-					arguments: [functionName]
+					title: 'Debug Kani Generated Test',
+					tooltip: 'Tooltip provided by sample extension',
+					command: 'extension.connectToDebugger',
+					arguments: [functionName],
 				};
-
 
 				if (range) {
 					this.codeLenses.push(new vscode.CodeLens(range, c1));
