@@ -47,15 +47,12 @@ function createCommand(
 ): string {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
-	let finalCommand: string = '';
 	const command: string = commandURI === 'Kani.runConcretePlayback' ? 'kani' : 'cargo kani';
 
-	if(!isCargo || harnessType) {
-		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --concrete-playback=inplace`;
-	}
-	else {
-		finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
+	if (!isCargo || harnessType) {
+		return `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --concrete-playback=inplace`;
+	} else {
+		return `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
 
-	return finalCommand;
 }
