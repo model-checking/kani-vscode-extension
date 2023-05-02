@@ -13,6 +13,7 @@ import {
 	getWorkspaceTestPatterns,
 	testData,
 } from './test-tree/createTests';
+import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
@@ -196,6 +197,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		},
 	);
 
+	// Register the run viewer report command
+	const runningConcretePlayback = vscode.commands.registerCommand(
+		'Kani.runConcretePlayback',
+		async (harnessArgs) => {
+			callConcretePlayback('Kani.runConcretePlayback', harnessArgs);
+		},
+	);
+
 	// Callback function to Find or create files, update test tree and present to user upon trigger
 	async function updateNodeForDocument(e: vscode.TextDocument): Promise<void> {
 		if (e.uri.scheme !== 'file') {
@@ -224,4 +233,5 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runKani);
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
+	context.subscriptions.push(runningConcretePlayback);
 }
