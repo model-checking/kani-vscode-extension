@@ -122,7 +122,6 @@ export namespace SourceCodeParser {
 
 	// Search for concrete playback generated unit tests and their related metadata
 	export function extractKaniTestMetadata(text: string): any[] {
-
 		const tree = parser.parse(text);
 		const rootNode = tree.rootNode;
 
@@ -131,10 +130,10 @@ export namespace SourceCodeParser {
 		const result: any[] = [];
 
 		for (const function_item of tests) {
-			if(function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
+			if (function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
 				const function_item_name = function_item.namedChildren?.at(0)?.text;
 
-				if(function_item_name === undefined) {
+				if (function_item_name === undefined) {
 					return [];
 				}
 
@@ -149,24 +148,26 @@ export namespace SourceCodeParser {
 	// Find all concrete playback generated unit tests using tree walking
 	export function findKaniTests(rootNode: any): any[] {
 		// Find all attributes with #[test], then filter those with the concrete_playback_prefix
-		const attributeNode = rootNode.descendantsOfType('attribute_item').filter((item: any) => item.text == "#[test]" && item.nextNamedSibling?.type == 'function_item');
-		const attributes = attributeNode.filter((item: any) => item.nextNamedSibling?.text.includes("kani_concrete_playback"));
-
+		const attributeNode = rootNode
+			.descendantsOfType('attribute_item')
+			.filter(
+				(item: any) => item.text == '#[test]' && item.nextNamedSibling?.type == 'function_item',
+			);
+		const attributes = attributeNode.filter((item: any) =>
+			item.nextNamedSibling?.text.includes('kani_concrete_playback'),
+		);
 
 		const kani_concrete_tests: any[] = [];
 
-		for(const item of attributes) {
+		for (const item of attributes) {
 			const function_item = item.nextNamedSibling;
-			if(function_item && function_item.namedChildren?.at(0)?.type === 'identifier')
-			{
+			if (function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
 				kani_concrete_tests.push(function_item);
 			}
 		}
 
 		return kani_concrete_tests;
 	}
-
-
 
 	/**
 	 * Find kani proof and bolero proofs and extract metadata out of them from source text
@@ -209,5 +210,4 @@ export namespace SourceCodeParser {
 			}
 		}
 	};
-
 }

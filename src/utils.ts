@@ -97,13 +97,12 @@ export function splitCommand(command: string): CommandArgs {
 }
 
 export function extractFunctionName(line: string): string {
-
 	const lineSplit = line.split(' ');
 
 	for (let index = 0; index < lineSplit.length; index++) {
-		if(lineSplit[index].startsWith("kani_concrete_playback")) {
+		if (lineSplit[index].startsWith('kani_concrete_playback')) {
 			const functionNameRaw = lineSplit[index];
-			const functionName = functionNameRaw.split("(").at(0)!;
+			const functionName = functionNameRaw.split('(').at(0)!;
 			return functionName;
 		}
 	}
@@ -113,18 +112,18 @@ export function extractFunctionName(line: string): string {
 
 // Get the package name for the workspace from cargo.toml
 export async function getPackageName(): Promise<any> {
-    const dirName = getRootDir();
-    const cargoTomlUri = Uri.file(`${dirName}/Cargo.toml`);
+	const dirName = getRootDir();
+	const cargoTomlUri = Uri.file(`${dirName}/Cargo.toml`);
 
-    try {
-        const buffer = await workspace.fs.readFile(cargoTomlUri);
-        const cargoToml = buffer.toString();
-        const cargoTomlObject = toml.parse(cargoToml);
-        return cargoTomlObject.package?.name;
-    } catch (error) {
-        console.error(error);
-        return undefined;
-    }
+	try {
+		const buffer = await workspace.fs.readFile(cargoTomlUri);
+		const cargoToml = buffer.toString();
+		const cargoTomlObject = toml.parse(cargoToml);
+		return cargoTomlObject.package?.name;
+	} catch (error) {
+		console.error(error);
+		return undefined;
+	}
 }
 
 /* Split the command line invocation into the kani call and the argument array
