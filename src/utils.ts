@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
 
+import * as toml from 'toml';
 import { Uri, workspace } from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
@@ -108,6 +109,22 @@ export function extractFunctionName(line: string): string {
 	}
 
 	return '';
+}
+
+// Get the package name for the workspace from cargo.toml
+export async function getPackageName(): Promise<any> {
+    const dirName = getRootDir();
+    const cargoTomlUri = Uri.file(`${dirName}/Cargo.toml`);
+
+    try {
+        const buffer = await workspace.fs.readFile(cargoTomlUri);
+        const cargoToml = buffer.toString();
+        const cargoTomlObject = toml.parse(cargoToml);
+        return cargoTomlObject.package?.name;
+    } catch (error) {
+        console.error(error);
+        return undefined;
+    }
 }
 
 /* Split the command line invocation into the kani call and the argument array

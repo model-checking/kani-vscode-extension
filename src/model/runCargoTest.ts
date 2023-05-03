@@ -1,23 +1,12 @@
-import * as toml from 'toml';
 import * as vscode from 'vscode';
 
-import { getRootDir } from '../utils';
+import { getPackageName } from '../utils';
 
-export async function getPackageName(): Promise<any> {
-    const dirName = getRootDir();
-    const cargoTomlUri = vscode.Uri.file(`${dirName}/Cargo.toml`);
 
-    try {
-        const buffer = await vscode.workspace.fs.readFile(cargoTomlUri);
-        const cargoToml = buffer.toString();
-        const cargoTomlObject = toml.parse(cargoToml);
-        return cargoTomlObject.package?.name;
-    } catch (error) {
-        console.error(error);
-        return undefined;
-    }
-}
-
+/**
+ * Runs the cargo test task whenver the user clicks on a codelens button
+ * @param functionName - Name of the unit test being run by the user
+ */
 export async function runCodeLensTest(functionName: string): Promise<void> {
     const taskName = `Cargo Test: ${functionName}`;
 

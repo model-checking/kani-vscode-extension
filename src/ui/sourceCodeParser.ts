@@ -120,6 +120,7 @@ export namespace SourceCodeParser {
 		return false;
 	}
 
+	// Search for concrete playback generated unit tests and their related metadata
 	export function extractKaniTestMetadata(text: string): any[] {
 
 		const tree = parser.parse(text);
@@ -145,8 +146,9 @@ export namespace SourceCodeParser {
 		return result;
 	}
 
+	// Find all concrete playback generated unit tests using tree walking
 	export function findKaniTests(rootNode: any): any[] {
-		// Find the attribute by searching for its text
+		// Find all attributes with #[test], then filter those with the concrete_playback_prefix
 		const attributeNode = rootNode.descendantsOfType('attribute_item').filter((item: any) => item.text == "#[test]" && item.nextNamedSibling?.type == 'function_item');
 		const attributes = attributeNode.filter((item: any) => item.nextNamedSibling?.text.includes("kani_concrete_playback"));
 

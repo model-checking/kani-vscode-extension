@@ -21,13 +21,21 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 		});
 	}
 
+	/**
+	 * Extends the provideCodeLenses function provided by CodeLens and adds Kani generated unit tests to their lists
+	 *
+	 * @param document Takes in the current file and provides the codelens button
+	 * @param _token
+	 * @returns
+	 */
+
 	public provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
 
 		if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
 			this.codeLenses = [];
 			const text = document.getText();
 
-			// Find the attribute by searching for its text
+			// Find the unit tests by searching for its text
 			const kani_concrete_tests = SourceCodeParser.extractKaniTestMetadata(text);
 
 			for (const item of kani_concrete_tests) {
@@ -38,6 +46,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 					return [];
 				}
 
+				// This is the metadata that VSCode needs to place the codelens button
 				const line = document.lineAt(startPosition.row);
 				const indexOf = line.text.indexOf(function_item_name);
 				const position = new vscode.Position(line.lineNumber, indexOf);
