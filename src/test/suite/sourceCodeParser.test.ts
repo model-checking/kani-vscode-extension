@@ -5,6 +5,7 @@ import * as assert from 'assert';
 import Parser from 'tree-sitter';
 
 import { SourceCodeParser } from '../../ui/sourceCodeParser';
+import { kaniConcreteTestsMetaData, rustFileWithUnitTestsOnly } from '../test-programs/concretePlaybackTests';
 import {
 	attributeMetadataUnsupported,
 	boleroProofs,
@@ -17,6 +18,7 @@ import {
 	rustFileWithoutProof,
 } from '../test-programs/sampleRustString';
 
+
 const listofHarnesses: Set<string> = new Set<string>([
 	'insert_test',
 	'insert_test_2',
@@ -25,7 +27,7 @@ const listofHarnesses: Set<string> = new Set<string>([
 	'function_xyz',
 ]);
 
-suite('Verification symbol view', () => {
+suite('test source code parsing', () => {
 	// Parse for kani::proof helper function
 	const Rust = require('tree-sitter-rust');
 	const parser = new Parser();
@@ -65,4 +67,11 @@ suite('Verification symbol view', () => {
 			harnessMetadata,
 		);
 	});
+
+	test('Test if concrete playback unit tests are picked up and placed at the right location', () => {
+		assert.deepStrictEqual(
+			SourceCodeParser.extractKaniTestMetadata(rustFileWithUnitTestsOnly),
+			kaniConcreteTestsMetaData,
+		);
+	})
 });

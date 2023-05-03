@@ -5,12 +5,12 @@ import * as assert from 'assert';
 import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
 
-import { countOccurrences } from '../utils';
 import { HarnessMetadata } from './sourceMap';
+import { countOccurrences } from '../utils';
 
 // Parse for kani::proof helper function
 const Rust = require('tree-sitter-rust');
-const parser = new Parser();
+export const parser = new Parser();
 parser.setLanguage(Rust);
 
 export namespace SourceCodeParser {
@@ -119,6 +119,52 @@ export namespace SourceCodeParser {
 		}
 		return false;
 	}
+
+	export function extractKaniTestMetadata(text: string): any[] {
+
+		const tree = parser.parse(text);
+		const rootNode = tree.rootNode;
+
+		// Find the attribute by searching for its text
+		const tests = findKaniTests(rootNode);
+		const result: any[] = [];
+
+		for (const function_item of tests) {
+			if(function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
+				const function_item_name = function_item.namedChildren?.at(0)?.text;
+
+				if(function_item_name === undefined) {
+					return [];
+				}
+
+				const line = function_item.startPosition;
+				result.push([function_item_name, line]);
+			}
+		}
+
+		return result;
+	}
+
+	export function findKaniTests(rootNode: any): any[] {
+		// Find the attribute by searching for its text
+		const attributeNode = rootNode.descendantsOfType('attribute_item').filter((item: any) => item.text == "#[test]" && item.nextNamedSibling?.type == 'function_item');
+		const attributes = attributeNode.filter((item: any) => item.nextNamedSibling?.text.includes("kani_concrete_playback"));
+
+
+		const kani_concrete_tests: any[] = [];
+
+		for(const item of attributes) {
+			const function_item = item.nextNamedSibling;
+			if(function_item && function_item.namedChildren?.at(0)?.type === 'identifier')
+			{
+				kani_concrete_tests.push(function_item);
+			}
+		}
+
+		return kani_concrete_tests;
+	}
+
+
 
 	/**
 	 * Find kani proof and bolero proofs and extract metadata out of them from source text
