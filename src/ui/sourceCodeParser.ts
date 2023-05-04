@@ -5,8 +5,8 @@ import * as assert from 'assert';
 import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
 
-import { HarnessMetadata } from './sourceMap';
 import { countOccurrences } from '../utils';
+import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
 const Rust = require('tree-sitter-rust');
