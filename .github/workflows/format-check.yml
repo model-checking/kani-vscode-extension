@@ -18,8 +18,13 @@ jobs:
         with:
           node-version: '16.x'
 
-      - name: Check TS code formatting
+      - name: Check TS linting
         run: |
           npm install -g npm@latest
           npm install
           npm run lint
+
+      - name: Check TS formatting
+        run : |
+          npm ci
+          npm run prettier:check:ci

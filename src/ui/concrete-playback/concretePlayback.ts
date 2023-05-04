@@ -54,5 +54,4 @@ function createCommand(
 	} else {
 		return `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
-
 }
