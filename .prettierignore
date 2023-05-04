@@ -7,3 +7,9 @@ package.lock.json
 out
 .changes
 src/testFixtures/**
+*.json
+.eslintrc.js
+.clang-format
+.prettierrc
+*.d.ts
+*.yml
