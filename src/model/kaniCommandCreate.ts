@@ -21,7 +21,16 @@ export async function runKaniHarnessInterface(harnessName: string, args?: number
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	const kaniOutput = await catchOutput(harnessCommand);
-	return kaniOutput;
+	if( typeof kaniOutput == "number") {
+		return [kaniOutput, ''];
+	}
+	else if( Array.isArray(kaniOutput) && kaniOutput.length == 2 && typeof kaniOutput[0] === "number" && typeof kaniOutput[1] === "object")
+	{
+		return kaniOutput;
+	}
+	else {
+		return [5, ''];
+	}
 }
 
 /**
@@ -97,7 +106,7 @@ export async function runCommandPure(command: string): Promise<void> {
 }
 
 // Run a command and capture the command line output into a string
-async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<number> {
+async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<any> {
 	const process = await runKaniCommand(command);
 	return process;
 }

@@ -150,7 +150,13 @@ function executeKaniProcess(
 			} else if (error) {
 				if (error.code === 1) {
 					// verification failed
-					resolve(1);
+					if (stdout) {
+						const responseObject: KaniResponse = responseParserInterface(stdout.toString('utf-8'));
+						resolve([1, responseObject]);
+					}
+					else {
+						resolve(1);
+					}
 				} else {
 					// Error is an object created by nodejs created when nodejs cannot execute the command
 					vscode.window.showErrorMessage(

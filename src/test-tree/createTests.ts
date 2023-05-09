@@ -212,20 +212,25 @@ export class TestCase {
 	async run(item: vscode.TestItem, options: vscode.TestRun): Promise<void> {
 		const start: number = Date.now();
 		if (this.proof_boolean) {
-			const actual: number = await this.evaluate(
+			const actualResult: any = await this.evaluate(
 				this.file_name,
 				this.harness_name,
 				this.harness_unwind_value,
 			);
+
+			const actual = actualResult[0];
+
 			const duration: number = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
 			} else {
+				const responseObject: KaniResponse | string = actualResult[1];
+
+				if(typeof responseObject == 'string') {
+					return;
+				}
+
 				const location = new vscode.Location(item.uri!, item.range!);
-				const responseObject: KaniResponse = await captureFailedChecks(
-					this.harness_name,
-					this.harness_unwind_value,
-				);
 				const failedChecks: string = responseObject.failedProperty;
 				const failedMessage: string = responseObject.failedMessages;
 				const currentCase = new FailedCase(
@@ -270,18 +275,18 @@ export class TestCase {
 	}
 
 	// Run kani on the file, crate with given arguments
-	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<number> {
+	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<[number, KaniResponse | string]> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (args === undefined || NaN) {
-				const outputKani: number = await runKaniHarnessInterface(harness_name);
+				const outputKani: any = await runKaniHarnessInterface(harness_name);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarnessInterface(harness_name, args);
+				const outputKani: any = await runKaniHarnessInterface(harness_name, args);
 				return outputKani;
 			}
 		}
 
-		return 0;
+		return [0, ''];
 	}
 
 	// Run kani on bolero test case, file, crate with given arguments
