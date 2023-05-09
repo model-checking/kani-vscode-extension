@@ -20,7 +20,7 @@ import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
-import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
+import { checkCargoExist, getContentFromFilesystem, getPackageName, getRootDirURI } from './utils';
 
 let disposables: vscode.Disposable[] = [];
 
@@ -38,6 +38,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	// create a uri for the root folder
 	context.subscriptions.push(controller);
 	const crateURI: Uri = getRootDirURI();
+	const packageName = await getPackageName();
 	const treeRoot: vscode.TestItem = controller.createTestItem(
 		'Kani proofs',
 		'Kani Proofs',
@@ -241,8 +242,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
 	});
 
-	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
-		runCodeLensTest(args);
+	vscode.commands.registerCommand('codelens-sample.codelensAction', (functionName: any, moduleName: any, fileName: any) => {
+		runCodeLensTest(functionName, moduleName, fileName, packageName);
 	});
 
 	// Update the test tree with proofs whenever a test case is opened

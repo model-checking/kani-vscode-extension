@@ -45,7 +45,6 @@ export namespace SourceCodeParser {
 	}
 
 	export function findModulesForFunctions(rootNode: any): any {
-
 		const moduleDeclarationNodes = mapModulesToHarness(rootNode);
 		const mapFromFunctionMod = new Map<any, any>();
 		for (const [moduleItem, functionItems] of moduleDeclarationNodes) {
@@ -170,18 +169,27 @@ export namespace SourceCodeParser {
 
 		// Find the attribute by searching for its text
 		const tests = findKaniTests(rootNode);
+		const modMap = findModulesForFunctions(rootNode);
 		const result: any[] = [];
 
 		for (const function_item of tests) {
 			if (function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
 				const function_item_name = function_item.namedChildren?.at(0)?.text;
+				let module_name = '';
 
 				if (function_item_name === undefined) {
 					return [];
 				}
 
+				if(modMap.size == 0 || !modMap.has(function_item_name) || (modMap.get(function_item_name) == undefined) || modMap.get(function_item_name) == null) {
+					module_name = '';
+				}
+				else {
+					module_name = modMap.get(function_item_name);
+				}
+
 				const line = function_item.startPosition;
-				result.push([function_item_name, line]);
+				result.push([function_item_name, line, module_name]);
 			}
 		}
 
