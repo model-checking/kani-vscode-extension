@@ -21,6 +21,21 @@ mod test {
     fn random_name() {
         assert!(1==1);
     }
+
+    #[test]
+    fn kani_concrete_playback_my_harness_5205172929174653629() {
+        let concrete_vals: Vec<Vec<u8>> = vec![
+            // 1
+            vec![1],
+            // 101
+            vec![101],
+            // 0
+            vec![0],
+            // 102
+            vec![101],
+        ];
+        kani::concrete_playback_run(concrete_vals, my_harness);
+    }
 }
 
 #[test]
@@ -69,24 +84,35 @@ fn kani_concrete_playback_harness_2_1490343813496395367() {
 
 export const kaniConcreteTestsMetaData: any[] = [
 	[
+        "kani_concrete_playback_my_harness_5205172929174653629",
+        {
+            "column": 4,
+            "row": 22,
+        },
+        "test"
+    ],
+    [
 		'kani_concrete_playback_check_estimate_size_14615086421508420155',
 		{
-			row: 23,
+			row: 38,
 			column: 0,
 		},
+        '',
 	],
 	[
 		'kani_concrete_playback_harness_1664386709067937259',
 		{
-			row: 32,
+			row: 47,
 			column: 0,
 		},
+        '',
 	],
 	[
 		'kani_concrete_playback_harness_2_1490343813496395367',
 		{
-			row: 49,
+			row: 64,
 			column: 0,
 		},
+        '',
 	],
 ];

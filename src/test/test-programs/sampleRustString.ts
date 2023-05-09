@@ -282,6 +282,7 @@ export const findHarnessesResultBolero = [
 export const harnessMetadata = [
 	{
 		name: 'insert_test_80978342',
+		module: 'test',
 		fullLine: 'fn insert_test_80978342() {',
 		endPosition: {
 			row: 6,
@@ -295,6 +296,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'insert_test_2',
+		module: 'test',
 		fullLine: 'fn insert_test_2() {',
 		endPosition: {
 			row: 13,
@@ -308,6 +310,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'random_name',
+		module: 'test',
 		fullLine: 'fn random_name() {',
 		endPosition: {
 			row: 20,
@@ -321,6 +324,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'function_abc',
+		"module": undefined,
 		fullLine: 'fn function_abc() {',
 		endPosition: {
 			row: 28,
@@ -334,6 +338,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'function_xyz',
+		module: undefined,
 		fullLine: 'pub fn function_xyz() {',
 		endPosition: {
 			row: 35,
@@ -347,6 +352,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'function_xyz_2',
+		module: undefined,
 		fullLine: 'unsafe fn function_xyz_2() {',
 		endPosition: {
 			row: 44,
@@ -360,6 +366,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'function_xyz_3',
+		module: undefined,
 		fullLine: 'pub unsafe fn function_xyz_3() {',
 		endPosition: {
 			row: 50,
@@ -373,6 +380,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'function_xyz_7',
+		module: undefined,
 		fullLine: 'fn function_xyz_7() {',
 		endPosition: {
 			row: 58,
@@ -389,6 +397,7 @@ export const harnessMetadata = [
 export const attributeMetadataUnsupported = [
 	{
 		name: 'function_1',
+		module: undefined,
 		fullLine: 'fn function_1() {',
 		endPosition: {
 			row: 6,
@@ -402,6 +411,7 @@ export const attributeMetadataUnsupported = [
 	},
 	{
 		name: 'function_2',
+		module: undefined,
 		fullLine: 'pub fn function_2() {',
 		endPosition: {
 			row: 14,
