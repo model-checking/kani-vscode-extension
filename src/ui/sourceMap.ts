@@ -1,11 +1,16 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+
+export interface FileHarnessMetaData {
+	fileMetaData: FileMetaData[];
+	harnesses: HarnessMetadata[];
+}
+
 export interface FileMetaData {
 	fileName: string;
 	filePath: string;
 	crateName: string;
 	cratePath: string;
-	harnesses: HarnessMetadata[];
 }
 
 export interface HarnessMetadata {
@@ -14,6 +19,8 @@ export interface HarnessMetadata {
 	endPosition: Position;
 	attributes: string[];
 	args: AttributeMetaData;
+	module?: string;
+	metaData?: FileMetaData;
 }
 
 export interface AttributeMetaData {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
+import * as path from 'path';
 
 import { KaniResponse } from '../constants';
 import {
@@ -11,6 +12,7 @@ import {
 } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
 import { getContentFromFilesystem } from '../utils';
+import { FileMetaData } from '../ui/sourceMap';
 
 export type KaniData = TestFile | TestCase | string;
 
@@ -149,8 +151,10 @@ export class TestFile {
 			}
 		};
 
+		const metadata: FileMetaData = getCurrentRustFileMetadata(item)!;
+
 		// Trigger the parser and process extracted metadata to create a test case
-		SourceCodeParser.parseRustfile(content, {
+		SourceCodeParser.parseRustfile(content, metadata, {
 			onTest: (range, name, proofBoolean, args) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {
@@ -389,4 +393,32 @@ class FailedCase extends TestCase {
 
 		return placeholderMarkdown;
 	}
+}
+
+function getCurrentRustFileMetadata(item: any): FileMetaData | undefined {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return undefined;
+	}
+
+	const fileName = path.basename(item.uri.fsPath);
+	const filePath = item.uri.fsPath;
+
+	const workspace = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+	if (!workspace) {
+		return undefined;
+	}
+
+	const workspacePath = workspace.uri.fsPath;
+	const crateName = path.basename(workspacePath);
+	const cratePath = workspacePath;
+
+	const file_metadata: FileMetaData = {
+		fileName: fileName,
+		filePath: filePath,
+		crateName: crateName,
+		cratePath: cratePath
+	}
+
+	return file_metadata;
 }

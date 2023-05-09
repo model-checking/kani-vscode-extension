@@ -6,7 +6,7 @@ import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
 
 import { countOccurrences } from '../utils';
-import { HarnessMetadata } from './sourceMap';
+import { FileMetaData, HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
 const Rust = require('tree-sitter-rust');
@@ -29,10 +29,53 @@ export namespace SourceCodeParser {
 	export function getAttributeFromRustFile(file: string): HarnessMetadata[] {
 		const tree = parser.parse(file);
 		const harnesses = searchParseTreeForFunctions(tree.rootNode);
-		const sortedHarnessByline = [...harnesses].sort(
+		const harnessesMapped = addModuleToFunction(tree.rootNode, harnesses);
+		const sortedHarnessByline = [...harnessesMapped].sort(
 			(a, b) => a.endPosition.row - b.endPosition.row,
 		);
 		return sortedHarnessByline;
+	}
+
+	export function addModuleToFunction(rootNode: any, harnesses: any): any {
+		const modMap = findModulesForFunctions(rootNode);
+		for( const harness of harnesses) {
+			harness.module = modMap.get(harness.name);
+		}
+		return harnesses;
+	}
+
+	export function findModulesForFunctions(rootNode: any): any {
+
+		const moduleDeclarationNodes = mapModulesToHarness(rootNode);
+		const mapFromFunctionMod = new Map<any, any>();
+		for (const [moduleItem, functionItems] of moduleDeclarationNodes) {
+			console.log(`${moduleItem} has the following functions ${functionItems}`);
+			for( const functionItem of functionItems) {
+				mapFromFunctionMod.set(functionItem, moduleItem);
+			}
+		}
+
+		return mapFromFunctionMod;
+	}
+
+	export function mapModulesToHarness(rootNode: any): any{
+		const moduleDeclarationNodes = rootNode.descendantsOfType("mod_item");
+
+		// Extract the functions from each module
+		const mapFromModFunction = new Map<any, any>();
+		for (const item of moduleDeclarationNodes) {
+			// Extract the functions from each module
+			const moduleName = item.namedChildren[0].text.trim();
+			// Find all function declaration nodes within this module
+			const functionDeclarationNodes = item.descendantsOfType("function_item");
+			// Extract the function names
+			const functionNames = functionDeclarationNodes.map((functionDeclarationNode: any) => {
+				return functionDeclarationNode.namedChildren[0].text.trim();
+			});
+			mapFromModFunction.set(moduleName, functionNames);
+		}
+
+		return mapFromModFunction;
 	}
 
 	// Do DFS to get all harnesses
@@ -169,6 +212,14 @@ export namespace SourceCodeParser {
 		return kani_concrete_tests;
 	}
 
+	export function addMetaDataToHarness(harnesses: HarnessMetadata[], metaData: FileMetaData): HarnessMetadata[] {
+		for(const harness of harnesses) {
+			harness.metaData = metaData;
+		}
+
+		return harnesses
+	}
+
 	/**
 	 * Find kani proof and bolero proofs and extract metadata out of them from source text
 	 *
@@ -177,22 +228,24 @@ export namespace SourceCodeParser {
 	 */
 	export const parseRustfile = (
 		text: string,
+		metaData: FileMetaData,
 		events: {
 			onTest(range: vscode.Range, name: string, proofBoolean: boolean, harnessArgs?: number): void;
 		},
 	): void => {
 		// Create harness metadata for the entire file
 		const allHarnesses: HarnessMetadata[] = getAttributeFromRustFile(text);
-		console.log(JSON.stringify(allHarnesses, undefined, 2));
+		const harness_with_metadata = addMetaDataToHarness(allHarnesses, metaData);
+		console.log(JSON.stringify(harness_with_metadata, undefined, 2));
 		const lines = text.split('\n');
-		if (allHarnesses.length > 0) {
+		if (harness_with_metadata.length > 0) {
 			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
 				// Get the current line from source and check if
 				// the maps contain the line or not
 				const line: string = lines[lineNo];
 
 				// Add the parsed node for the current line
-				const harness = allHarnesses.find((p) => p.endPosition.row === lineNo);
+				const harness = harness_with_metadata.find((p) => p.endPosition.row === lineNo);
 				if (harness) {
 					assert.equal(harness.fullLine, line.trim());
 
