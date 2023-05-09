@@ -107,9 +107,7 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 		if (checkInstanceObject.status == 'FAILURE') {
 			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
-		}
-
-		else if (checkInstanceObject.status == 'UNREACHABLE') {
+		} else if (checkInstanceObject.status == 'UNREACHABLE') {
 			unreachableMessage += checkInstanceObject.createFailureMessage();
 			unreachableDisplay += checkInstanceObject.createDisplayMessage();
 		}
@@ -121,8 +119,8 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 
 	const unreachableResponse: KaniResponse = {
 		failedProperty: unreachableMessage,
-		failedMessages: unreachableDisplay
-	}
+		failedMessages: unreachableDisplay,
+	};
 
 	return failureResponse;
 }
