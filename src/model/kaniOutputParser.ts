@@ -36,7 +36,7 @@ class CheckInstance {
 	 * Structured Response for the Diff Output
 	 */
 	public createFailureMessage(): string {
-		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}`;
+		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}\n`;
 		return responseMessage;
 	}
 
@@ -95,20 +95,35 @@ function cleanChecksArray(checksArray: Array<string>): Array<string> {
 }
 
 function parseChecksArray(checksArray: Array<string>): KaniResponse {
-	let responseMessage = ``;
-	let displayMessage = ``;
+	let failureResponseMessage = ``;
+	let failureDisplayMessage = ``;
+
+	let unreachableMessage = ``;
+	let unreachableDisplay = ``;
+
 	for (let i = 0; i < checksArray.length; i++) {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
-		if (checkInstanceObject.status !== 'SUCCESS') {
-			responseMessage += checkInstanceObject.createFailureMessage();
-			displayMessage = checkInstanceObject.createDisplayMessage();
+		if (checkInstanceObject.status == 'FAILURE') {
+			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
+			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
+		}
+
+		else if (checkInstanceObject.status == 'UNREACHABLE') {
+			unreachableMessage += checkInstanceObject.createFailureMessage();
+			unreachableDisplay += checkInstanceObject.createDisplayMessage();
 		}
 	}
 	const failureResponse: KaniResponse = {
-		failedProperty: responseMessage,
-		failedMessages: displayMessage,
+		failedProperty: failureResponseMessage,
+		failedMessages: failureDisplayMessage,
 	};
+
+	const unreachableResponse: KaniResponse = {
+		failedProperty: unreachableMessage,
+		failedMessages: unreachableDisplay
+	}
+
 	return failureResponse;
 }
 
