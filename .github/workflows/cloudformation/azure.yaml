@@ -1,0 +1,33 @@
+Description: >
+  Login credentials for the Azure DevOps account used to manage the
+  model-checking publisher in the Microsoft Marketplace.
+
+Resources:
+
+  AzureDevOpsUsername:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: AzureDevOpsUsername
+      Description: >
+        Username for the Azure DevOps account used to manage the
+        model-checking publisher in the Microsoft Marketplace.
+
+  AzureDevOpsPassword:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: AzureDevOpsPassword
+      Description: >
+        Password for the Azure DevOps account used to manage the
+        model-checking publisher in the Microsoft Marketplace.
+
+Outputs:
+
+  AzureDevOpsUsername:
+    Value: !Ref AzureDevOpsUsername
+    Export:
+      Name: AzureDevOpsUsername
+
+  AzureDevOpsPassword:
+    Value: !Ref AzureDevOpsPassword
+    Export:
+      Name: AzureDevOpsPassword

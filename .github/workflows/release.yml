@@ -1,0 +1,83 @@
+name: Release Kani Debugger
+
+# A new tag of the form Kani-VERSION will trigger a new release,
+# upload the package to the release page, and publish the package
+# to the Microsoft Marketplace for Visual Studio Code extensions
+# using the Model Checking publisher.
+
+# Code checkout notes:
+#   GitHub has deprecated actions/create-release
+#   https://github.com/actions/create-release
+#
+#   GitHub recommends four actions including
+#     softprops/action-gh-release is highly rated but includes deprecated code
+#       https://github.com/softprops/action-gh-release
+#     ncipollo/release-action@v1
+#       https://github.com/ncipollo/release-action
+
+# AWS credentials notes:
+#   GitHub has decprecated Node12 in favor of Node16
+#   We use the workaround recommended by the AWS credentials package, see
+#   https://github.com/aws-actions/configure-aws-credentials/issues/489
+#     #issuecomment-1278145876
+
+on:
+  push:
+    tags:
+      - debugger-*
+
+env:
+  AWS_ROLE: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/PublisherTokenReader
+  AWS_REGION: us-west-2
+  PAT_ID: AzureDevOpsPAT
+
+jobs:
+  Release:
+    name: Release proof debugger
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Validate release and tagged version numbers
+        # $GITHUB_REF is refs/tags/debugger-VERSION
+        run: |
+          REL=$(jq -r '.version' package.json)
+          TAG=$(echo $GITHUB_REF | cut -d "/" -f 3 | cut -d "-" -f 2)
+          if [[ $REL != $TAG ]]; then
+            echo Release version $REL does not match tagged version $TAG
+            exit 1
+          fi
+          echo "VERSION=$REL" >> $GITHUB_ENV
+
+      - name: Create package
+        run: make setup-ubuntu package
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "*.vsix"
+          artifactContentType: application/zip
+          body: |
+            This release is Kani version ${{ env.VERSION }}.  For the latest release, go to the [Marketplace](https://marketplace.visualstudio.com/vscode) for Visual Studio Code extensions.
+
+            To install this release, download the package `kani-${{ env.VERSION }}.vsix` below and install it with
+
+            ```
+            code --install-extension kani-${{ env.VERSION }}.vsix
+            ```
+
+      - name: Authenticate GitHub workflow to AWS
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Publish release
+        run: |
+          export VSCE_PAT=$(aws secretsmanager get-secret-value --secret-id $PAT_ID | jq -r '.SecretString')
+          make publish
