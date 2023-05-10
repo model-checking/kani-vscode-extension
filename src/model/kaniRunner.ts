@@ -153,8 +153,7 @@ function executeKaniProcess(
 					if (stdout) {
 						const responseObject: KaniResponse = responseParserInterface(stdout.toString('utf-8'));
 						resolve([1, responseObject]);
-					}
-					else {
+					} else {
 						resolve(1);
 					}
 				} else {

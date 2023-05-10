@@ -226,7 +226,7 @@ export class TestCase {
 			} else {
 				const responseObject: KaniResponse | string = actualResult[1];
 
-				if(typeof responseObject == 'string') {
+				if (typeof responseObject == 'string') {
 					return;
 				}
 
@@ -275,7 +275,11 @@ export class TestCase {
 	}
 
 	// Run kani on the file, crate with given arguments
-	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<[number, KaniResponse | string]> {
+	async evaluate(
+		rsFile: string,
+		harness_name: string,
+		args?: number,
+	): Promise<[number, KaniResponse | string]> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (args === undefined || NaN) {
 				const outputKani: any = await runKaniHarnessInterface(harness_name);
