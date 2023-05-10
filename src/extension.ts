@@ -78,7 +78,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					// update the test tree with the new heading items
 					await discoverTests(gatherTestItems(test.children));
 				}
-
 			}
 		};
 

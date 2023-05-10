@@ -1,21 +1,21 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
+import path from 'path';
 
-import Parser from 'web-tree-sitter';
 import * as vscode from 'vscode';
+import Parser from 'web-tree-sitter';
 
 import { countOccurrences } from '../utils';
 import { HarnessMetadata } from './sourceMap';
-import path from 'path';
 
 // Parse for kani::proof helper function
 export async function loadParser(): Promise<Parser> {
-    await Parser.init();
-    const parser = new Parser();
-    const lang = await Parser.Language.load(path.join(__dirname, "../..", 'tree-sitter-rust.wasm'));
-    parser.setLanguage(lang);
-    return parser;
+	await Parser.init();
+	const parser = new Parser();
+	const lang = await Parser.Language.load(path.join(__dirname, '../..', 'tree-sitter-rust.wasm'));
+	parser.setLanguage(lang);
+	return parser;
 }
 
 export namespace SourceCodeParser {
