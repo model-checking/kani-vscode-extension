@@ -24,7 +24,7 @@ name: Release Kani Debugger
 on:
   push:
     tags:
-      - debugger-*
+      - Kani-vscode-*
 
 env:
   AWS_ROLE: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/PublisherTokenReader
