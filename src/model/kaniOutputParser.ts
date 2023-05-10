@@ -98,28 +98,17 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 	let failureResponseMessage = ``;
 	let failureDisplayMessage = ``;
 
-	let unreachableMessage = ``;
-	let unreachableDisplay = ``;
-
 	for (let i = 0; i < checksArray.length; i++) {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
 		if (checkInstanceObject.status == 'FAILURE') {
 			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
-		} else if (checkInstanceObject.status == 'UNREACHABLE') {
-			unreachableMessage += checkInstanceObject.createFailureMessage();
-			unreachableDisplay += checkInstanceObject.createDisplayMessage();
 		}
 	}
 	const failureResponse: KaniResponse = {
 		failedProperty: failureResponseMessage,
 		failedMessages: failureDisplayMessage,
-	};
-
-	const unreachableResponse: KaniResponse = {
-		failedProperty: unreachableMessage,
-		failedMessages: unreachableDisplay,
 	};
 
 	return failureResponse;
