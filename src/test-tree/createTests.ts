@@ -52,7 +52,7 @@ export async function findInitialFiles(
 	rootItem?: vscode.TestItem,
 ): Promise<void> {
 	for (const file of await vscode.workspace.findFiles(pattern)) {
-		const fileHasProofs: boolean = SourceCodeParser.checkFileForProofs(
+		const fileHasProofs: boolean = await SourceCodeParser.checkFileForProofs(
 			await getContentFromFilesystem(file),
 		);
 		if (fileHasProofs) {
@@ -132,11 +132,11 @@ export class TestFile {
 	 * Parses the tests from the input text, and updates the tests contained
 	 * by this file to be those from the text,
 	 */
-	public updateFromContents(
+	public async updateFromContents(
 		controller: vscode.TestController,
 		content: string,
 		item: vscode.TestItem,
-	): void {
+	): Promise<void> {
 		const ancestors = [{ item, children: [] as vscode.TestItem[] }];
 
 		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -150,7 +150,7 @@ export class TestFile {
 		};
 
 		// Trigger the parser and process extracted metadata to create a test case
-		SourceCodeParser.parseRustfile(content, {
+		await SourceCodeParser.parseRustfile(content, {
 			onTest: (range, name, proofBoolean, args) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {

@@ -31,9 +31,9 @@ suite('Verification symbol view', () => {
 	const parser = new Parser();
 	parser.setLanguage(Rust);
 
-	test('Test if proofs exist in file', () => {
-		assert.strictEqual(SourceCodeParser.checkFileForProofs(fullProgramSource), true);
-		assert.strictEqual(SourceCodeParser.checkFileForProofs(rustFileWithoutProof), false);
+	test('Test if proofs exist in file', async () => {
+		assert.strictEqual(await SourceCodeParser.checkFileForProofs(fullProgramSource), true);
+		assert.strictEqual(await SourceCodeParser.checkFileForProofs(rustFileWithoutProof), false);
 	});
 
 	test('Test if all kani harnesses are detected', () => {
@@ -52,16 +52,16 @@ suite('Verification symbol view', () => {
 		);
 	});
 
-	test('Test if all attributes are detected', () => {
+	test('Test if all attributes are detected', async () => {
 		assert.deepStrictEqual(
-			SourceCodeParser.getAttributeFromRustFile(kaniProofsUnsupported),
+			await SourceCodeParser.getAttributeFromRustFile(kaniProofsUnsupported),
 			attributeMetadataUnsupported,
 		);
 	});
 
-	test('Test if final metadata map is structured right', () => {
+	test('Test if final metadata map is structured right', async () => {
 		assert.deepStrictEqual(
-			SourceCodeParser.getAttributeFromRustFile(fullProgramSource),
+			await SourceCodeParser.getAttributeFromRustFile(fullProgramSource),
 			harnessMetadata,
 		);
 	});
