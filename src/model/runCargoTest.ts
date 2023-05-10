@@ -5,10 +5,10 @@ import * as vscode from 'vscode';
 import { getPackageName } from '../utils';
 
 /**
- * Runs the cargo test task whenver the user clicks on a codelens button
+ * Runs the cargo test task whenever the user clicks on a codelens button
  * @param functionName - Name of the unit test being run by the user
  */
-export async function runCodeLensTest(functionName: string): Promise<void> {
+export async function runCargoTest(functionName: string): Promise<void> {
 	const taskName = `Cargo Test: ${functionName}`;
 
 	const packageName = await getPackageName();

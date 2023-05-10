@@ -5,19 +5,16 @@ export const rustFileWithUnitTestsOnly = `
 #[cfg(test)]
 mod test {
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test() {
         assert!(1==2);
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
         assert!(1==1);
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
         assert!(1==1);
     }
@@ -71,21 +68,21 @@ export const kaniConcreteTestsMetaData: any[] = [
 	[
 		'kani_concrete_playback_check_estimate_size_14615086421508420155',
 		{
-			row: 23,
+			row: 20,
 			column: 0,
 		},
 	],
 	[
 		'kani_concrete_playback_harness_1664386709067937259',
 		{
-			row: 32,
+			row: 29,
 			column: 0,
 		},
 	],
 	[
 		'kani_concrete_playback_harness_2_1490343813496395367',
 		{
-			row: 49,
+			row: 46,
 			column: 0,
 		},
 	],
