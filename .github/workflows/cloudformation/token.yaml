@@ -1,0 +1,79 @@
+Description: >
+  The personal access token for the Azure DevOps account used to manage the
+  model-checking publisher in the Microsoft Marketplace.
+  Enable storage of the PAT in the AWS Secrets Manager and access to the PAT
+  from the GitHub workflows in model-checking/cbmc-proof-debugger.
+
+Parameters:
+  GithubRepoOrganization:
+    Type: String
+    Description: GitHub organization for the cbmc-proof-debugger
+    Default: model-checking
+  CbmcRepoName:
+    Type: String
+    Description: GitHub repository for the cbmc-proof-debugger
+    Default: cbmc-proof-debugger
+  KaniRepoName:
+    Type: String
+    Description: GitHub repository for the kani extension
+    Default: kani-vscode-extension
+  CbmcPublicationTag:
+    Type: String
+    Description: GitHub tag for proof debugger triggering the GitHub publication workflow
+    Default: debugger-*
+  KaniPublicationTag:
+    Type: String
+    Description: GitHub tag for kani extension triggering the GitHub publication workflow
+    Default: Kani-vscode-*
+
+Resources:
+
+  PublisherToken:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: AzureDevOpsPAT
+      Description: >
+        The personal access token for the Azure DevOps account used to
+        manage the model-checking publisher in the Microsoft Marketplace.
+
+  PublisherTokenReader:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: PublisherTokenReader
+      Description: >
+        This role can retrieve the personal access token for the model
+        checking publisher in the Microsoft Marketplace.
+
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !ImportValue GithubIdentityProvider
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  !Sub repo:${GithubRepoOrganization}/${CbmcRepoName}:ref:refs/tags/${CbmcPublicationTag}
+                  !Sub repo:${GithubRepoOrganization}/${KaniRepoName}:ref:refs/tags/${KaniPublicationTag}
+
+      Policies:
+        - PolicyName: PublisherTokenAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref PublisherToken
+
+Outputs:
+  PublisherToken:
+    Value: !Ref PublisherToken
+    Export:
+      Name: PublisherToken
+  PublisherTokenReader:
+    Value: !GetAtt PublisherTokenReader.Arn
+    Export:
+      Name: PublisherTokenReader
