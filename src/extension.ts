@@ -53,7 +53,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		const queue: { test: vscode.TestItem; data: TestCase }[] = [];
 		const run: vscode.TestRun = controller.createTestRun(request);
 		// map of file uris to statements on each line:
-		const coveredLines = new Map<string, (vscode.StatementCoverage | undefined)[]>();
 
 		const discoverTests = async (tests: Iterable<vscode.TestItem>): Promise<void> => {
 			for (const test of tests) {
@@ -80,23 +79,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					await discoverTests(gatherTestItems(test.children));
 				}
 
-				// test uri is it's unique identifier and we store the uris in a map called coveredlines
-				// to prevent re-processing the lines
-				if (test.uri && !coveredLines.has(test.uri.toString())) {
-					try {
-						const lines: string[] = (await getContentFromFilesystem(test.uri)).split('\n');
-						coveredLines.set(
-							test.uri.toString(),
-							lines.map((lineText, lineNo) =>
-								lineText.trim().length
-									? new vscode.StatementCoverage(0, new vscode.Position(lineNo, 0))
-									: undefined,
-							),
-						);
-					} catch {
-						// ignored
-					}
-				}
 			}
 		};
 
@@ -110,35 +92,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					await data.run(test, run);
 				}
 
-				const lineNo: number = test.range!.start.line;
-				const fileCoverage = coveredLines.get(test.uri!.toString());
-				if (fileCoverage) {
-					fileCoverage[lineNo]!.executionCount++;
-				}
-
 				run.appendOutput(`Completed ${test.id}\r\n`);
 			}
 
 			run.end();
-		};
-
-		/**
-		 *  Map from line uri to coverage info
-		 */
-		run.coverageProvider = {
-			provideFileCoverage(): vscode.FileCoverage[] {
-				const coverage: vscode.FileCoverage[] = [];
-				for (const [uri, statements] of coveredLines) {
-					coverage.push(
-						vscode.FileCoverage.fromDetails(
-							Uri.parse(uri),
-							statements.filter((s): s is vscode.StatementCoverage => !!s),
-						),
-					);
-				}
-
-				return coverage;
-			},
 		};
 
 		// Initial test case scan across the crate
