@@ -23,8 +23,6 @@ import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
 import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
 
-let disposables: vscode.Disposable[] = [];
-
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {

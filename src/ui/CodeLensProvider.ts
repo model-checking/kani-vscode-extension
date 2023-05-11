@@ -69,14 +69,13 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 					arguments: [function_item_name],
 				};
 
-				if(range) {
+				if (range) {
 					const runTestCodelens = new vscode.CodeLens(range, runTestAction);
 					const debugTestCodelens = new vscode.CodeLens(range, debugTestAction);
 
 					this.codeLenses.push(runTestCodelens);
 					this.codeLenses.push(debugTestCodelens);
 				}
-
 			}
 			return this.codeLenses;
 		}
