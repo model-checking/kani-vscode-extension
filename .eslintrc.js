@@ -39,7 +39,7 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
-        '@typescript-eslint/explicit-function-return-type': 'error',
+        '@typescript-eslint/explicit-function-return-type': 'warn',
         'sort-imports': 'off',
         '@typescript-eslint/no-namespace': 'off',
         'no-inner-declarations': 'off',

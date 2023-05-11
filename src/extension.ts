@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
+import { connectToDebugger } from './debugger/debugger';
 import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
@@ -229,7 +230,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const codelensProvider = new CodelensProvider();
 	const rustLanguageSelector = { scheme: 'file', language: 'rust' };
 
-	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
+	const providerDisposable = vscode.languages.registerCodeLensProvider(
+		rustLanguageSelector,
+		codelensProvider,
+	);
 
 	// Allows VSCode to enable code lens globally.
 	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
@@ -257,4 +261,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
 	context.subscriptions.push(runningConcretePlayback);
+	context.subscriptions.push(providerDisposable);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.connectToDebugger', (programName) =>
+			connectToDebugger(programName),
+		),
+	);
 }
