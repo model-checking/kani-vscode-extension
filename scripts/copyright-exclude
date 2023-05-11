@@ -16,6 +16,7 @@ gitmodules
 .prettierrc
 makefile
 ignore
+tree-sitter-rust.wasm
 scripts/copyright-exclude
 .json
 eslintrc.js

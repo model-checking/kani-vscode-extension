@@ -1,32 +1,39 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
+import path from 'path';
 
-import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
+import Parser from 'web-tree-sitter';
 
 import { countOccurrences } from '../utils';
 import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
-const Rust = require('tree-sitter-rust');
-export const parser = new Parser();
-parser.setLanguage(Rust);
+export async function loadParser(): Promise<Parser> {
+	await Parser.init();
+	const parser = new Parser();
+	const lang = await Parser.Language.load(path.join(__dirname, '../..', 'tree-sitter-rust.wasm'));
+	parser.setLanguage(lang);
+	return parser;
+}
 
 export namespace SourceCodeParser {
 	// Return True if proofs exist in the file, False if not
-	export function checkFileForProofs(content: string): boolean {
+	export async function checkFileForProofs(content: string): Promise<boolean> {
 		return checkTextForProofs(content);
 	}
 
 	// Match source text for Kani annotations
-	export const checkTextForProofs = (content: string): boolean => {
+	export const checkTextForProofs = async (content: string): Promise<boolean> => {
+		const parser = await loadParser();
 		const tree = parser.parse(content);
 		return checkforKani(tree.rootNode);
 	};
 
 	// Use the tree sitter to get attributes
-	export function getAttributeFromRustFile(file: string): HarnessMetadata[] {
+	export async function getAttributeFromRustFile(file: string): Promise<HarnessMetadata[]> {
+		const parser = await loadParser();
 		const tree = parser.parse(file);
 		const harnesses = searchParseTreeForFunctions(tree.rootNode);
 		const sortedHarnessByline = [...harnesses].sort(
@@ -121,7 +128,8 @@ export namespace SourceCodeParser {
 	}
 
 	// Search for concrete playback generated unit tests and their related metadata
-	export function extractKaniTestMetadata(text: string): any[] {
+	export async function extractKaniTestMetadata(text: string): Promise<any[]> {
+		const parser = await loadParser();
 		const tree = parser.parse(text);
 		const rootNode = tree.rootNode;
 
@@ -175,14 +183,14 @@ export namespace SourceCodeParser {
 	 * @param text - raw source text from a file
 	 * @param events - events that trigger parsing and extracting the harness metadata
 	 */
-	export const parseRustfile = (
+	export const parseRustfile = async (
 		text: string,
 		events: {
 			onTest(range: vscode.Range, name: string, proofBoolean: boolean, harnessArgs?: number): void;
 		},
-	): void => {
+	): Promise<void> => {
 		// Create harness metadata for the entire file
-		const allHarnesses: HarnessMetadata[] = getAttributeFromRustFile(text);
+		const allHarnesses: HarnessMetadata[] = await getAttributeFromRustFile(text);
 		console.log(JSON.stringify(allHarnesses, undefined, 2));
 		const lines = text.split('\n');
 		if (allHarnesses.length > 0) {
