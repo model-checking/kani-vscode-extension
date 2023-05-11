@@ -72,7 +72,7 @@ module.exports = {
        'import/no-unresolved': 'off',
        // 'import/no-named-as-default-member': 'off',
        'import/order': [
-         'error',
+         'warn',
          {
            groups: [
              'builtin', // Built-in imports (come from NodeJS native) go first
