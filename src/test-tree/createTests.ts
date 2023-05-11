@@ -364,11 +364,7 @@ class FailedCase extends TestCase {
 			`command:Kani.runConcretePlayback?${encodeURIComponent(JSON.stringify(args))}`,
 		);
 		sample.appendMarkdown(
-<<<<<<< HEAD
-			`[Run Concrete Playback for ${this.harness_name}](${concretePlaybackUri})`,
-=======
 			`[Run concrete playback for ${this.harness_name}](${concretePlaybackUri})`,
->>>>>>> 9b68904549d1028495311a69b7704a43d16bed93
 		);
 
 		return sample;

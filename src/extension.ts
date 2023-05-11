@@ -237,8 +237,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		codelensProvider,
 	);
 
-	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
-
 	// Allows VSCode to enable code lens globally.
 	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
 	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
