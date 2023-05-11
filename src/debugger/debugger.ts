@@ -7,6 +7,8 @@ import * as vscode from 'vscode';
 
 import { getPackageName, getRootDir, getRootDirURI } from '../utils';
 
+// Extracts the path for the cargo artifact for the user's crate which we shall plug into the debugger
+// by connecting to the vscode debugger controller
 async function getBinaryPath(): Promise<string | undefined> {
 	try {
 		// Run 'cargo' command to get the binary path

@@ -84,7 +84,6 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 	}
 
 	public resolveCodeLens(codeLens: vscode.CodeLens): vscode.ProviderResult<vscode.CodeLens> {
-		console.log(codeLens);
 		return codeLens;
 	}
 }
