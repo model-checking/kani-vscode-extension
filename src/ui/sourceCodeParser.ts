@@ -147,7 +147,7 @@ export namespace SourceCodeParser {
 
 	// Find all concrete playback generated unit tests using tree walking
 	export function findKaniTests(rootNode: any): any[] {
-		// Find all attributes with #[test], then filter those with the concrete_playback_prefix
+		// Find all attributes with `#[test]`, then filter those with the `concrete_playback` prefix
 		const attributeNode = rootNode
 			.descendantsOfType('attribute_item')
 			.filter(
