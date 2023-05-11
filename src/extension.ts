@@ -233,7 +233,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
 
-	// Allows VSCode to enable VSCode globally (if the user switches off code lens in settings, the kani codelens action will be too)
+	// Allows VSCode to enable code lens globally.
+	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
 	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
 	});
@@ -243,7 +244,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
 	});
 
-	// Registers the command (or short hands | triggers) for the code lens test runner function
+	// Register the command for the code lens Kani test runner function
 	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
 		runCargoTest(args);
 	});
