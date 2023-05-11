@@ -33,7 +33,7 @@ env:
 
 jobs:
   Release:
-    name: Release proof debugger
+    name: Release Kani debugger
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -47,7 +47,7 @@ jobs:
         # $GITHUB_REF is refs/tags/debugger-VERSION
         run: |
           REL=$(jq -r '.version' package.json)
-          TAG=$(echo $GITHUB_REF | cut -d "/" -f 3 | cut -d "-" -f 2)
+          TAG=$(echo $GITHUB_REF | cut -d "/" -f 3 | cut -d "-" -f 3)
           if [[ $REL != $TAG ]]; then
             echo Release version $REL does not match tagged version $TAG
             exit 1
