@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
 
-import Parser from 'tree-sitter';
-
-import { SourceCodeParser } from '../../ui/sourceCodeParser';
+import { SourceCodeParser, loadParser } from '../../ui/sourceCodeParser';
 import {
 	attributeMetadataUnsupported,
 	boleroProofs,
@@ -25,11 +23,9 @@ const listofHarnesses: Set<string> = new Set<string>([
 	'function_xyz',
 ]);
 
-suite('Verification symbol view', () => {
+suite('Verification symbol view', async () => {
 	// Parse for kani::proof helper function
-	const Rust = require('tree-sitter-rust');
-	const parser = new Parser();
-	parser.setLanguage(Rust);
+	const parser = await loadParser();
 
 	test('Test if proofs exist in file', async () => {
 		assert.strictEqual(await SourceCodeParser.checkFileForProofs(fullProgramSource), true);
