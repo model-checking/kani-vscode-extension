@@ -128,7 +128,8 @@ export namespace SourceCodeParser {
 	}
 
 	// Search for concrete playback generated unit tests and their related metadata
-	export function extractKaniTestMetadata(text: string): any[] {
+	export async function extractKaniTestMetadata(text: string): Promise<any[]> {
+		const parser = await loadParser();
 		const tree = parser.parse(text);
 		const rootNode = tree.rootNode;
 

@@ -29,16 +29,16 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 	 * @returns
 	 */
 
-	public provideCodeLenses(
+	public async provideCodeLenses(
 		document: vscode.TextDocument,
 		_token: vscode.CancellationToken,
-	): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
+	): Promise<any> {
 		if (vscode.workspace.getConfiguration('codelens-sample').get('enableCodeLens', true)) {
 			this.codeLenses = [];
 			const text = document.getText();
 
 			// Find the unit tests by searching for its text
-			const kani_concrete_tests = SourceCodeParser.extractKaniTestMetadata(text);
+			const kani_concrete_tests = await SourceCodeParser.extractKaniTestMetadata(text);
 
 			for (const item of kani_concrete_tests) {
 				const function_item_name = item.at(0);
