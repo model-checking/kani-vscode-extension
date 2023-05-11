@@ -43,7 +43,7 @@ async function getBinaryPath(): Promise<string | undefined> {
 		 * 			success: true
 		 * 		}
 		 * ]
-		*/
+		 */
 
 		const packageCompilationArtifact = jsonMessages[jsonMessages.length - 2];
 
