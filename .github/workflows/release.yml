@@ -60,6 +60,8 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true
+          replacesArtifacts: true
           artifacts: "*.vsix"
           artifactContentType: application/zip
           body: |
