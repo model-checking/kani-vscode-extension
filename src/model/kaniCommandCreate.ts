@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
-import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
+import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
  * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani

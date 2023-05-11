@@ -6,9 +6,9 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
+import { KaniResponse } from '../constants';
 import { CommandArgs, getRootDir, splitCommand } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
-import { KaniResponse } from '../constants';
 
 /**
  * Get the system resolved path to the cargo-kani command
