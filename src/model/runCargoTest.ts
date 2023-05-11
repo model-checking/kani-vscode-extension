@@ -17,6 +17,9 @@ export async function runCargoTest(functionName: string): Promise<void> {
 		command: 'test',
 		args: [functionName],
 	};
+
+
+	// Adding --bin {packageName} to the command prevents recompiling when there's no changes to the unit tests, which makes rerunning unit tests faster.
 	const cargoTestCommand: string = `RUSTFLAGS="--cfg=kani" cargo test --package ${packageName} --bin ${packageName} -- ${functionName} --exact --nocapture`;
 	const task = new vscode.Task(
 		taskDefinition,

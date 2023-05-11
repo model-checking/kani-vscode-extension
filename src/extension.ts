@@ -22,8 +22,6 @@ import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
 import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
 
-let disposables: vscode.Disposable[] = [];
-
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
@@ -258,13 +256,4 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
 	context.subscriptions.push(runningConcretePlayback);
-}
-
-// this method is called when your extension is deactivated
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function deactivate() {
-	if (disposables) {
-		disposables.forEach((item) => item.dispose());
-	}
-	disposables = [];
 }
