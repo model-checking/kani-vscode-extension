@@ -4,7 +4,7 @@ import * as assert from 'assert';
 
 import Parser from 'tree-sitter';
 
-import { SourceCodeParser } from '../../ui/sourceCodeParser';
+import { SourceCodeParser, loadParser } from '../../ui/sourceCodeParser';
 import {
 	kaniConcreteTestsMetaData,
 	rustFileWithUnitTestsOnly,
@@ -31,16 +31,13 @@ const listofHarnesses: Set<string> = new Set<string>([
 
 suite('test source code parsing', () => {
 	// Parse for kani::proof helper function
-	const Rust = require('tree-sitter-rust');
-	const parser = new Parser();
-	parser.setLanguage(Rust);
-
 	test('Test if proofs exist in file', async () => {
 		assert.strictEqual(await SourceCodeParser.checkFileForProofs(fullProgramSource), true);
 		assert.strictEqual(await SourceCodeParser.checkFileForProofs(rustFileWithoutProof), false);
 	});
 
-	test('Test if all kani harnesses are detected', () => {
+	test('Test if all kani harnesses are detected', async () => {
+		const parser = await loadParser();
 		const tree = parser.parse(kaniProofs);
 		assert.deepStrictEqual(
 			SourceCodeParser.findHarnesses(tree.rootNode.namedChildren),
@@ -48,7 +45,8 @@ suite('test source code parsing', () => {
 		);
 	});
 
-	test('Test if all Bolero harnesses are detected', () => {
+	test('Test if all Bolero harnesses are detected', async () => {
+		const parser = await loadParser();
 		const tree = parser.parse(boleroProofs);
 		assert.deepStrictEqual(
 			SourceCodeParser.searchParseTreeForFunctions(tree.rootNode),
@@ -70,9 +68,9 @@ suite('test source code parsing', () => {
 		);
 	});
 
-	test('Test if concrete playback unit tests are picked up and placed at the right location', () => {
+	test('Test if concrete playback unit tests are picked up and placed at the right location', async () => {
 		assert.deepStrictEqual(
-			SourceCodeParser.extractKaniTestMetadata(rustFileWithUnitTestsOnly),
+			await SourceCodeParser.extractKaniTestMetadata(rustFileWithUnitTestsOnly),
 			kaniConcreteTestsMetaData,
 		);
 	});
