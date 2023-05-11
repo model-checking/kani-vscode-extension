@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
 
+import * as toml from 'toml';
 import { Uri, workspace } from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
@@ -92,6 +93,36 @@ export function splitCommand(command: string): CommandArgs {
 		return { commandPath, args };
 	} else {
 		return { commandPath, args: [] };
+	}
+}
+
+export function extractFunctionName(line: string): string {
+	const lineSplit = line.split(' ');
+
+	for (let index = 0; index < lineSplit.length; index++) {
+		if (lineSplit[index].startsWith('kani_concrete_playback')) {
+			const functionNameRaw = lineSplit[index];
+			const functionName = functionNameRaw.split('(').at(0)!;
+			return functionName;
+		}
+	}
+
+	return '';
+}
+
+// Get the package name for the workspace from cargo.toml
+export async function getPackageName(): Promise<any> {
+	const dirName = getRootDir();
+	const cargoTomlUri = Uri.file(`${dirName}/Cargo.toml`);
+
+	try {
+		const buffer = await workspace.fs.readFile(cargoTomlUri);
+		const cargoToml = buffer.toString();
+		const cargoTomlObject = toml.parse(cargoToml);
+		return cargoTomlObject.package?.name;
+	} catch (error) {
+		console.error(error);
+		return undefined;
 	}
 }
 

@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
+import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -13,6 +14,7 @@ import {
 	getWorkspaceTestPatterns,
 	testData,
 } from './test-tree/createTests';
+import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
@@ -223,6 +225,27 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		data.updateFromContents(controller, e.getText(), file);
 		data.addToCrate(controller, file, treeRoot);
 	}
+
+	const codelensProvider = new CodelensProvider();
+	const rustLanguageSelector = { scheme: 'file', language: 'rust' };
+
+	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
+
+	// Allows VSCode to enable code lens globally.
+	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
+	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
+	});
+
+	// Allows VSCode to disable VSCode globally
+	vscode.commands.registerCommand('codelens-sample.disableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
+	});
+
+	// Register the command for the code lens Kani test runner function
+	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
+		runCargoTest(args);
+	});
 
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(

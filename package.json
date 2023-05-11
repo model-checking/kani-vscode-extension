@@ -31,8 +31,26 @@
         "when": "editorLangId == rust",
         "category": "Kani",
         "title": "Run Cargo Kani"
+      },
+      {
+        "title": "Enable CodeLens",
+        "command": "codelens-sample.enableCodeLens",
+        "category": "CodeLens Sample"
+      },
+      {
+        "title": "Disable Codelens",
+        "command": "codelens-sample.disableCodeLens",
+        "category": "CodeLens Sample"
       }
-    ]
+    ],
+    "configuration": {
+      "properties": {
+        "codelens-sample.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -71,6 +89,7 @@
   "dependencies": {
     "esbuild": "0.16.2",
     "readline": "^1.3.0",
+    "toml": "^3.0.0",
     "tree-sitter": "0.16.1",
     "tree-sitter-rust": "^0.16.0"
   }
