@@ -1,3 +1,5 @@
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 import process = require('process');
 
 import * as vscode from 'vscode';
@@ -45,19 +47,11 @@ function createCommand(
 ): string {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
-	let finalCommand: string = '';
+	const command: string = commandURI === 'Kani.runConcretePlayback' ? 'kani' : 'cargo kani';
 
-	if (!isCargo) {
-		const command: string = commandURI === 'Kani.runConcretePlayback' ? 'kani' : 'cargo kani';
-		finalCommand = `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --concrete-playback=inplace`;
+	if (!isCargo || harnessType) {
+		return `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --concrete-playback=inplace`;
 	} else {
-		if (harnessType) {
-			const command: string = commandURI === 'Kani.runConcretePlayback' ? 'kani' : 'cargo kani';
-			finalCommand = `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --concrete-playback=inplace`;
-		} else {
-			finalCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} --visualize`;
-		}
+		return `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
-
-	return finalCommand;
 }

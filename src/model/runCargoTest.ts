@@ -1,24 +1,14 @@
-import * as toml from 'toml';
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
-import { getRootDir } from '../utils';
+import { getPackageName } from '../utils';
 
-export async function getPackageName(): Promise<any> {
-	const dirName = getRootDir();
-	const cargoTomlUri = vscode.Uri.file(`${dirName}/Cargo.toml`);
-
-	try {
-		const buffer = await vscode.workspace.fs.readFile(cargoTomlUri);
-		const cargoToml = buffer.toString();
-		const cargoTomlObject = toml.parse(cargoToml);
-		return cargoTomlObject.package?.name;
-	} catch (error) {
-		console.error(error);
-		return undefined;
-	}
-}
-
-export async function runCodeLensTest(functionName: string): Promise<void> {
+/**
+ * Runs the cargo test task whenever the user clicks on a codelens button
+ * @param functionName - Name of the unit test being run by the user
+ */
+export async function runCargoTest(functionName: string): Promise<void> {
 	const taskName = `Cargo Test: ${functionName}`;
 
 	const packageName = await getPackageName();
@@ -27,6 +17,9 @@ export async function runCodeLensTest(functionName: string): Promise<void> {
 		command: 'test',
 		args: [functionName],
 	};
+
+	// Adding `--bin {packageName}` to the command prevents recompiling when
+	// there's no changes to the unit tests, which makes rerunning unit tests faster.
 	const cargoTestCommand: string = `RUSTFLAGS="--cfg=kani" cargo test --package ${packageName} --bin ${packageName} -- ${functionName} --exact --nocapture`;
 	const task = new vscode.Task(
 		taskDefinition,

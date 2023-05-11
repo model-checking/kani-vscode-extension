@@ -10,7 +10,7 @@ import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
 const Rust = require('tree-sitter-rust');
-const parser = new Parser();
+export const parser = new Parser();
 parser.setLanguage(Rust);
 
 export namespace SourceCodeParser {
@@ -118,6 +118,55 @@ export namespace SourceCodeParser {
 			}
 		}
 		return false;
+	}
+
+	// Search for concrete playback generated unit tests and their related metadata
+	export function extractKaniTestMetadata(text: string): any[] {
+		const tree = parser.parse(text);
+		const rootNode = tree.rootNode;
+
+		// Find the attribute by searching for its text
+		const tests = findKaniTests(rootNode);
+		const result: any[] = [];
+
+		for (const function_item of tests) {
+			if (function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
+				const function_item_name = function_item.namedChildren?.at(0)?.text;
+
+				if (function_item_name === undefined) {
+					return [];
+				}
+
+				const line = function_item.startPosition;
+				result.push([function_item_name, line]);
+			}
+		}
+
+		return result;
+	}
+
+	// Find all concrete playback generated unit tests using tree walking
+	export function findKaniTests(rootNode: any): any[] {
+		// Find all attributes with `#[test]`, then filter those with the `concrete_playback` prefix
+		const attributeNode = rootNode
+			.descendantsOfType('attribute_item')
+			.filter(
+				(item: any) => item.text == '#[test]' && item.nextNamedSibling?.type == 'function_item',
+			);
+		const attributes = attributeNode.filter((item: any) =>
+			item.nextNamedSibling?.text.includes('kani_concrete_playback'),
+		);
+
+		const kani_concrete_tests: any[] = [];
+
+		for (const item of attributes) {
+			const function_item = item.nextNamedSibling;
+			if (function_item && function_item.namedChildren?.at(0)?.type === 'identifier') {
+				kani_concrete_tests.push(function_item);
+			}
+		}
+
+		return kani_concrete_tests;
 	}
 
 	/**

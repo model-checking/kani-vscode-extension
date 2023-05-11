@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
-import { runCodeLensTest } from './model/runCargoTest';
+import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -237,16 +237,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		codelensProvider,
 	);
 
+	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
+
+	// Allows VSCode to enable code lens globally.
+	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
 	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
 	});
 
+	// Allows VSCode to disable VSCode globally
 	vscode.commands.registerCommand('codelens-sample.disableCodeLens', () => {
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
 	});
 
+	// Register the command for the code lens Kani test runner function
 	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
-		runCodeLensTest(args);
+		runCargoTest(args);
 	});
 
 	// Update the test tree with proofs whenever a test case is opened
@@ -265,13 +271,4 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			connectToDebugger(programName),
 		),
 	);
-}
-
-// this method is called when your extension is deactivated
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function deactivate() {
-	if (disposables) {
-		disposables.forEach((item) => item.dispose());
-	}
-	disposables = [];
 }
