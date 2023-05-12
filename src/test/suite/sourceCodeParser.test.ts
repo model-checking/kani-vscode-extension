@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as assert from 'assert';
 
-import Parser from 'tree-sitter';
-
 import { SourceCodeParser, loadParser } from '../../ui/sourceCodeParser';
 import {
 	kaniConcreteTestsMetaData,
