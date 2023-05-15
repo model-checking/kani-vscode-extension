@@ -21,12 +21,12 @@ import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
-import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
+import { checkCargoExist, getContentFromFilesystem, getRootDirURI, showErrorWithReportIssueButton } from './utils';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
-		vscode.window.showErrorMessage('Cannot find Cargo.toml to run Cargo Kani on crate');
+		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
 	}
 
 	const controller: vscode.TestController = vscode.tests.createTestController(

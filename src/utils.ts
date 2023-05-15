@@ -4,10 +4,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
 
+
+
 import * as toml from 'toml';
-import { Uri, workspace } from 'vscode';
+import * as vscode from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
+const linkToBugReportTemplate = 'https://github.com/model-checking/kani-vscode-extension/issues/new?assignees=&labels=bug&projects=&template=bug_report.md'
 
 export interface CommandArgs {
 	commandPath: string;
@@ -15,9 +18,9 @@ export interface CommandArgs {
 }
 
 // Get the raw text from a given file given it's path uri
-export const getContentFromFilesystem = async (uri: Uri): Promise<string> => {
+export const getContentFromFilesystem = async (uri: vscode.Uri): Promise<string> => {
 	try {
-		const rawContent: Uint8Array = await workspace.fs.readFile(uri);
+		const rawContent: Uint8Array = await vscode.workspace.fs.readFile(uri);
 		return textDecoder.decode(rawContent);
 	} catch (e) {
 		console.warn(`Error providing tests for ${uri.fsPath}`, e);
@@ -26,10 +29,10 @@ export const getContentFromFilesystem = async (uri: Uri): Promise<string> => {
 };
 
 // Convert path to URI
-export function getRootDirURI(): Uri {
-	let crateURI: Uri = Uri.parse('');
-	if (workspace.workspaceFolders !== undefined) {
-		crateURI = workspace.workspaceFolders[0].uri;
+export function getRootDirURI(): vscode.Uri {
+	let crateURI: vscode.Uri = vscode.Uri.parse('');
+	if (vscode.workspace.workspaceFolders !== undefined) {
+		crateURI = vscode.workspace.workspaceFolders[0].uri;
 		return crateURI;
 	}
 
@@ -38,9 +41,9 @@ export function getRootDirURI(): Uri {
 
 // Get the workspace of the current directory
 export function getRootDir(): string {
-	let crateURI: Uri = Uri.parse('');
-	if (workspace.workspaceFolders !== undefined) {
-		crateURI = workspace.workspaceFolders[0].uri;
+	let crateURI: vscode.Uri = vscode.Uri.parse('');
+	if (vscode.workspace.workspaceFolders !== undefined) {
+		crateURI = vscode.workspace.workspaceFolders[0].uri;
 		return crateURI.fsPath;
 	}
 
@@ -113,10 +116,10 @@ export function extractFunctionName(line: string): string {
 // Get the package name for the workspace from cargo.toml
 export async function getPackageName(): Promise<any> {
 	const dirName = getRootDir();
-	const cargoTomlUri = Uri.file(`${dirName}/Cargo.toml`);
+	const cargoTomlUri = vscode.Uri.file(`${dirName}/Cargo.toml`);
 
 	try {
-		const buffer = await workspace.fs.readFile(cargoTomlUri);
+		const buffer = await vscode.workspace.fs.readFile(cargoTomlUri);
 		const cargoToml = buffer.toString();
 		const cargoTomlObject = toml.parse(cargoToml);
 		return cargoTomlObject.package?.name;
@@ -138,4 +141,14 @@ function parseCommand(command: string): string[] {
 		parts.push(match[1] || match[2] || match[0]);
 	}
 	return parts;
+}
+
+// Show an error message with a button that links to the bug report template
+// used for new issues related to bugs in the Kani VSCode extension repository.
+export async function showErrorWithReportIssueButton(message: string): Promise<void> {
+	const response = await vscode.window.showErrorMessage(message, 'Report Issue');
+	if (response == 'Report Issue') {
+		const uriLink = vscode.Uri.parse(linkToBugReportTemplate);
+		vscode.env.openExternal(uriLink);
+	}
 }
