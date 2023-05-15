@@ -134,7 +134,6 @@ export function getTimeBasedUniqueId(): string {
 	return timestamp;
 }
 
-
 /* Split the command line invocation into the kani call and the argument array
 For example - Input: '"my command" --arg1 "file with spaces.txt"';
 Output: ['my command', '--arg1', 'file with spaces.txt']

@@ -7,17 +7,21 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { CommandArgs, getRootDir,getTimeBasedUniqueId, showErrorWithReportIssueButton, splitCommand } from '../utils';
+import {
+	CommandArgs,
+	getRootDir,
+	getTimeBasedUniqueId,
+	showErrorWithReportIssueButton,
+	splitCommand,
+} from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
-
 
 interface CommandOutput {
 	stdout: string;
 	stderr: string;
 	errorCode: number | undefined;
-	error: any
-  }
-
+	error: any;
+}
 
 /**
  * Get the system resolved path to the cargo-kani command
@@ -145,13 +149,11 @@ function executeKaniProcess(
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
-
-
 			const output: CommandOutput = {
 				stdout: stdout.toString().trim(),
 				stderr: stderr.toString().trim(),
 				errorCode: error?.code,
-				error: error
+				error: error,
 			};
 
 			// Call the process function with the output
