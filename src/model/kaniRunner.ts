@@ -190,6 +190,7 @@ function executeKaniProcess(
 	});
 }
 
+// Creates a unique name and adds a channel for the harness output to Output Logs
 function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 	const harnessName = args.at(1)!;
 
