@@ -16,6 +16,7 @@ import {
 } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 
+// Store the output from process into a object with this type
 interface CommandOutput {
 	stdout: string;
 	stderr: string;
@@ -149,6 +150,7 @@ function executeKaniProcess(
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+			// Store the output of the process into an object
 			const output: CommandOutput = {
 				stdout: stdout.toString().trim(),
 				stderr: stderr.toString().trim(),
@@ -156,7 +158,7 @@ function executeKaniProcess(
 				error: error,
 			};
 
-			// Call the process function with the output
+			// Send output to output channel specific to the harness
 			sendOutputToChannel(output, args);
 
 			if (stderr && !stdout) {
