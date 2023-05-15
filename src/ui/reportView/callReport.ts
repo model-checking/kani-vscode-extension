@@ -8,7 +8,13 @@ import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
 import { getKaniPath } from '../../model/kaniRunner';
-import { CommandArgs, checkCargoExist, getRootDir, splitCommand } from '../../utils';
+import {
+	CommandArgs,
+	checkCargoExist,
+	getRootDir,
+	showErrorWithReportIssueButton,
+	splitCommand,
+} from '../../utils';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');
@@ -79,13 +85,13 @@ function showVisualizeError(output: reportMetadata): void {
 	switch (output.statusCode) {
 		// Could not run the visualize command
 		case 1:
-			vscode.window.showErrorMessage(
+			showErrorWithReportIssueButton(
 				`Could not generate report due to execution error: ${output.error}`,
 			);
 			break;
 		// Could run the command, but the file generated could not be verified or was generated at wrong location
 		case 2:
-			vscode.window.showErrorMessage(`Could not find path to the report file: ${output.error}`);
+			showErrorWithReportIssueButton(`Could not find path to the report file: ${output.error}`);
 			break;
 	}
 	return;
