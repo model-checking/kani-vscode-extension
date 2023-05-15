@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { CommandArgs, getRootDir, getTimeBasedUniqueId, splitCommand } from '../utils';
+import { CommandArgs, getRootDir,getTimeBasedUniqueId, showErrorWithReportIssueButton, splitCommand } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 
 
@@ -121,7 +121,7 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 		});
 	} else {
 		// Error Case
-		vscode.window.showWarningMessage('Kani executable crashed while parsing error message');
+		showErrorWithReportIssueButton('Kani executable crashed while parsing error message');
 		return new Promise((resolve, _reject) => {
 			resolve({ failedProperty: 'error', failedMessages: 'error' });
 		});
@@ -161,7 +161,7 @@ function executeKaniProcess(
 				if (cargoKaniMode) {
 					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
 					// a rustc error or an unhandled kani error
-					vscode.window.showErrorMessage(
+					showErrorWithReportIssueButton(
 						`Kani Executable Crashed due to an underlying rustc error ->\n ${stderr}`,
 					);
 					reject();
@@ -173,7 +173,7 @@ function executeKaniProcess(
 					resolve(1);
 				} else {
 					// Error is an object created by nodejs created when nodejs cannot execute the command
-					vscode.window.showErrorMessage(
+					showErrorWithReportIssueButton(
 						`Kani Extension could not execute command due to error ->\n ${error}`,
 					);
 					reject();
