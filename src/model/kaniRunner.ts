@@ -10,6 +10,15 @@ import { KaniResponse } from '../constants';
 import { CommandArgs, getRootDir, splitCommand } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 
+
+interface CommandOutput {
+	stdout: string;
+	stderr: string;
+	errorCode: number | undefined;
+	error: any
+  }
+
+
 /**
  * Get the system resolved path to the cargo-kani command
  *
@@ -136,6 +145,18 @@ function executeKaniProcess(
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+
+
+			const output: CommandOutput = {
+				stdout: stdout.toString().trim(),
+				stderr: stderr.toString().trim(),
+				errorCode: error?.code,
+				error: error
+			};
+
+			// Call the process function with the output
+			processOutput(output, args);
+
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {
 					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
@@ -165,3 +186,15 @@ function executeKaniProcess(
 		});
 	});
 }
+
+
+function processOutput(output: CommandOutput, args: string[]): void {
+	const harnessName = args.at(1)!;
+	const channel = vscode.window.createOutputChannel(`Kani Output ${harnessName}`);
+
+	// Add output
+	console.log(output);
+
+	// Append stdout and stderr to the output channel
+	channel.appendLine(output.stdout);
+  }
