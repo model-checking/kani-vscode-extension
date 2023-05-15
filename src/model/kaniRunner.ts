@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { CommandArgs, getRootDir, splitCommand } from '../utils';
+import { CommandArgs, getRootDir, getTimeBasedUniqueId, splitCommand } from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
 
 
@@ -155,7 +155,7 @@ function executeKaniProcess(
 			};
 
 			// Call the process function with the output
-			processOutput(output, args);
+			sendOutputToChannel(output, args);
 
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {
@@ -170,7 +170,6 @@ function executeKaniProcess(
 				}
 			} else if (error) {
 				if (error.code === 1) {
-					// verification failed
 					resolve(1);
 				} else {
 					// Error is an object created by nodejs created when nodejs cannot execute the command
@@ -187,14 +186,13 @@ function executeKaniProcess(
 	});
 }
 
-
-function processOutput(output: CommandOutput, args: string[]): void {
+function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 	const harnessName = args.at(1)!;
-	const channel = vscode.window.createOutputChannel(`Kani Output ${harnessName}`);
 
-	// Add output
-	console.log(output);
+	// Create unique ID for the output channel
+	const timestamp = getTimeBasedUniqueId();
+	const channel = vscode.window.createOutputChannel(`Kani Output ${harnessName} - ${timestamp}`);
 
-	// Append stdout and stderr to the output channel
+	// Append stdout to the output channel
 	channel.appendLine(output.stdout);
-  }
+}
