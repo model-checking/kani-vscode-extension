@@ -4,13 +4,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
 
-
-
 import * as toml from 'toml';
 import * as vscode from 'vscode';
 
 const textDecoder = new TextDecoder('utf-8');
-const linkToBugReportTemplate = 'https://github.com/model-checking/kani-vscode-extension/issues/new?assignees=&labels=bug&projects=&template=bug_report.md'
+const linkToBugReportTemplate =
+	'https://github.com/model-checking/kani-vscode-extension/issues/new?assignees=&labels=bug&projects=&template=bug_report.md';
 
 export interface CommandArgs {
 	commandPath: string;

@@ -8,7 +8,13 @@ import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
 import { getKaniPath } from '../../model/kaniRunner';
-import { CommandArgs, checkCargoExist, getRootDir, showErrorWithReportIssueButton, splitCommand } from '../../utils';
+import {
+	CommandArgs,
+	checkCargoExist,
+	getRootDir,
+	showErrorWithReportIssueButton,
+	splitCommand,
+} from '../../utils';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');
