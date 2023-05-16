@@ -152,8 +152,8 @@ function executeKaniProcess(
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
 			// Store the output of the process into an object
 			const output: CommandOutput = {
-				stdout: stdout.toString().trim(),
-				stderr: stderr.toString().trim(),
+				stdout: stdout.toString(),
+				stderr: stderr.toString(),
 				errorCode: error?.code,
 				error: error,
 			};
