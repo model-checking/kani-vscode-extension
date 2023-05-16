@@ -128,6 +128,12 @@ export async function getPackageName(): Promise<any> {
 	}
 }
 
+// Create a timestamp to help differentiate strings
+export function getTimeBasedUniqueId(): string {
+	const timestamp = new Date().getTime().toString();
+	return timestamp;
+}
+
 /* Split the command line invocation into the kani call and the argument array
 For example - Input: '"my command" --arg1 "file with spaces.txt"';
 Output: ['my command', '--arg1', 'file with spaces.txt']

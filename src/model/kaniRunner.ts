@@ -7,8 +7,22 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
-import { CommandArgs, getRootDir, showErrorWithReportIssueButton, splitCommand } from '../utils';
+import {
+	CommandArgs,
+	getRootDir,
+	getTimeBasedUniqueId,
+	showErrorWithReportIssueButton,
+	splitCommand,
+} from '../utils';
 import { responseParserInterface } from './kaniOutputParser';
+
+// Store the output from process into a object with this type
+interface CommandOutput {
+	stdout: string;
+	stderr: string;
+	errorCode: number | undefined;
+	error: any;
+}
 
 /**
  * Get the system resolved path to the cargo-kani command
@@ -136,6 +150,17 @@ function executeKaniProcess(
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
 		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+			// Store the output of the process into an object
+			const output: CommandOutput = {
+				stdout: stdout.toString(),
+				stderr: stderr.toString(),
+				errorCode: error?.code,
+				error: error,
+			};
+
+			// Send output to output channel specific to the harness
+			sendOutputToChannel(output, args);
+
 			if (stderr && !stdout) {
 				if (cargoKaniMode) {
 					// stderr is an output stream that happens when there are no problems executing the kani command but kani itself throws an error due to (most likely)
@@ -149,7 +174,6 @@ function executeKaniProcess(
 				}
 			} else if (error) {
 				if (error.code === 1) {
-					// verification failed
 					resolve(1);
 				} else {
 					// Error is an object created by nodejs created when nodejs cannot execute the command
@@ -164,4 +188,16 @@ function executeKaniProcess(
 			}
 		});
 	});
+}
+
+// Creates a unique name and adds a channel for the harness output to Output Logs
+function sendOutputToChannel(output: CommandOutput, args: string[]): void {
+	const harnessName = args.at(1)!;
+
+	// Create unique ID for the output channel
+	const timestamp = getTimeBasedUniqueId();
+	const channel = vscode.window.createOutputChannel(`Output (Kani): ${harnessName} - ${timestamp}`);
+
+	// Append stdout to the output channel
+	channel.appendLine(output.stdout);
 }
