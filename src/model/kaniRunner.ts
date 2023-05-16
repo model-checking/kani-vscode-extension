@@ -196,7 +196,7 @@ function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
-	const channel = vscode.window.createOutputChannel(`Kani Output ${harnessName} - ${timestamp}`);
+	const channel = vscode.window.createOutputChannel(`Output (Kani): ${harnessName} - ${timestamp}`);
 
 	// Append stdout to the output channel
 	channel.appendLine(output.stdout);
