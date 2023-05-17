@@ -45,7 +45,7 @@ export namespace SourceCodeParser {
 
 	export function addModuleToFunction(rootNode: any, harnesses: any): any {
 		const modMap = findModulesForFunctions(rootNode);
-		for( const harness of harnesses) {
+		for (const harness of harnesses) {
 			harness.module = modMap.get(harness.name);
 		}
 		return harnesses;
@@ -56,7 +56,7 @@ export namespace SourceCodeParser {
 		const mapFromFunctionMod = new Map<any, any>();
 		for (const [moduleItem, functionItems] of moduleDeclarationNodes) {
 			console.log(`${moduleItem} has the following functions ${functionItems}`);
-			for( const functionItem of functionItems) {
+			for (const functionItem of functionItems) {
 				mapFromFunctionMod.set(functionItem, moduleItem);
 			}
 		}
@@ -64,8 +64,8 @@ export namespace SourceCodeParser {
 		return mapFromFunctionMod;
 	}
 
-	export function mapModulesToHarness(rootNode: any): any{
-		const moduleDeclarationNodes = rootNode.descendantsOfType("mod_item");
+	export function mapModulesToHarness(rootNode: any): any {
+		const moduleDeclarationNodes = rootNode.descendantsOfType('mod_item');
 
 		// Extract the functions from each module
 		const mapFromModFunction = new Map<any, any>();
@@ -73,7 +73,7 @@ export namespace SourceCodeParser {
 			// Extract the functions from each module
 			const moduleName = item.namedChildren[0].text.trim();
 			// Find all function declaration nodes within this module
-			const functionDeclarationNodes = item.descendantsOfType("function_item");
+			const functionDeclarationNodes = item.descendantsOfType('function_item');
 			// Extract the function names
 			const functionNames = functionDeclarationNodes.map((functionDeclarationNode: any) => {
 				return functionDeclarationNode.namedChildren[0].text.trim();
@@ -189,10 +189,14 @@ export namespace SourceCodeParser {
 					return [];
 				}
 
-				if(modMap.size == 0 || !modMap.has(function_item_name) || (modMap.get(function_item_name) == undefined) || modMap.get(function_item_name) == null) {
+				if (
+					modMap.size == 0 ||
+					!modMap.has(function_item_name) ||
+					modMap.get(function_item_name) == undefined ||
+					modMap.get(function_item_name) == null
+				) {
 					module_name = '';
-				}
-				else {
+				} else {
 					module_name = modMap.get(function_item_name);
 				}
 
@@ -228,12 +232,15 @@ export namespace SourceCodeParser {
 		return kani_concrete_tests;
 	}
 
-	export function addMetaDataToHarness(harnesses: HarnessMetadata[], metaData: FileMetaData): HarnessMetadata[] {
-		for(const harness of harnesses) {
+	export function addMetaDataToHarness(
+		harnesses: HarnessMetadata[],
+		metaData: FileMetaData,
+	): HarnessMetadata[] {
+		for (const harness of harnesses) {
 			harness.metaData = metaData;
 		}
 
-		return harnesses
+		return harnesses;
 	}
 
 	/**

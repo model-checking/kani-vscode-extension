@@ -6,7 +6,12 @@ import * as vscode from 'vscode';
  * Runs the cargo test task whenver the user clicks on a codelens button
  * @param functionName - Name of the unit test being run by the user
  */
-export function runCargoTest(functionName: string, moduleName: string, fileName: string,  packageName: any): void {
+export function runCargoTest(
+	functionName: string,
+	moduleName: string,
+	fileName: string,
+	packageName: any,
+): void {
 	const taskName = `Cargo Test: ${functionName}`;
 	let functionParameter: string;
 
@@ -17,22 +22,18 @@ export function runCargoTest(functionName: string, moduleName: string, fileName:
 	};
 
 	if (fileName === 'main') {
-		if(moduleName !== '') {
+		if (moduleName !== '') {
 			functionParameter = `${moduleName}::${functionName}`;
-		}
-		else {
+		} else {
 			functionParameter = functionName;
 		}
-	}
-	else if (fileName != ''){
+	} else if (fileName != '') {
 		if (moduleName === '') {
 			functionParameter = `${fileName}::${functionName}`;
-		}
-		else {
+		} else {
 			functionParameter = `${fileName}::${moduleName}::${functionName}`;
 		}
-	}
-	else {
+	} else {
 		// throw error?
 		functionParameter = functionName;
 	}

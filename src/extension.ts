@@ -210,9 +210,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	});
 
 	// Register the command for the code lens Kani test runner function
-	vscode.commands.registerCommand('codelens-sample.codelensAction', (functionName: any, moduleName: any, fileName: any) => {
-		runCargoTest(functionName, moduleName, fileName, packageName);
-	});
+	vscode.commands.registerCommand(
+		'codelens-sample.codelensAction',
+		(functionName: any, moduleName: any, fileName: any) => {
+			runCargoTest(functionName, moduleName, fileName, packageName);
+		},
+	);
 
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(
@@ -226,8 +229,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runningConcretePlayback);
 	context.subscriptions.push(providerDisposable);
 	context.subscriptions.push(
-		vscode.commands.registerCommand('extension.connectToDebugger', (programName: any, moduleName: any, fileName: any) =>
-			connectToDebugger(programName, moduleName, fileName),
+		vscode.commands.registerCommand(
+			'extension.connectToDebugger',
+			(programName: any, moduleName: any, fileName: any) =>
+				connectToDebugger(programName, moduleName, fileName),
 		),
 	);
 }

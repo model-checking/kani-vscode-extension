@@ -324,7 +324,7 @@ export const harnessMetadata = [
 	},
 	{
 		name: 'function_abc',
-		"module": undefined,
+		module: undefined,
 		fullLine: 'fn function_abc() {',
 		endPosition: {
 			row: 28,

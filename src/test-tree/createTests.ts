@@ -417,8 +417,8 @@ function getCurrentRustFileMetadata(item: any): FileMetaData | undefined {
 		fileName: fileName,
 		filePath: filePath,
 		crateName: crateName,
-		cratePath: cratePath
-	}
+		cratePath: cratePath,
+	};
 
 	return file_metadata;
 }
