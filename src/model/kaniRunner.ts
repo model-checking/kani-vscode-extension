@@ -39,6 +39,7 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 		execFile('which', [kaniCommand], options, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`execFile error: ${error}`);
+				reject(new Error(`Kani executable was not found in PATH.`));
 				return;
 			}
 			if (stderr) {
