@@ -203,7 +203,7 @@ export const findHarnessesResultKani = [
 			row: 20,
 			column: 24,
 		},
-		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]','#[kani::should_panic]'],
+		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]', '#[kani::should_panic]'],
 		args: {
 			proof: true,
 			test: false,
@@ -403,7 +403,7 @@ export const attributeMetadataUnsupported = [
 			row: 6,
 			column: 13,
 		},
-		attributes: ["#[kani::unwind(0)]", "#[kani::should_panic]", "#[kani::cover]"],
+		attributes: ['#[kani::unwind(0)]', '#[kani::should_panic]', '#[kani::cover]'],
 		args: {
 			proof: true,
 			test: false,
@@ -417,10 +417,10 @@ export const attributeMetadataUnsupported = [
 			row: 14,
 			column: 17,
 		},
-		attributes: ["#[kani::stub]"],
+		attributes: ['#[kani::stub]'],
 		args: {
 			proof: true,
 			test: false,
 		},
-	}
+	},
 ];

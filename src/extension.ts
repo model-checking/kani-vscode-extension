@@ -3,7 +3,8 @@
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
-import { runCodeLensTest } from './model/runCargoTest';
+import { connectToDebugger } from './debugger/debugger';
+import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -20,14 +21,17 @@ import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
-import { checkCargoExist, getContentFromFilesystem, getPackageName, getRootDirURI } from './utils';
-
-let disposables: vscode.Disposable[] = [];
+import {
+	checkCargoExist,
+	getContentFromFilesystem,
+	getRootDirURI,
+	showErrorWithReportIssueButton,
+} from './utils';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
-		vscode.window.showErrorMessage('Cannot find Cargo.toml to run Cargo Kani on crate');
+		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
 	}
 
 	const controller: vscode.TestController = vscode.tests.createTestController(
@@ -58,7 +62,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		const queue: { test: vscode.TestItem; data: TestCase }[] = [];
 		const run: vscode.TestRun = controller.createTestRun(request);
 		// map of file uris to statements on each line:
-		const coveredLines = new Map<string, (vscode.StatementCoverage | undefined)[]>();
 
 		const discoverTests = async (tests: Iterable<vscode.TestItem>): Promise<void> => {
 			for (const test of tests) {
@@ -84,24 +87,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					// update the test tree with the new heading items
 					await discoverTests(gatherTestItems(test.children));
 				}
-
-				// test uri is it's unique identifier and we store the uris in a map called coveredlines
-				// to prevent re-processing the lines
-				if (test.uri && !coveredLines.has(test.uri.toString())) {
-					try {
-						const lines: string[] = (await getContentFromFilesystem(test.uri)).split('\n');
-						coveredLines.set(
-							test.uri.toString(),
-							lines.map((lineText, lineNo) =>
-								lineText.trim().length
-									? new vscode.StatementCoverage(0, new vscode.Position(lineNo, 0))
-									: undefined,
-							),
-						);
-					} catch {
-						// ignored
-					}
-				}
 			}
 		};
 
@@ -115,35 +100,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 					await data.run(test, run);
 				}
 
-				const lineNo: number = test.range!.start.line;
-				const fileCoverage = coveredLines.get(test.uri!.toString());
-				if (fileCoverage) {
-					fileCoverage[lineNo]!.executionCount++;
-				}
-
 				run.appendOutput(`Completed ${test.id}\r\n`);
 			}
 
 			run.end();
-		};
-
-		/**
-		 *  Map from line uri to coverage info
-		 */
-		run.coverageProvider = {
-			provideFileCoverage(): vscode.FileCoverage[] {
-				const coverage: vscode.FileCoverage[] = [];
-				for (const [uri, statements] of coveredLines) {
-					coverage.push(
-						vscode.FileCoverage.fromDetails(
-							Uri.parse(uri),
-							statements.filter((s): s is vscode.StatementCoverage => !!s),
-						),
-					);
-				}
-
-				return coverage;
-			},
 		};
 
 		// Initial test case scan across the crate
@@ -232,18 +192,25 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const codelensProvider = new CodelensProvider();
 	const rustLanguageSelector = { scheme: 'file', language: 'rust' };
 
-	vscode.languages.registerCodeLensProvider(rustLanguageSelector, codelensProvider);
+	const providerDisposable = vscode.languages.registerCodeLensProvider(
+		rustLanguageSelector,
+		codelensProvider,
+	);
 
+	// Allows VSCode to enable code lens globally.
+	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
 	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
 	});
 
+	// Allows VSCode to disable VSCode globally
 	vscode.commands.registerCommand('codelens-sample.disableCodeLens', () => {
 		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
 	});
 
-	vscode.commands.registerCommand('codelens-sample.codelensAction', (functionName: any, moduleName: any, fileName: any) => {
-		runCodeLensTest(functionName, moduleName, fileName, packageName);
+	// Register the command for the code lens Kani test runner function
+	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
+		runCargoTest(args);
 	});
 
 	// Update the test tree with proofs whenever a test case is opened
@@ -256,13 +223,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
 	context.subscriptions.push(runningConcretePlayback);
-}
-
-// this method is called when your extension is deactivated
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function deactivate() {
-	if (disposables) {
-		disposables.forEach((item) => item.dispose());
-	}
-	disposables = [];
+	context.subscriptions.push(providerDisposable);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.connectToDebugger', (programName) =>
+			connectToDebugger(programName),
+		),
+	);
 }

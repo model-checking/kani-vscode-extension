@@ -5,36 +5,18 @@ export const rustFileWithUnitTestsOnly = `
 #[cfg(test)]
 mod test {
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test() {
         assert!(1==2);
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
         assert!(1==1);
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
         assert!(1==1);
-    }
-
-    #[test]
-    fn kani_concrete_playback_my_harness_5205172929174653629() {
-        let concrete_vals: Vec<Vec<u8>> = vec![
-            // 1
-            vec![1],
-            // 101
-            vec![101],
-            // 0
-            vec![0],
-            // 102
-            vec![101],
-        ];
-        kani::concrete_playback_run(concrete_vals, my_harness);
     }
 }
 
@@ -84,35 +66,24 @@ fn kani_concrete_playback_harness_2_1490343813496395367() {
 
 export const kaniConcreteTestsMetaData: any[] = [
 	[
-        "kani_concrete_playback_my_harness_5205172929174653629",
-        {
-            "column": 4,
-            "row": 22,
-        },
-        "test"
-    ],
-    [
 		'kani_concrete_playback_check_estimate_size_14615086421508420155',
 		{
-			row: 38,
+			row: 20,
 			column: 0,
 		},
-        '',
 	],
 	[
 		'kani_concrete_playback_harness_1664386709067937259',
 		{
-			row: 47,
+			row: 29,
 			column: 0,
 		},
-        '',
 	],
 	[
 		'kani_concrete_playback_harness_2_1490343813496395367',
 		{
-			row: 64,
+			row: 46,
 			column: 0,
 		},
-        '',
 	],
 ];
