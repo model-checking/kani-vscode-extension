@@ -24,6 +24,7 @@ import { startWatchingWorkspace } from './ui/watchWorkspace';
 import {
 	checkCargoExist,
 	getContentFromFilesystem,
+	getPackageName,
 	getRootDirURI,
 	showErrorWithReportIssueButton,
 } from './utils';
@@ -209,8 +210,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	});
 
 	// Register the command for the code lens Kani test runner function
-	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
-		runCargoTest(args);
+	vscode.commands.registerCommand('codelens-sample.codelensAction', (functionName: any, moduleName: any, fileName: any) => {
+		runCargoTest(functionName, moduleName, fileName, packageName);
 	});
 
 	// Update the test tree with proofs whenever a test case is opened
@@ -225,8 +226,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(runningConcretePlayback);
 	context.subscriptions.push(providerDisposable);
 	context.subscriptions.push(
-		vscode.commands.registerCommand('extension.connectToDebugger', (programName) =>
-			connectToDebugger(programName),
+		vscode.commands.registerCommand('extension.connectToDebugger', (programName: any, moduleName: any, fileName: any) =>
+			connectToDebugger(programName, moduleName, fileName),
 		),
 	);
 }

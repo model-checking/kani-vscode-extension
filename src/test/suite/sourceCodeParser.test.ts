@@ -8,10 +8,6 @@ import {
 	rustFileWithUnitTestsOnly,
 } from '../test-programs/concretePlaybackTests';
 import {
-	kaniConcreteTestsMetaData,
-	rustFileWithUnitTestsOnly,
-} from '../test-programs/concretePlaybackTests';
-import {
 	attributeMetadataUnsupported,
 	boleroProofs,
 	findHarnessesResultBolero,

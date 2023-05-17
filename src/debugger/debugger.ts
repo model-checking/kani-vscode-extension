@@ -66,19 +66,35 @@ export async function connectToDebugger(functionName: string, moduleName: string
 
 	let functionParameter: string;
 
-	if(moduleName !== '') {
-		functionParameter = `${fileName}::${moduleName}::${functionName}`;
+	if (fileName === 'main') {
+		if(moduleName !== '') {
+			functionParameter = `${moduleName}::${functionName}`;
+		}
+		else {
+			functionParameter = functionName;
+		}
+	}
+	else if (fileName != ''){
+		if (moduleName === '') {
+			functionParameter = `${fileName}::${functionName}`;
+		}
+		else {
+			functionParameter = `${fileName}::${moduleName}::${functionName}`;
+		}
 	}
 	else {
+		// throw error?
 		functionParameter = functionName;
 	}
 
+	const workspaceFolder = vscode.workspace.getWorkspaceFolder(getRootDirURI());
+
 	// These config options allow VSCode to attach the binary artifact to lldb's debugger extension, with
 	// kani extension acting as the bridge.
-	vscode.debug.startDebugging(vscode.workspace.getWorkspaceFolder(getRootDirURI()), {
+	vscode.debug.startDebugging(workspaceFolder, {
 		type: 'lldb',
 		request: 'launch',
-		name: 'test ${programName}',
+		name: `test ${functionName}`,
 		program: binaryName,
 		args: [functionParameter, '--exact', '--nocapture'],
 		cwd: '${workspaceFolder}',

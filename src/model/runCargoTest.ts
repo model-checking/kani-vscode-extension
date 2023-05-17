@@ -16,11 +16,24 @@ export function runCargoTest(functionName: string, moduleName: string, fileName:
 		args: [functionName],
 	};
 
-
-	if(moduleName !== '') {
-		functionParameter = `${fileName}::${moduleName}::${functionName}`;
+	if (fileName === 'main') {
+		if(moduleName !== '') {
+			functionParameter = `${moduleName}::${functionName}`;
+		}
+		else {
+			functionParameter = functionName;
+		}
+	}
+	else if (fileName != ''){
+		if (moduleName === '') {
+			functionParameter = `${fileName}::${functionName}`;
+		}
+		else {
+			functionParameter = `${fileName}::${moduleName}::${functionName}`;
+		}
 	}
 	else {
+		// throw error?
 		functionParameter = functionName;
 	}
 
