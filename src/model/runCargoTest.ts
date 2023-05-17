@@ -34,7 +34,6 @@ export function runCargoTest(
 			functionParameter = `${fileName}::${moduleName}::${functionName}`;
 		}
 	} else {
-		// throw error?
 		functionParameter = functionName;
 	}
 

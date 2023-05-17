@@ -83,7 +83,6 @@ export async function connectToDebugger(
 			functionParameter = `${fileName}::${moduleName}::${functionName}`;
 		}
 	} else {
-		// throw error?
 		functionParameter = functionName;
 	}
 

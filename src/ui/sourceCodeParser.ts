@@ -192,8 +192,7 @@ export namespace SourceCodeParser {
 				if (
 					modMap.size == 0 ||
 					!modMap.has(function_item_name) ||
-					modMap.get(function_item_name) == undefined ||
-					modMap.get(function_item_name) == null
+					modMap.get(function_item_name) == undefined
 				) {
 					module_name = '';
 				} else {

@@ -1,9 +1,10 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+import path from 'path';
+
 import * as vscode from 'vscode';
 
 import { SourceCodeParser } from './sourceCodeParser';
-import path from 'path';
 
 /**
  * CodelensProvider

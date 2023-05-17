@@ -1,8 +1,9 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+import * as path from 'path';
+
 import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
-import * as path from 'path';
 
 import { KaniResponse } from '../constants';
 import {
@@ -11,8 +12,8 @@ import {
 	runKaniHarnessInterface,
 } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
-import { getContentFromFilesystem } from '../utils';
 import { FileMetaData } from '../ui/sourceMap';
+import { getContentFromFilesystem } from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
 
