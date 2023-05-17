@@ -59,10 +59,19 @@ async function getBinaryPath(): Promise<string | undefined> {
 	}
 }
 
-export async function connectToDebugger(functionName: string) {
+export async function connectToDebugger(functionName: string, moduleName: string, fileName: string) {
 	// The binary that is being referred to here, is the binary present in the cargo artifacts.
 	// It looks like this - kani_concrete_playback_check_estimate_size_14615086421508420155
 	const binaryName = await getBinaryPath();
+
+	let functionParameter: string;
+
+	if(moduleName !== '') {
+		functionParameter = `${fileName}::${moduleName}::${functionName}`;
+	}
+	else {
+		functionParameter = functionName;
+	}
 
 	// These config options allow VSCode to attach the binary artifact to lldb's debugger extension, with
 	// kani extension acting as the bridge.
@@ -71,7 +80,7 @@ export async function connectToDebugger(functionName: string) {
 		request: 'launch',
 		name: 'test ${programName}',
 		program: binaryName,
-		args: [functionName, '--exact', '--nocapture'],
+		args: [functionParameter, '--exact', '--nocapture'],
 		cwd: '${workspaceFolder}',
 		sourceLanguages: ['rust'],
 		env: {
