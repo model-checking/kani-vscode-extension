@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
-import { runCargoTest } from './model/runCargoTest';
 import { getKaniPath } from './model/kaniRunner';
+import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
