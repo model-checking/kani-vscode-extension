@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
+import { getKaniPath } from './model/kaniRunner';
 import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
@@ -32,6 +33,15 @@ import {
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
 		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
+	}
+	try {
+		// GET binary path
+		const kaniBinaryPath = await getKaniPath('cargo-kani');
+	} catch (error) {
+		showErrorWithReportIssueButton(
+			'The Kani executable was not found in PATH. Please install it using the instructions         at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
+		);
+		return;
 	}
 
 	const controller: vscode.TestController = vscode.tests.createTestController(
