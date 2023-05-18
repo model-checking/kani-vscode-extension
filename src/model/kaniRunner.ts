@@ -14,7 +14,7 @@ import {
 	showErrorWithReportIssueButton,
 	splitCommand,
 } from '../utils';
-import { responseParserInterface } from './kaniOutputParser';
+import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
 
 // Store the output from process into a object with this type
 interface CommandOutput {
@@ -172,7 +172,7 @@ async function executeKaniProcess(
 
 			// Send output to diagnostics and return if there is an error in stdout
 			// this means that the command could not be executed.
-			if (stdout.includes('error') && stderr.includes('error')) {
+			if (checkOutputForError(output.stdout, output.stderr)) {
 				reject(new Error(stdout.toString('utf-8')));
 			}
 

@@ -49,6 +49,20 @@ class CheckInstance {
 	}
 }
 
+// Check if stderr and std out contain the error strings or the strings indicating successful compilation and verification
+export function checkOutputForError(outString: string, errString: string): boolean {
+	if (errString.includes('Finished dev') && outString.includes('VERIFICATION:-')) {
+		return false;
+	}
+
+	// If by this point, we havent returned false, it usually happens only because there was an error with kani itself
+	if (outString.includes('error') && errString.includes('error')) {
+		return true;
+	}
+
+	return false;
+}
+
 // Expose output parser to other modules
 export function responseParserInterface(responseString: string): KaniResponse {
 	return responseParser(responseString);
