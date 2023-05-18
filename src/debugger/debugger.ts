@@ -59,6 +59,7 @@ async function getBinaryPath(): Promise<string | undefined> {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function connectToDebugger(functionName: string) {
 	// The binary that is being referred to here, is the binary present in the cargo artifacts.
 	// It looks like this - kani_concrete_playback_check_estimate_size_14615086421508420155
