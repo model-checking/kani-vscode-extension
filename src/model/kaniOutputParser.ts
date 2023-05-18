@@ -97,15 +97,16 @@ function cleanChecksArray(checksArray: Array<string>): Array<string> {
 function parseChecksArray(checksArray: Array<string>): KaniResponse {
 	let failureResponseMessage = ``;
 	let failureDisplayMessage = ``;
-	const error_statuses = ['FAILURE', 'UNDETERMINED', 'UNREACHABLE', 'SATISFIED', 'UNSATISFIABLE'];
+	const failure_statuses = ['FAILURE', 'UNDETERMINED', 'UNREACHABLE', 'UNSATISFIABLE'];
+	const success_statuses = ['SATISFIED', 'SUCCESS'];
 
 	for (let i = 0; i < checksArray.length; i++) {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
-		if (error_statuses.includes(checkInstanceObject.status)) {
+		if (failure_statuses.includes(checkInstanceObject.status)) {
 			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
-		} else if (checkInstanceObject.status != 'SUCCESS') {
+		} else if (!success_statuses.includes(checkInstanceObject.status)) {
 			failureResponseMessage +=
 				checkInstanceObject.createFailureMessage() +
 				'WARNING: unknown status returned from Kani.\n\n';
