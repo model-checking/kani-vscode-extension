@@ -95,9 +95,9 @@ export async function runKaniCommand(
 		}
 		catch (error: any) {
 			showErrorWithReportIssueButton(
-				`Could not generate report due to execution error: ${error}`,
+				`Could not run Kani on harness: ${error}`,
 			);
-			return new Error(`Kani executable was not found in PATH.`);
+			return new Error(`Kani executable was unable to detect or run harness.`);
 		}
 
 	} else {
@@ -173,7 +173,7 @@ async function executeKaniProcess(
 			// this means that the command could not be executed.
 			if(stdout.includes("error") && stderr.includes("error"))
 			{
-				reject(new Error("Compilation failed"));
+				reject(new Error(stdout.toString('utf-8')));
 			}
 
 			// Send output to output channel specific to the harness
