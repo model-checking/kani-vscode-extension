@@ -33,6 +33,7 @@ import {
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
 		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
+		return;
 	}
 	try {
 		// GET binary path

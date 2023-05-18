@@ -89,7 +89,17 @@ export async function runKaniCommand(
 			cwd: directory,
 		};
 
-		return executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
+		try {
+			const executionResult = await executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
+			return executionResult;
+		}
+		catch (error: any) {
+			showErrorWithReportIssueButton(
+				`Could not generate report due to execution error: ${error}`,
+			);
+			return new Error(`Kani executable was not found in PATH.`);
+		}
+
 	} else {
 		return false;
 	}
@@ -143,14 +153,14 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
  * @param cargoKaniMode - Whether it's running in `cargo-kani` or not
  * @returns the path for the binary cargo-kani (either the installed binary or the development one)
  */
-function executeKaniProcess(
+async function executeKaniProcess(
 	kaniBinaryPath: string,
 	args: string[],
 	options: any,
 	cargoKaniMode: boolean,
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
-		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
+		execFile(kaniBinaryPath, args, options, async (error, stdout, stderr) => {
 			// Store the output of the process into an object
 			const output: CommandOutput = {
 				stdout: stdout.toString(),
@@ -158,6 +168,13 @@ function executeKaniProcess(
 				errorCode: error?.code,
 				error: error,
 			};
+
+			// Send output to diagnostics and return if there is an error in stdout
+			// this means that the command could not be executed.
+			if(stdout.includes("error") && stderr.includes("error"))
+			{
+				reject(new Error("Compilation failed"));
+			}
 
 			// Send output to output channel specific to the harness
 			sendOutputToChannel(output, args);
