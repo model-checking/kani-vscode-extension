@@ -97,17 +97,12 @@ function cleanChecksArray(checksArray: Array<string>): Array<string> {
 function parseChecksArray(checksArray: Array<string>): KaniResponse {
 	let failureResponseMessage = ``;
 	let failureDisplayMessage = ``;
+	const error_statuses = ['FAILURE', 'UNDETERMINED', 'UNREACHABLE', 'SATISFIED', 'UNSATISFIABLE'];
 
 	for (let i = 0; i < checksArray.length; i++) {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
-		if (
-			checkInstanceObject.status == 'FAILURE' ||
-			checkInstanceObject.status == 'UNDETERMINED' ||
-			checkInstanceObject.status == 'UNREACHABLE' ||
-			checkInstanceObject.status == 'SATISFIED' ||
-			checkInstanceObject.status == 'UNSATISFIABLE'
-		) {
+		if (error_statuses.includes(checkInstanceObject.status)) {
 			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
 		} else if (checkInstanceObject.status != 'SUCCESS') {
