@@ -36,7 +36,7 @@ class CheckInstance {
 	 * Structured Response for the Diff Output
 	 */
 	public createFailureMessage(): string {
-		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}\n`;
+		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nStatus - ${this.status}\nLocation - ${this.location}\n`;
 		return responseMessage;
 	}
 
@@ -101,8 +101,19 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 	for (let i = 0; i < checksArray.length; i++) {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
-		if (checkInstanceObject.status == 'FAILURE') {
+		if (
+		   checkInstanceObject.status == 'FAILURE' ||
+		   checkInstanceObject.status == 'UNDETERMINED' ||
+		   checkInstanceObject.status == 'UNREACHABLE' ||
+		   checkInstanceObject.status == 'SATISFIED' ||
+		   checkInstanceObject.status == 'UNSATISFIABLE')
+		{
 			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
+			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
+		}
+		else if(checkInstanceObject.status != 'SUCCESS')
+		{
+			failureResponseMessage += checkInstanceObject.createFailureMessage() + 'WARNING: unknown status returned from Kani.\n\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
 		}
 	}
