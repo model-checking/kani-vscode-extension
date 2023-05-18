@@ -102,18 +102,18 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
 		if (
-		   checkInstanceObject.status == 'FAILURE' ||
-		   checkInstanceObject.status == 'UNDETERMINED' ||
-		   checkInstanceObject.status == 'UNREACHABLE' ||
-		   checkInstanceObject.status == 'SATISFIED' ||
-		   checkInstanceObject.status == 'UNSATISFIABLE')
-		{
+			checkInstanceObject.status == 'FAILURE' ||
+			checkInstanceObject.status == 'UNDETERMINED' ||
+			checkInstanceObject.status == 'UNREACHABLE' ||
+			checkInstanceObject.status == 'SATISFIED' ||
+			checkInstanceObject.status == 'UNSATISFIABLE'
+		) {
 			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
-		}
-		else if(checkInstanceObject.status != 'SUCCESS')
-		{
-			failureResponseMessage += checkInstanceObject.createFailureMessage() + 'WARNING: unknown status returned from Kani.\n\n';
+		} else if (checkInstanceObject.status != 'SUCCESS') {
+			failureResponseMessage +=
+				checkInstanceObject.createFailureMessage() +
+				'WARNING: unknown status returned from Kani.\n\n';
 			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
 		}
 	}
