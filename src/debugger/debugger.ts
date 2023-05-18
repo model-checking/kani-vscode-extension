@@ -28,21 +28,21 @@ async function getBinaryPath(): Promise<string | undefined> {
 		const lines = outputString.trim().split('\n');
 		const jsonMessages = lines.map((line: string) => JSON.parse(line));
 
-		/**
-		 * The artifact we're interested is present in the second to last message in the Json response from cargo
-		 * The JSON looks something like this -
-		 * [
-		 * 		...,
-		 * 		{
-		 * 			reason: "compiler-artifact",
-		 * 			package_id: "test-concrete 0.1.0 (path+file:///home/ubuntu/test-concrete)",
-		 * 		...
-		 * 		},
-		 * 		{
-		 * 			reason: 'build-finished',
-		 * 			success: true
-		 * 		}
-		 * ]
+		/*
+			The artifact we're interested is present in the second to last message in the Json response from cargo
+			The JSON looks something like this -
+			[
+					...,
+					{
+						reason: "compiler-artifact",
+						package_id: "test-concrete 0.1.0 (path+file:///home/ubuntu/test-concrete)",
+					...
+					},
+					{
+						reason: 'build-finished',
+						success: true
+					}
+			]
 		 */
 
 		const packageCompilationArtifact = jsonMessages[jsonMessages.length - 2];
@@ -59,6 +59,7 @@ async function getBinaryPath(): Promise<string | undefined> {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function connectToDebugger(functionName: string) {
 	// The binary that is being referred to here, is the binary present in the cargo artifacts.
 	// It looks like this - kani_concrete_playback_check_estimate_size_14615086421508420155
@@ -69,9 +70,9 @@ export async function connectToDebugger(functionName: string) {
 	vscode.debug.startDebugging(vscode.workspace.getWorkspaceFolder(getRootDirURI()), {
 		type: 'lldb',
 		request: 'launch',
-		name: 'test ${programName}',
+		name: `test ${functionName}`,
 		program: binaryName,
-		args: [functionName, '--exact', '--nocapture'],
+		args: [functionName, '--nocapture'],
 		cwd: '${workspaceFolder}',
 		sourceLanguages: ['rust'],
 		env: {
