@@ -90,16 +90,17 @@ export async function runKaniCommand(
 		};
 
 		try {
-			const executionResult = await executeKaniProcess(kaniBinaryPath, args, options, cargoKaniMode);
-			return executionResult;
-		}
-		catch (error: any) {
-			showErrorWithReportIssueButton(
-				`Could not run Kani on harness: ${error}`,
+			const executionResult = await executeKaniProcess(
+				kaniBinaryPath,
+				args,
+				options,
+				cargoKaniMode,
 			);
+			return executionResult;
+		} catch (error: any) {
+			showErrorWithReportIssueButton(`Could not run Kani on harness: ${error}`);
 			return new Error(`Kani executable was unable to detect or run harness.`);
 		}
-
 	} else {
 		return false;
 	}
@@ -171,8 +172,7 @@ async function executeKaniProcess(
 
 			// Send output to diagnostics and return if there is an error in stdout
 			// this means that the command could not be executed.
-			if(stdout.includes("error") && stderr.includes("error"))
-			{
+			if (stdout.includes('error') && stderr.includes('error')) {
 				reject(new Error(stdout.toString('utf-8')));
 			}
 

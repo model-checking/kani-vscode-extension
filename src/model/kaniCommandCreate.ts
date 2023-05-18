@@ -102,6 +102,6 @@ async function catchOutput(command: string, cargoKaniMode: boolean = false): Pro
 		const process = await runKaniCommand(command);
 		return process;
 	} catch (error) {
-		return new Error("compilation failed");
+		return new Error('compilation failed');
 	}
 }
