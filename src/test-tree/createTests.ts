@@ -220,7 +220,7 @@ export class TestCase {
 			const duration: number = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
-			} else {
+			} else if (actual == 1) {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await captureFailedChecks(
 					this.harness_name,
@@ -240,13 +240,20 @@ export class TestCase {
 				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
+			} else {
+				options.errored(
+					item,
+					new TestMessage(
+						'Kani executable was unable to detect or run harness. Please check Output (Kani) channel in the Output window for more information.',
+					),
+				);
 			}
 		} else {
 			const actual = await this.evaluateTest(this.harness_name, this.harness_unwind_value);
 			const duration = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
-			} else {
+			} else if (actual == 1) {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await runCargoKaniTest(
 					this.harness_name,
@@ -265,6 +272,13 @@ export class TestCase {
 				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
+			} else {
+				options.errored(
+					item,
+					new TestMessage(
+						'Kani executable was unable to detect or run harness. Please check Output (Kani) channel in the Output window for more information.',
+					),
+				);
 			}
 		}
 	}

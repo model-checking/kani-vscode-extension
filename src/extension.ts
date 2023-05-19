@@ -33,13 +33,14 @@ import {
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
 		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
+		return;
 	}
 	try {
 		// GET binary path
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 	} catch (error) {
 		showErrorWithReportIssueButton(
-			'The Kani executable was not found in PATH. Please install it using the instructions         at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
+			'The Kani executable was not found in PATH. Please install it using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
 		);
 		return;
 	}

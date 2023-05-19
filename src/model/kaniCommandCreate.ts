@@ -97,7 +97,11 @@ export async function runCommandPure(command: string): Promise<void> {
 }
 
 // Run a command and capture the command line output into a string
-async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<number> {
-	const process = await runKaniCommand(command);
-	return process;
+async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<any> {
+	try {
+		const process = await runKaniCommand(command);
+		return process;
+	} catch (error) {
+		return new Error('compilation failed');
+	}
 }
