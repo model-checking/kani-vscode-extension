@@ -76,11 +76,11 @@ export async function runKaniCommand(
 ): Promise<any> {
 	// Get the full resolved path for the root directory of the crate
 	const directory = path.resolve(getRootDir());
-	const commmandSplit: CommandArgs = splitCommand(harnessCommand);
+	const commandSplit: CommandArgs = splitCommand(harnessCommand);
 
 	// Get cargo command and args for the command to be executed
-	const command = commmandSplit.commandPath;
-	const args = commmandSplit.args;
+	const command = commandSplit.commandPath;
+	const args = commandSplit.args;
 
 	if (command == 'cargo' || command == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
@@ -115,13 +115,13 @@ export async function runKaniCommand(
 export async function createFailedDiffMessage(command: string): Promise<KaniResponse> {
 	// Root dir of the crate and the command and args to be executed
 	const directory = path.resolve(getRootDir());
-	const commmandSplit: CommandArgs = splitCommand(command);
+	const commandSplit: CommandArgs = splitCommand(command);
 
 	// Get the args for the kani command to run
-	const args = commmandSplit.args;
+	const args = commandSplit.args;
 
 	// Check the command running and execute that with the full path and safe options
-	if (commmandSplit.commandPath == 'cargo' || commmandSplit.commandPath == 'cargo kani') {
+	if (commandSplit.commandPath == 'cargo' || commandSplit.commandPath == 'cargo kani') {
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		const options = {
 			shell: false,
