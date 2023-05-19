@@ -20,7 +20,7 @@ import { checkOutputForError, responseParserInterface } from './kaniOutputParser
 interface CommandOutput {
 	stdout: string;
 	stderr: string;
-	errorCode: number | undefined;
+	errorCode: any;
 	error: any;
 }
 
