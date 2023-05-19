@@ -132,7 +132,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			getWorkspaceTestPatterns().map(({ pattern }) => findInitialFiles(controller, pattern)),
 		);
 		for (const document of vscode.workspace.textDocuments) {
-			updateNodeForDocument(document);
+			await updateNodeForDocument(document);
 		}
 	};
 
@@ -195,7 +195,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		}
 
 		const { file, data } = getOrCreateFile(controller, e.uri);
-		data.updateFromContents(controller, e.getText(), file);
+		await data.updateFromContents(controller, e.getText(), file);
 		data.addToCrate(controller, file, treeRoot);
 	}
 
@@ -226,7 +226,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
-		// vscode.workspace.onDidChangeTextDocument(e => updateNodeForDocument(e.document)),
+		vscode.workspace.onDidSaveTextDocument(async (e) => await updateNodeForDocument(e)),
 	);
 
 	context.subscriptions.push(runKani);
