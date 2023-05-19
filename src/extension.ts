@@ -129,7 +129,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	 */
 	controller.refreshHandler = async (): Promise<void> => {
 		await Promise.all(
-			getWorkspaceTestPatterns().map(async ({ pattern }) => await findInitialFiles(controller, pattern)),
+			getWorkspaceTestPatterns().map(({ pattern }) => findInitialFiles(controller, pattern)),
 		);
 		for (const document of vscode.workspace.textDocuments) {
 			await updateNodeForDocument(document);
@@ -225,8 +225,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(
-		vscode.workspace.onDidOpenTextDocument(await updateNodeForDocument),
-		vscode.workspace.onDidSaveTextDocument(async e => await updateNodeForDocument(e)),
+		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
+		vscode.workspace.onDidSaveTextDocument(async (e) => await updateNodeForDocument(e)),
 	);
 
 	context.subscriptions.push(runKani);
