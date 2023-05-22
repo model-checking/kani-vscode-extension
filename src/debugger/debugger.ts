@@ -12,7 +12,7 @@ import { getPackageName, getRootDir, getRootDirURI } from '../utils';
 async function getBinaryPath(): Promise<string | undefined> {
 	try {
 		// Run 'cargo' command to get the binary path
-		const cargoPath = await getPackageName();
+		const cargoPath = await getPackageName(getRootDir());
 		const directory = path.resolve(getRootDir());
 		const options = {
 			shell: false,

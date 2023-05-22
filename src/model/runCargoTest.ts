@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
-import { getPackageName } from '../utils';
+import { getPackageName, getRootDir } from '../utils';
 
 /**
  * Runs the cargo test task whenever the user clicks on a codelens button
@@ -11,7 +11,7 @@ import { getPackageName } from '../utils';
 export async function runCargoTest(functionName: string): Promise<void> {
 	const taskName = `Cargo Test: ${functionName}`;
 
-	const packageName = await getPackageName();
+	const packageName = await getPackageName(getRootDir());
 	const taskDefinition: vscode.TaskDefinition = {
 		type: 'cargo',
 		command: 'test',

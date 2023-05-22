@@ -13,12 +13,16 @@ import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
  * @param args - arguments to Kani if provided
  * @returns verification status (i.e success or failure)
  */
-export async function runKaniHarnessInterface(harnessName: string, args?: number): Promise<any> {
+export async function runKaniHarnessInterface(
+	harnessName: string,
+	packageName: string,
+	args?: number,
+): Promise<any> {
 	let harnessCommand = '';
 	if (args === undefined || isNaN(args)) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	const kaniOutput = await catchOutput(harnessCommand);
 	return kaniOutput;
@@ -35,14 +39,15 @@ export async function runKaniHarnessInterface(harnessName: string, args?: number
  */
 export async function runCargoKaniTest(
 	harnessName: string,
+	packageName: string,
 	failedCheck?: boolean,
 	args?: number,
 ): Promise<any> {
 	let harnessCommand = '';
 	if (args === undefined || isNaN(args)) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
 	}
 	if (failedCheck) {
 		const kaniOutput: KaniResponse = await createFailedDiffMessage(harnessCommand);

@@ -113,14 +113,12 @@ export function extractFunctionName(line: string): string {
 }
 
 // Get the package name for the workspace from cargo.toml
-export async function getPackageName(): Promise<any> {
-	const dirName = getRootDir();
+export async function getPackageName(dirName: string): Promise<any> {
 	const cargoTomlUri = vscode.Uri.file(`${dirName}/Cargo.toml`);
 
 	try {
-		const buffer = await vscode.workspace.fs.readFile(cargoTomlUri);
-		const cargoToml = buffer.toString();
-		const cargoTomlObject = toml.parse(cargoToml);
+		const tomlFile = await vscode.workspace.fs.readFile(cargoTomlUri);
+		const cargoTomlObject = toml.parse(tomlFile.toString());
 		return cargoTomlObject.package?.name;
 	} catch (error) {
 		console.error(error);

@@ -173,7 +173,8 @@ async function executeKaniProcess(
 			// Send output to diagnostics and return if there is an error in stdout
 			// this means that the command could not be executed.
 			if (checkOutputForError(output.stdout, output.stderr)) {
-				reject(new Error(stdout.toString('utf-8')));
+				sendErrorToChannel(output, args);
+				reject(new Error(error?.message));
 			}
 
 			// Send output to output channel specific to the harness
@@ -206,6 +207,18 @@ async function executeKaniProcess(
 			}
 		});
 	});
+}
+
+// Creates a unique name and adds a channel for the harness output to Output Logs
+function sendErrorToChannel(output: CommandOutput, args: string[]): void {
+	const harnessName = args.at(1)!;
+
+	// Create unique ID for the output channel
+	const timestamp = getTimeBasedUniqueId();
+	const channel = vscode.window.createOutputChannel(`Error: ${harnessName} - ${timestamp}`);
+
+	// Append stdout to the output channel
+	channel.appendLine(output.error?.message);
 }
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
