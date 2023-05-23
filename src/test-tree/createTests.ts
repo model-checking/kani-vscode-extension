@@ -206,7 +206,7 @@ export class TestFile {
  * @param harness_name - name of harness to be verified
  * @param package_name - Name of the package the harness is under that is extracted from cargo.toml
  * @param proof_boolean - True if proof, false if bolero harness
- * @param stubbing_request - True if there's a stub request attribute present
+ * @param stubbing - True if the Kani harness is annotated with stubs
  * @returns verification status (i.e success or failure)
  */
 export class TestCase {
@@ -333,7 +333,7 @@ export class TestCase {
 	async evaluateTest(
 		harness_name: string,
 		package_name: string,
-		stubbing_args?: boolean,
+		stubbing?: boolean,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (stubbing_args === false || undefined || NaN) {
