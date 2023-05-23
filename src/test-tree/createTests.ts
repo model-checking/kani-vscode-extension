@@ -204,8 +204,9 @@ export class TestFile {
  *
  * @param file_name - name of the harness that is to be verified
  * @param harness_name - name of harness to be verified
+ * @param package_name - Name of the package the harness is under that is extracted from cargo.toml
  * @param proof_boolean - True if proof, false if bolero harness
- * @param harness_unwind_value - unwind value of the harness (if it exists)
+ * @param stubbing_request - True if there's a stub request attribute present
  * @returns verification status (i.e success or failure)
  */
 export class TestCase {
