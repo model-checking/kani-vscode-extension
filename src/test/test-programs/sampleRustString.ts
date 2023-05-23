@@ -425,7 +425,7 @@ export const attributeMetadataUnsupported = [
 			row: 6,
 			column: 13,
 		},
-		attributes: ["#[kani::unwind(0)]", "#[kani::should_panic]", "#[kani::cover]"],
+		attributes: ['#[kani::unwind(0)]', '#[kani::should_panic]', '#[kani::cover]'],
 		args: {
 			proof: true,
 			test: false,
