@@ -73,6 +73,7 @@ export namespace SourceCodeParser {
 				const attributes: any[] = [];
 				const attributesMetadata: any[] = [];
 				let test_bool: boolean = false;
+				let stub_bool: boolean = false;
 				for (let j = i; j < strList.length; j++) {
 					if (strList[j].type == 'attribute_item' && strList[j].text.includes('kani')) {
 						// Check if test is above and if its in the form of cfg_attr()
@@ -84,6 +85,9 @@ export namespace SourceCodeParser {
 						if (strList[j].text != '#[kani::proof]') {
 							attributes.push(strList[j]);
 							attributesMetadata.push(strList[j].text);
+							if(strList[j].text.includes("stub")) {
+								stub_bool = true;
+							}
 						}
 					}
 
@@ -99,7 +103,7 @@ export namespace SourceCodeParser {
 							fullLine: unprocessedLine,
 							endPosition: functionName.endPosition,
 							attributes: attributesMetadata,
-							args: { proof: true, test: test_bool },
+							args: { proof: true, test: test_bool, stub: stub_bool },
 						};
 						resultMap.push(current_harness);
 						break;
@@ -186,12 +190,12 @@ export namespace SourceCodeParser {
 	export const parseRustfile = async (
 		text: string,
 		events: {
-			onTest(range: vscode.Range, name: string, proofBoolean: boolean, harnessArgs?: number): void;
+			onTest(range: vscode.Range, name: string, proofBoolean: boolean, stub?: boolean): void;
 		},
 	): Promise<void> => {
 		// Create harness metadata for the entire file
 		const allHarnesses: HarnessMetadata[] = await getAttributeFromRustFile(text);
-		console.log(JSON.stringify(allHarnesses, undefined, 2));
+		// console.log(JSON.stringify(allHarnesses, undefined, 2));
 		const lines = text.split('\n');
 		if (allHarnesses.length > 0) {
 			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
@@ -211,9 +215,11 @@ export namespace SourceCodeParser {
 						new vscode.Position(lineNo, line.length),
 					);
 
+					const stub: boolean = harness.args.stub;
+
 					// Check if it's a proof (true) or a bolero case (false)
 					const proofBoolean = !harness.args.test;
-					events.onTest(range, name, proofBoolean);
+					events.onTest(range, name, proofBoolean, stub);
 				}
 			}
 		}

@@ -156,7 +156,7 @@ export class TestFile {
 
 		// Trigger the parser and process extracted metadata to create a test case
 		await SourceCodeParser.parseRustfile(content, {
-			onTest: (range, harnessName, proofBoolean, args) => {
+			onTest: (range, harnessName, proofBoolean, stubAttribute) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {
 					throw new Error('No item or item path found');
@@ -167,7 +167,7 @@ export class TestFile {
 					harnessName,
 					packageName,
 					proofBoolean,
-					args,
+					stubAttribute,
 				);
 				const id: string = `${item.uri}/${data.getLabel()}`;
 
@@ -214,7 +214,7 @@ export class TestCase {
 		readonly harness_name: string,
 		readonly package_name: string,
 		readonly proof_boolean: boolean,
-		readonly harness_unwind_value?: number,
+		readonly stubbing_request?: boolean,
 	) {}
 
 	getLabel(): string {
@@ -229,7 +229,7 @@ export class TestCase {
 				this.file_name,
 				this.harness_name,
 				this.package_name,
-				this.harness_unwind_value,
+				this.stubbing_request,
 			);
 			const duration: number = Date.now() - start;
 			if (actual === 0) {
@@ -238,7 +238,7 @@ export class TestCase {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await captureFailedChecks(
 					this.harness_name,
-					this.harness_unwind_value,
+					this.stubbing_request,
 				);
 				const failedChecks: string = responseObject.failedProperty;
 				const failedMessage: string = responseObject.failedMessages;
@@ -267,7 +267,7 @@ export class TestCase {
 			const actual = await this.evaluateTest(
 				this.harness_name,
 				this.package_name,
-				this.harness_unwind_value,
+				this.stubbing_request,
 			);
 			const duration = Date.now() - start;
 			if (actual === 0) {
@@ -278,7 +278,7 @@ export class TestCase {
 					this.harness_name,
 					this.package_name,
 					true,
-					this.harness_unwind_value,
+					this.stubbing_request,
 				);
 				const failedChecks: string = responseObject.failedProperty;
 				const failedMessage: string = responseObject.failedMessages;
@@ -309,14 +309,14 @@ export class TestCase {
 		rsFile: string,
 		harness_name: string,
 		package_name: string,
-		args?: number,
+		stubbing?: boolean,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			if (args === undefined || NaN) {
+			if (stubbing === false || undefined || NaN) {
 				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name, args);
+				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name, stubbing);
 				return outputKani;
 			}
 		}
@@ -328,10 +328,10 @@ export class TestCase {
 	async evaluateTest(
 		harness_name: string,
 		package_name: string,
-		harness_args?: number,
+		stubbing_args?: boolean,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			if (harness_args === undefined || NaN) {
+			if (stubbing_args === false || undefined || NaN) {
 				const outputKaniTest: number = await runCargoKaniTest(harness_name, package_name, false);
 				return outputKaniTest;
 			} else {
@@ -339,7 +339,7 @@ export class TestCase {
 					harness_name,
 					package_name,
 					false,
-					harness_args,
+					stubbing_args,
 				);
 				return outputKaniTest;
 			}
