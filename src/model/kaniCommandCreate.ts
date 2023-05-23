@@ -16,13 +16,13 @@ import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 export async function runKaniHarnessInterface(
 	harnessName: string,
 	packageName: string,
-	args?: number,
+	stubbing_args?: boolean,
 ): Promise<any> {
 	let harnessCommand = '';
-	if (args === undefined || isNaN(args)) {
+	if (stubbing_args === undefined || !stubbing_args) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
 	const kaniOutput = await catchOutput(harnessCommand);
 	return kaniOutput;
@@ -41,10 +41,10 @@ export async function runCargoKaniTest(
 	harnessName: string,
 	packageName: string,
 	failedCheck?: boolean,
-	args?: number,
+	args?: boolean,
 ): Promise<any> {
 	let harnessCommand = '';
-	if (args === undefined || isNaN(args)) {
+	if (args === undefined || !args) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
@@ -69,11 +69,11 @@ export async function runCargoKaniTest(
  */
 export async function captureFailedChecks(
 	harnessName: string,
-	args?: number,
+	args?: boolean,
 ): Promise<KaniResponse> {
 	let harnessCommand = '';
 
-	if (args === undefined || isNaN(args)) {
+	if (args === undefined || !args) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;

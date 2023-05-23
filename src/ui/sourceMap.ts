@@ -25,8 +25,10 @@ export interface HarnessMetadata {
 export interface AttributeMetaData {
 	/// Whether the harness has been annotated with proof.
 	proof: boolean;
-	/// Whethere the harness has been annotated with test (bolero cases)
+	/// Whether the harness has been annotated with test (bolero cases)
 	test: boolean;
+	/// Stubbing metadata boolean
+	stub: boolean;
 }
 
 interface Position {
