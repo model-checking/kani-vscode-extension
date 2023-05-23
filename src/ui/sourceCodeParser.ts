@@ -85,7 +85,7 @@ export namespace SourceCodeParser {
 						if (strList[j].text != '#[kani::proof]') {
 							attributes.push(strList[j]);
 							attributesMetadata.push(strList[j].text);
-							if(strList[j].text.includes("stub")) {
+							if (strList[j].text.includes('stub')) {
 								stub_bool = true;
 							}
 						}

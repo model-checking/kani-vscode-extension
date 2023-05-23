@@ -316,7 +316,11 @@ export class TestCase {
 				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name, stubbing);
+				const outputKani: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					stubbing,
+				);
 				return outputKani;
 			}
 		}
