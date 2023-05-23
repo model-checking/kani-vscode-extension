@@ -1,5 +1,7 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+import * as path from 'path';
+
 import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
@@ -10,7 +12,8 @@ import {
 	runKaniHarnessInterface,
 } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
-import { getContentFromFilesystem } from '../utils';
+import { FileMetaData } from '../ui/sourceMap';
+import { getContentFromFilesystem, getPackageName } from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
 
@@ -149,14 +152,23 @@ export class TestFile {
 			}
 		};
 
+		const metadata = await getCurrentRustFileMetadata(item)!;
+
 		// Trigger the parser and process extracted metadata to create a test case
 		await SourceCodeParser.parseRustfile(content, {
-			onTest: (range, name, proofBoolean, args) => {
+			onTest: (range, harnessName, proofBoolean, args) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {
 					throw new Error('No item or item path found');
 				}
-				const data: TestCase = new TestCase(item.uri.fsPath, name, proofBoolean, args);
+				const packageName = typeof metadata?.fileName === 'undefined' ? '' : metadata?.filePackage;
+				const data: TestCase = new TestCase(
+					item.uri.fsPath,
+					harnessName,
+					packageName,
+					proofBoolean,
+					args,
+				);
 				const id: string = `${item.uri}/${data.getLabel()}`;
 
 				const tcase: vscode.TestItem = controller.createTestItem(id, data.getLabel(), item.uri);
@@ -200,6 +212,7 @@ export class TestCase {
 	constructor(
 		readonly file_name: string,
 		readonly harness_name: string,
+		readonly package_name: string,
 		readonly proof_boolean: boolean,
 		readonly harness_unwind_value?: number,
 	) {}
@@ -215,6 +228,7 @@ export class TestCase {
 			const actual: number = await this.evaluate(
 				this.file_name,
 				this.harness_name,
+				this.package_name,
 				this.harness_unwind_value,
 			);
 			const duration: number = Date.now() - start;
@@ -232,6 +246,7 @@ export class TestCase {
 					failedChecks,
 					this.file_name,
 					this.harness_name,
+					this.package_name,
 					this.proof_boolean,
 					failedMessage,
 				);
@@ -249,7 +264,11 @@ export class TestCase {
 				);
 			}
 		} else {
-			const actual = await this.evaluateTest(this.harness_name, this.harness_unwind_value);
+			const actual = await this.evaluateTest(
+				this.harness_name,
+				this.package_name,
+				this.harness_unwind_value,
+			);
 			const duration = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
@@ -257,6 +276,7 @@ export class TestCase {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await runCargoKaniTest(
 					this.harness_name,
+					this.package_name,
 					true,
 					this.harness_unwind_value,
 				);
@@ -266,6 +286,7 @@ export class TestCase {
 					failedChecks,
 					this.file_name,
 					this.harness_name,
+					this.package_name,
 					this.proof_boolean,
 					failedMessage,
 				);
@@ -284,13 +305,18 @@ export class TestCase {
 	}
 
 	// Run kani on the file, crate with given arguments
-	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<number> {
+	async evaluate(
+		rsFile: string,
+		harness_name: string,
+		package_name: string,
+		args?: number,
+	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (args === undefined || NaN) {
-				const outputKani: number = await runKaniHarnessInterface(harness_name);
+				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarnessInterface(harness_name, args);
+				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name, args);
 				return outputKani;
 			}
 		}
@@ -299,13 +325,22 @@ export class TestCase {
 	}
 
 	// Run kani on bolero test case, file, crate with given arguments
-	async evaluateTest(harness_name: string, harness_args?: number): Promise<number> {
+	async evaluateTest(
+		harness_name: string,
+		package_name: string,
+		harness_args?: number,
+	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (harness_args === undefined || NaN) {
-				const outputKaniTest: number = await runCargoKaniTest(harness_name, false);
+				const outputKaniTest: number = await runCargoKaniTest(harness_name, package_name, false);
 				return outputKaniTest;
 			} else {
-				const outputKaniTest: number = await runCargoKaniTest(harness_name, false, harness_args);
+				const outputKaniTest: number = await runCargoKaniTest(
+					harness_name,
+					package_name,
+					false,
+					harness_args,
+				);
 				return outputKaniTest;
 			}
 		}
@@ -324,10 +359,11 @@ class FailedCase extends TestCase {
 		failed_checks: string,
 		file_name: string,
 		harness_name: string,
+		package_name: string,
 		harness_type: boolean,
 		failed_message?: string,
 	) {
-		super(file_name, harness_name, harness_type);
+		super(file_name, harness_name, package_name, harness_type);
 		this.failed_checks = failed_checks;
 		if (failed_message) {
 			this.failed_message = failed_message;
@@ -403,4 +439,47 @@ class FailedCase extends TestCase {
 
 		return placeholderMarkdown;
 	}
+}
+
+async function getCurrentRustFileMetadata(item: any): Promise<FileMetaData | undefined> {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return undefined;
+	}
+
+	const fileName = path.basename(item.uri.fsPath);
+	const filePath = item.uri.fsPath;
+
+	const workspace = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+
+	if (!workspace) {
+		return undefined;
+	}
+
+	const workspacePath = workspace.uri.fsPath;
+	const crateName = path.basename(workspacePath);
+	const cratePath = workspacePath;
+
+	const fs = require('fs');
+	let tomlsInFolder = '';
+	let tomlFilePath: string = filePath;
+
+	do {
+		tomlFilePath = path.dirname(tomlFilePath);
+		tomlsInFolder = fs
+			.readdirSync(tomlFilePath)
+			.filter((file: string) => path.extname(file) === '.toml');
+	} while (!tomlsInFolder.includes('Cargo.toml') && tomlFilePath.length > 0);
+
+	const filePackage = await getPackageName(tomlFilePath);
+
+	const file_metadata: FileMetaData = {
+		fileName: fileName,
+		filePath: filePath,
+		filePackage: filePackage,
+		crateName: crateName,
+		cratePath: cratePath,
+	};
+
+	return file_metadata;
 }

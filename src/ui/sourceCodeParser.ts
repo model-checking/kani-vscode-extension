@@ -95,7 +95,7 @@ export namespace SourceCodeParser {
 						);
 						const unprocessedLine = strList[j].text.split('\n')[0];
 						const current_harness: HarnessMetadata = {
-							name: functionName.text,
+							harnessName: functionName.text,
 							fullLine: unprocessedLine,
 							endPosition: functionName.endPosition,
 							attributes: attributesMetadata,
@@ -204,7 +204,7 @@ export namespace SourceCodeParser {
 				if (harness) {
 					assert.equal(harness.fullLine, line.trim());
 
-					const name: string = harness.name;
+					const name: string = harness.harnessName;
 					// Range should cover the entire harness
 					const range = new vscode.Range(
 						new vscode.Position(lineNo, 0),
