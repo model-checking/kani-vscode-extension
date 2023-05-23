@@ -89,9 +89,6 @@ export async function runKaniCommand(
 			cwd: directory,
 		};
 
-		console.log(`$Harness : ${args.at(1)}`);
-		console.log(harnessCommand);
-
 		try {
 			const executionResult = await executeKaniProcess(
 				kaniBinaryPath,
