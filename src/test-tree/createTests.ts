@@ -336,7 +336,7 @@ export class TestCase {
 		stubbing?: boolean,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			if (stubbing_args === false || undefined || NaN) {
+			if (stubbing === false || undefined || NaN) {
 				const outputKaniTest: number = await runCargoKaniTest(harness_name, package_name, false);
 				return outputKaniTest;
 			} else {
@@ -344,7 +344,7 @@ export class TestCase {
 					harness_name,
 					package_name,
 					false,
-					stubbing_args,
+					stubbing,
 				);
 				return outputKaniTest;
 			}
