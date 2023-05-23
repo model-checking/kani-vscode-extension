@@ -132,6 +132,25 @@ export function getTimeBasedUniqueId(): string {
 	return timestamp;
 }
 
+// Given a filepath, get it's package name from the cargo.toml
+export async function getPackageNameFromFilePath(fileUri: vscode.Uri): Promise<string> {
+	const filePath = fileUri.fsPath;
+
+	const fs = require('fs');
+	let tomlsInFolder = '';
+	let tomlFilePath: string = filePath;
+
+	do {
+		tomlFilePath = path.dirname(tomlFilePath);
+		tomlsInFolder = fs
+			.readdirSync(tomlFilePath)
+			.filter((file: string) => path.extname(file) === '.toml');
+	} while (!tomlsInFolder.includes('Cargo.toml') && tomlFilePath.length > 0);
+
+	const filePackage = await getPackageName(tomlFilePath);
+	return filePackage;
+}
+
 /* Split the command line invocation into the kani call and the argument array
 For example - Input: '"my command" --arg1 "file with spaces.txt"';
 Output: ['my command', '--arg1', 'file with spaces.txt']

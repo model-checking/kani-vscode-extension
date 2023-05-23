@@ -22,9 +22,9 @@ export function startWatchingWorkspace(
 	const watcher = getWorkspaceTestPatterns().map(({ workspaceFolder, pattern }) => {
 		const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 
-		watcher.onDidCreate((uri) => getOrCreateFile(controller, uri));
-		watcher.onDidChange((uri) => {
-			const { file, data } = getOrCreateFile(controller, uri);
+		watcher.onDidCreate(async (uri) => await getOrCreateFile(controller, uri));
+		watcher.onDidChange(async (uri) => {
+			const { file, data } = await getOrCreateFile(controller, uri);
 			if (data.didResolve) {
 				data.updateFromDisk(controller, file);
 			}
