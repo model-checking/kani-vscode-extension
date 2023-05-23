@@ -195,7 +195,6 @@ export namespace SourceCodeParser {
 	): Promise<void> => {
 		// Create harness metadata for the entire file
 		const allHarnesses: HarnessMetadata[] = await getAttributeFromRustFile(text);
-		// console.log(JSON.stringify(allHarnesses, undefined, 2));
 		const lines = text.split('\n');
 		if (allHarnesses.length > 0) {
 			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
