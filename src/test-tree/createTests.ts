@@ -13,7 +13,7 @@ import {
 } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
 import { FileMetaData } from '../ui/sourceMap';
-import { getContentFromFilesystem, getPackageName } from '../utils';
+import { getContentFromFilesystem, getPackageName, getPackageNameFromFilePath } from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
 
@@ -60,9 +60,9 @@ export async function findInitialFiles(
 		);
 		if (fileHasProofs) {
 			if (rootItem) {
-				getOrCreateFile(controller, file, rootItem);
+				await getOrCreateFile(controller, file, rootItem);
 			} else {
-				getOrCreateFile(controller, file);
+				await getOrCreateFile(controller, file);
 			}
 		} else {
 			console.log(fileHasProofs, file);
@@ -78,21 +78,27 @@ export async function findInitialFiles(
  * @param rootItem - root node of the test tree
  * @returns - Test File and it's metadata as a record
  */
-export function getOrCreateFile(
+export async function getOrCreateFile(
 	controller: vscode.TestController,
 	uri: Uri,
 	rootItem?: vscode.TestItem,
-): TestFileMetaData {
+): Promise<TestFileMetaData> {
 	const existing = controller.items.get(uri.toString());
 	if (existing) {
 		return { file: existing, data: testData.get(existing) as TestFile };
 	}
 
-	const file: vscode.TestItem = controller.createTestItem(
-		uri.toString(),
-		uri.path.split('/').pop()!,
-		uri,
-	);
+	let testLabel = '';
+
+	// Label from the file URI
+	const packageName = await getPackageNameFromFilePath(uri);
+	if (packageName !== undefined) {
+		testLabel = packageName + '/' + uri.fsPath.split('/').pop()!;
+	} else {
+		testLabel = uri.fsPath.split('/').pop()!;
+	}
+
+	const file: vscode.TestItem = controller.createTestItem(uri.toString(), testLabel, uri);
 
 	const data: TestFile = new TestFile();
 	testData.set(file, data);

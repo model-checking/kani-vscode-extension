@@ -132,7 +132,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			getWorkspaceTestPatterns().map(({ pattern }) => findInitialFiles(controller, pattern)),
 		);
 		for (const document of vscode.workspace.textDocuments) {
-			await updateNodeForDocument(document);
+			updateNodeForDocument(document);
 		}
 	};
 
@@ -194,7 +194,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			return;
 		}
 
-		const { file, data } = getOrCreateFile(controller, e.uri);
+		const { file, data } = await getOrCreateFile(controller, e.uri);
 		await data.updateFromContents(controller, e.getText(), file);
 		data.addToCrate(controller, file, treeRoot);
 	}
