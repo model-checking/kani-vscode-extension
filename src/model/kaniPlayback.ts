@@ -8,8 +8,8 @@ import { getPackageName, getRootDir } from '../utils';
  * Runs the cargo test task whenever the user clicks on a codelens button
  * @param functionName - Name of the unit test being run by the user
  */
-export async function runCargoTest(functionName: string): Promise<void> {
-	const taskName = `Cargo Test: ${functionName}`;
+export async function runKaniPlayback(functionName: string): Promise<void> {
+	const taskName = `Kani Playback: ${functionName}`;
 
 	const packageName = await getPackageName(getRootDir());
 	const taskDefinition: vscode.TaskDefinition = {
@@ -18,15 +18,13 @@ export async function runCargoTest(functionName: string): Promise<void> {
 		args: [functionName],
 	};
 
-	// Adding `--bin {packageName}` to the command prevents recompiling when
-	// there's no changes to the unit tests, which makes rerunning unit tests faster.
-	const cargoTestCommand: string = `RUSTFLAGS="--cfg=kani" cargo test --package ${packageName} --bin ${packageName} -- ${functionName} --nocapture`;
+	const playbackCommand: string = `cargo kani playback --package ${packageName} -Z concrete-playback -- ${functionName} --nocapture`;
 	const task = new vscode.Task(
 		taskDefinition,
 		vscode.TaskScope.Workspace,
 		taskName,
 		'cargo',
-		new vscode.ShellExecution(cargoTestCommand),
+		new vscode.ShellExecution(playbackCommand),
 	);
 	vscode.tasks.executeTask(task);
 }

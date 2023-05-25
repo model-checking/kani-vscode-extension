@@ -20,8 +20,8 @@ async function getBinaryPath(): Promise<string | undefined> {
 		};
 
 		// <https://github.com/model-checking/kani-vscode-extension/issues/68#issue-1706506359>
-		const cargoTestCommand: string = `RUSTFLAGS="--cfg=kani" cargo +nightly test --no-run --message-format=json`;
-		const output = execSync(`cd ${directory} && ${cargoTestCommand}`);
+		const playbackCommand: string = `cargo kani playback -Z concrete-playback --only-codegen --message-format=json`;
+		const output = execSync(`cd ${directory} && ${playbackCommand}`);
 
 		const outputString = output.toString();
 
