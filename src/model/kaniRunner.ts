@@ -219,6 +219,8 @@ function sendErrorToChannel(output: CommandOutput, args: string[]): void {
 
 	// Append stdout to the output channel
 	channel.appendLine(output.error?.message);
+	// Open channel but don't change focus
+	channel.show(true);
 }
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
@@ -231,4 +233,6 @@ function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 
 	// Append stdout to the output channel
 	channel.appendLine(output.stdout);
+	// Open channel but don't change focus
+	channel.show(true);
 }
