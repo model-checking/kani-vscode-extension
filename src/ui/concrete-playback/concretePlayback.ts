@@ -5,7 +5,7 @@ import process = require('process');
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
-import { checkCargoExist, getRootDir } from '../../utils';
+import { checkCargoExist, getPackageName, getRootDir } from '../../utils';
 
 /**
  * Call the visualize flag on the harness and render the html page
@@ -13,23 +13,24 @@ import { checkCargoExist, getRootDir } from '../../utils';
  * @param commandURI - vscode command that is being executed
  * @param harnessObj - metadata about the harness
  */
-export async function callConcretePlayback(
-	commandURI: string,
-	harnessObj: { harnessName: string; harnessFile: string; harnessType: boolean },
-): Promise<void> {
+export async function callConcretePlayback(harnessObj: {
+	harnessName: string;
+	harnessFile: string;
+	harnessType: boolean;
+}): Promise<void> {
 	let finalCommand: string = '';
 
 	const platform: NodeJS.Platform = process.platform;
+	const packageName = await getPackageName(getRootDir());
 	const harnessName: string = harnessObj.harnessName;
-	const harnessFile: string = harnessObj.harnessFile;
 	const harnessType: boolean = harnessObj.harnessType;
 
 	// Detect source file
 	const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
-	// Generate the final visualize command for the supported platforms
+	// Generate the final concrete playback command for the supported platforms
 	if (platform === 'darwin' || platform == 'linux') {
-		const responseObject: string = createCommand(commandURI, harnessFile, harnessName, harnessType);
+		const responseObject: string = createCommand(packageName, harnessName, harnessType);
 		const crateURI: string = getRootDir();
 		finalCommand = `cd ${crateURI} && ${responseObject}`;
 	}
@@ -39,19 +40,14 @@ export async function callConcretePlayback(
 }
 
 // Check if cargo toml exists and create corresponding kani command
-function createCommand(
-	commandURI: string,
-	harnessFile: string,
-	harnessName: string,
-	harnessType: boolean,
-): string {
+function createCommand(packageName: string, harnessName: string, harnessType: boolean): string {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
-	const command: string = commandURI === 'Kani.runConcretePlayback' ? 'kani' : 'cargo kani';
+	const kaniArgs = `${KaniArguments.harnessFlag} ${harnessName} -p ${packageName} -Z concrete-playback --concrete-playback=inplace`;
 
-	if (!isCargo || harnessType) {
-		return `${command} ${harnessFile} --harness ${harnessName} --enable-unstable --concrete-playback=inplace`;
+	if (harnessType) {
+		return `${KaniConstants.CargoKaniExecutableName} ${kaniArgs}`;
 	} else {
-		return `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
+		return `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${kaniArgs}`;
 	}
 }

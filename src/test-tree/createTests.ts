@@ -425,7 +425,7 @@ class FailedCase extends TestCase {
 			`command:Kani.runConcretePlayback?${encodeURIComponent(JSON.stringify(args))}`,
 		);
 		sample.appendMarkdown(
-			`[Run concrete playback for ${this.harness_name}](${concretePlaybackUri})`,
+			`[Generate concrete test for ${this.harness_name}](${concretePlaybackUri})`,
 		);
 
 		return sample;
