@@ -176,7 +176,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const runningConcretePlayback = vscode.commands.registerCommand(
 		'Kani.runConcretePlayback',
 		async (harnessArgs) => {
-			callConcretePlayback('Kani.runConcretePlayback', harnessArgs);
+			callConcretePlayback(harnessArgs);
 		},
 	);
 
