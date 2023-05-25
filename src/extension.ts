@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
+import { runKaniPlayback } from './model/kaniPlayback';
 import { getKaniPath } from './model/kaniRunner';
-import { runCargoTest } from './model/runCargoTest';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -220,7 +220,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Register the command for the code lens Kani test runner function
 	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
-		runCargoTest(args);
+		runKaniPlayback(args);
 	});
 
 	// Update the test tree with proofs whenever a test case is opened
