@@ -13,9 +13,11 @@ import { checkCargoExist, getPackageName, getRootDir } from '../../utils';
  * @param commandURI - vscode command that is being executed
  * @param harnessObj - metadata about the harness
  */
-export async function callConcretePlayback(
-	harnessObj: { harnessName: string; harnessFile: string; harnessType: boolean },
-): Promise<void> {
+export async function callConcretePlayback(harnessObj: {
+	harnessName: string;
+	harnessFile: string;
+	harnessType: boolean;
+}): Promise<void> {
 	let finalCommand: string = '';
 
 	const platform: NodeJS.Platform = process.platform;
@@ -38,14 +40,10 @@ export async function callConcretePlayback(
 }
 
 // Check if cargo toml exists and create corresponding kani command
-function createCommand(
-	packageName: string,
-	harnessName: string,
-	harnessType: boolean,
-): string {
+function createCommand(packageName: string, harnessName: string, harnessType: boolean): string {
 	// Check if cargo toml exists
 	const isCargo = checkCargoExist();
-	const kaniArgs = `${KaniArguments.harnessFlag} ${harnessName} -p ${packageName} -Z concrete-playback --concrete-playback=inplace`
+	const kaniArgs = `${KaniArguments.harnessFlag} ${harnessName} -p ${packageName} -Z concrete-playback --concrete-playback=inplace`;
 
 	if (harnessType) {
 		return `${KaniConstants.CargoKaniExecutableName} ${kaniArgs}`;
