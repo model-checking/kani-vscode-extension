@@ -1,5 +1,6 @@
 # Copyright Kani Contributors
 # SPDX-License-Identifier: Apache-2.0 OR MIT
+name: Run CI
 on:
   push:
     branches:
@@ -9,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
@@ -21,5 +22,5 @@ jobs:
     - run: npm install
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'
-    # - run: npm test
-    #   if: runner.os != 'Linux'
+    - run: npm test
+      if: runner.os != 'Linux'
