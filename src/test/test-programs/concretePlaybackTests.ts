@@ -68,7 +68,7 @@ export const kaniConcreteTestsMetaData: any[] = [
 	[
 		'kani_concrete_playback_check_estimate_size_14615086421508420155',
 		{
-			row: 21,
+			row: 20,
 			column: 0,
 		},
 	],
