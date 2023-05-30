@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 
 import { getPackageName, getRootDir } from '../utils';
+import { getBinaryAbsolutePath } from './kaniRunner';
 
 /**
  * Runs the cargo test task whenever the user clicks on a codelens button
@@ -18,7 +19,9 @@ export async function runKaniPlayback(functionName: string): Promise<void> {
 		args: [functionName],
 	};
 
-	const playbackCommand: string = `cargo kani playback --package ${packageName} -Z concrete-playback -- ${functionName} --nocapture`;
+	const kaniCommand = await getBinaryAbsolutePath('cargo-kani');
+
+	const playbackCommand: string = `${kaniCommand} playback --package ${packageName} -Z concrete-playback -- ${functionName}`;
 	const task = new vscode.Task(
 		taskDefinition,
 		vscode.TaskScope.Workspace,

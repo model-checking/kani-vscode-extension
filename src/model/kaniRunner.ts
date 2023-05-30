@@ -15,6 +15,10 @@ import {
 	splitCommand,
 } from '../utils';
 import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
+import { promisify } from 'util';
+import glob from 'glob';
+
+const globAsync = promisify(glob);
 
 // Store the output from process into a object with this type
 interface CommandOutput {
@@ -22,6 +26,70 @@ interface CommandOutput {
 	stderr: string;
 	errorCode: any;
 	error: any;
+}
+
+/**
+ * Get the system resolved path to the cargo-kani command. Tries to get the installed version first and if that fails, picks up the dev version automatically.
+ *
+ * @param binaryName - Full sanitized command created by kaniCommandCreate module
+ * @returns the path for the binary cargo-kani (either the installed binary or the development one)
+ */
+export async function getBinaryAbsolutePath(binaryName: string): Promise<string> {
+	try {
+	  // Try using 'which' command
+	  const output = await getKaniPath(binaryName);
+	  if (output) {
+		return output.trim();
+	  }
+	} catch (error) {
+	  // Ignore 'which' command error
+	}
+
+	try {
+	  // Try using glob pattern to find the binary
+	  const matches = await globAsync(`kani/scripts/cargo-kani`, { absolute: true });
+	  if (matches.length > 0) {
+		return matches[0];
+	  }
+	} catch (error) {
+	  // Ignore glob error
+	}
+
+	// Throw an error if both 'which' and glob failed
+	throw new Error(`Failed to find binary: ${binaryName}`);
+}
+
+// Displays the version of kani being used to the user as a status bar icon
+export async function getKaniVersion(): Promise<void> {
+	try {
+		const pathKani = await getBinaryAbsolutePath('cargo-kani');
+		console.log(pathKani);
+
+		execFile(pathKani, ['--version'], (error, stdout, stderr) => {
+			if (error) {
+			  console.error(`Error: ${error}`);
+			  return;
+			}
+
+			if (stdout) {
+				// Split the stdout by whitespace to separate words
+				const words = stdout.split(/\s+/);
+				// Find the word that contains the version number
+				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word));
+				const versionMessage = `Kani ${versionWord} being used to verify`;
+
+				vscode.window.setStatusBarMessage(versionMessage, 5000);
+				return;
+			}
+
+			console.log(`stdout: ${stdout}`);
+			console.error(`stderr: ${stderr}`);
+		  });
+	  } catch (error) {
+		// Ignore command error
+		return;
+	  }
+	  return;
 }
 
 /**
@@ -83,7 +151,8 @@ export async function runKaniCommand(
 	const args = commandSplit.args;
 
 	if (command == 'cargo' || command == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const kaniBinaryPath = await getBinaryAbsolutePath('cargo-kani');
+		console.log(`The path to kani is - ${kaniBinaryPath}`);
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -122,7 +191,8 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 
 	// Check the command running and execute that with the full path and safe options
 	if (commandSplit.commandPath == 'cargo' || commandSplit.commandPath == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const kaniBinaryPath = await getBinaryAbsolutePath('cargo-kani');
+		console.log(`The path to kani for executing is - ${kaniBinaryPath}`);
 		const options = {
 			shell: false,
 			cwd: directory,
