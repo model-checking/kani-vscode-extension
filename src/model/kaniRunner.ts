@@ -63,7 +63,6 @@ export async function getBinaryAbsolutePath(binaryName: string): Promise<string>
 export async function getKaniVersion(): Promise<void> {
 	try {
 		const pathKani = await getBinaryAbsolutePath('cargo-kani');
-		console.log(pathKani);
 
 		execFile(pathKani, ['--version'], (error, stdout, stderr) => {
 			if (error) {
@@ -152,7 +151,6 @@ export async function runKaniCommand(
 
 	if (command == 'cargo' || command == 'cargo kani') {
 		const kaniBinaryPath = await getBinaryAbsolutePath('cargo-kani');
-		console.log(`The path to kani is - ${kaniBinaryPath}`);
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -192,7 +190,6 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 	// Check the command running and execute that with the full path and safe options
 	if (commandSplit.commandPath == 'cargo' || commandSplit.commandPath == 'cargo kani') {
 		const kaniBinaryPath = await getBinaryAbsolutePath('cargo-kani');
-		console.log(`The path to kani for executing is - ${kaniBinaryPath}`);
 		const options = {
 			shell: false,
 			cwd: directory,
