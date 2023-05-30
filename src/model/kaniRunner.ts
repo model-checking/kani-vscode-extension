@@ -3,7 +3,9 @@
 import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { promisify } from 'util';
 
+import glob from 'glob';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
@@ -15,8 +17,6 @@ import {
 	splitCommand,
 } from '../utils';
 import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
-import { promisify } from 'util';
-import glob from 'glob';
 
 const globAsync = promisify(glob);
 
@@ -36,23 +36,23 @@ interface CommandOutput {
  */
 export async function getBinaryAbsolutePath(binaryName: string): Promise<string> {
 	try {
-	  // Try using 'which' command
-	  const output = await getKaniPath(binaryName);
-	  if (output) {
-		return output.trim();
-	  }
+		// Try using 'which' command
+		const output = await getKaniPath(binaryName);
+		if (output) {
+			return output.trim();
+		}
 	} catch (error) {
-	  // Ignore 'which' command error
+		// Ignore 'which' command error
 	}
 
 	try {
-	  // Try using glob pattern to find the binary
-	  const matches = await globAsync(`kani/scripts/cargo-kani`, { absolute: true });
-	  if (matches.length > 0) {
-		return matches[0];
-	  }
+		// Try using glob pattern to find the binary
+		const matches = await globAsync(`kani/scripts/cargo-kani`, { absolute: true });
+		if (matches.length > 0) {
+			return matches[0];
+		}
 	} catch (error) {
-	  // Ignore glob error
+		// Ignore glob error
 	}
 
 	// Throw an error if both 'which' and glob failed
@@ -67,8 +67,8 @@ export async function getKaniVersion(): Promise<void> {
 
 		execFile(pathKani, ['--version'], (error, stdout, stderr) => {
 			if (error) {
-			  console.error(`Error: ${error}`);
-			  return;
+				console.error(`Error: ${error}`);
+				return;
 			}
 
 			if (stdout) {
@@ -84,12 +84,12 @@ export async function getKaniVersion(): Promise<void> {
 
 			console.log(`stdout: ${stdout}`);
 			console.error(`stderr: ${stderr}`);
-		  });
-	  } catch (error) {
+		});
+	} catch (error) {
 		// Ignore command error
 		return;
-	  }
-	  return;
+	}
+	return;
 }
 
 /**
