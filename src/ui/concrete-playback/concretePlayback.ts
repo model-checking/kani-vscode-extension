@@ -1,6 +1,6 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { exec, execFile } from 'child_process';
+import {execFile } from 'child_process';
 import path = require('path');
 import process = require('process');
 
@@ -61,7 +61,6 @@ function createCommand(packageName: string, harnessName: string, harnessType: bo
 async function executePlaybackCommand(finalCommand: string) {
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 	statusBarItem.text = '$(gear~spin) Generating concrete test...';
-	const message = vscode.window.showInformationMessage('test');
 	statusBarItem.show();
 
 	const commandSplit: CommandArgs = splitCommand(finalCommand);
