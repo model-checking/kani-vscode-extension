@@ -43,8 +43,10 @@ export async function getKaniVersion(pathKani: string): Promise<void> {
 
 				console.log(`Kani version is ${versionNum}`);
 
-				if(versionNum < 0.29) {
-					vscode.window.showWarningMessage('Please install Kani 0.29 or later using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',);
+				if (versionNum < 0.29) {
+					vscode.window.showWarningMessage(
+						'Please install Kani 0.29 or later using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
+					);
 				}
 
 				const versionMessage = `$(gear~spin) Kani ${versionWord} being used to verify`;

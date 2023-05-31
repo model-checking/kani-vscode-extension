@@ -42,7 +42,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		globalConfig.setFilePath(kaniBinaryPath);
 
-		vscode.window.showInformationMessage(`Kani located at ${kaniBinaryPath} being used for verification`);
+		vscode.window.showInformationMessage(
+			`Kani located at ${kaniBinaryPath} being used for verification`,
+		);
 
 		// GET Version number and display to user
 		await getKaniVersion(globalConfig.getFilePath());
