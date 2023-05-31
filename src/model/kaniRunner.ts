@@ -234,13 +234,13 @@ function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 	// Append stdout to the output channel
 	channel.appendLine(output.stdout);
 
-    // Access the configuration
-    const config = vscode.workspace.getConfiguration('Kani');
-    const showOutputWindow = config.get('showOutputWindow');
+	// Access the configuration
+	const config = vscode.workspace.getConfiguration('Kani');
+	const showOutputWindow = config.get('showOutputWindow');
 
-    // Use the value to show or hide the output window
-    if (showOutputWindow) {
+	// Use the value to show or hide the output window
+	if (showOutputWindow) {
 		// Open channel but don't change focus
 		channel.show(true);
-    }
+	}
 }
