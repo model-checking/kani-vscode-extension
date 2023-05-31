@@ -1,18 +1,13 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import {execFile } from 'child_process';
+import { execFile } from 'child_process';
 import path = require('path');
 import process = require('process');
 
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
-import {
-	CommandArgs,
-	getPackageName,
-	getRootDir,
-	splitCommand,
-} from '../../utils';
+import { CommandArgs, getPackageName, getRootDir, splitCommand } from '../../utils';
 import GlobalConfig from '../../globalConfig';
 
 /**
