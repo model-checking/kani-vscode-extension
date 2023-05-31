@@ -6,6 +6,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 
 import { getPackageName, getRootDir, getRootDirURI } from '../utils';
+import GlobalConfig from '../globalConfig';
 
 // Extracts the path for the cargo artifact for the user's crate which we shall plug into the debugger
 // by connecting to the vscode debugger controller
@@ -20,7 +21,10 @@ async function getBinaryPath(): Promise<string | undefined> {
 		};
 
 		// <https://github.com/model-checking/kani-vscode-extension/issues/68#issue-1706506359>
-		const playbackCommand: string = `cargo kani playback -Z concrete-playback --only-codegen --message-format=json`;
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
+
+		const playbackCommand: string = `${kaniBinaryPath} playback -Z concrete-playback --only-codegen --message-format=json`;
 		const output = execSync(`cd ${directory} && ${playbackCommand}`);
 
 		const outputString = output.toString();

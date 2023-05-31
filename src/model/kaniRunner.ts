@@ -15,6 +15,7 @@ import {
 	splitCommand,
 } from '../utils';
 import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
+import GlobalConfig from '../globalConfig';
 
 // Store the output from process into a object with this type
 interface CommandOutput {
@@ -77,7 +78,7 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 				return;
 			}
 			const cargoKaniPath = stdout.trim();
-			console.log(`Cargo is located at: ${cargoKaniPath}`);
+			console.log(`Kani is located at: ${cargoKaniPath}`);
 
 			// Check if cargo path is valid
 			try {
@@ -113,7 +114,8 @@ export async function runKaniCommand(
 	const args = commandSplit.args;
 
 	if (command == 'cargo' || command == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -152,7 +154,8 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 
 	// Check the command running and execute that with the full path and safe options
 	if (commandSplit.commandPath == 'cargo' || commandSplit.commandPath == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
 		const options = {
 			shell: false,
 			cwd: directory,
