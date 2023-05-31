@@ -7,14 +7,13 @@ import process = require('process');
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
-import { getKaniPath } from '../../model/kaniRunner';
 import {
 	CommandArgs,
-	checkCargoExist,
 	getPackageName,
 	getRootDir,
 	splitCommand,
 } from '../../utils';
+import GlobalConfig from '../../globalConfig';
 
 /**
  * Call the visualize flag on the harness and render the html page
@@ -58,7 +57,8 @@ function createCommand(packageName: string, harnessName: string, harnessType: bo
 	}
 }
 
-async function executePlaybackCommand(finalCommand: string) {
+// Generate the unit test from the playback command
+function executePlaybackCommand(finalCommand: string): void {
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 	statusBarItem.text = '$(gear~spin) Generating concrete test...';
 	statusBarItem.show();
@@ -70,7 +70,8 @@ async function executePlaybackCommand(finalCommand: string) {
 		cwd: path.resolve(getRootDir()),
 	};
 
-	const kaniBinaryPath = await getKaniPath('cargo-kani');
+	const globalConfig = GlobalConfig.getInstance();
+	const kaniBinaryPath = globalConfig.getFilePath();
 
 	const process = execFile(kaniBinaryPath, commandSplit.args, options, (error, stdout, stderr) => {
 		// Process execution has finished

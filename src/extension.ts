@@ -39,7 +39,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	try {
 		// GET binary path
 		const globalConfig = GlobalConfig.getInstance();
-
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		globalConfig.setFilePath(kaniBinaryPath);
 
