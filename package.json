@@ -37,20 +37,26 @@
       },
       {
         "title": "Enable CodeLens",
-        "command": "codelens-sample.enableCodeLens",
+        "command": "codelens-kani.enableCodeLens",
         "category": "CodeLens Sample"
       },
       {
         "title": "Disable Codelens",
-        "command": "codelens-sample.disableCodeLens",
+        "command": "codelens-kani.disableCodeLens",
         "category": "CodeLens Sample"
       }
     ],
     "configuration": {
+      "title": "Kani",
       "properties": {
-        "codelens-sample.enableCodeLens": {
+        "codelens-kani.enableCodeLens": {
           "type": "boolean",
           "default": true
+        },
+        "Kani.showOutputWindow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Controls the visibility of the output window by default."
         }
       }
     }
