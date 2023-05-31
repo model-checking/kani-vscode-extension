@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
-import { getPackageName, getRootDir } from '../utils';
 import GlobalConfig from '../globalConfig';
+import { getPackageName, getRootDir } from '../utils';
 
 /**
  * Runs the cargo test task whenever the user clicks on a codelens button

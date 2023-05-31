@@ -1,4 +1,5 @@
-// GlobalConfig.ts
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 class GlobalConfig {
 	private static instance: GlobalConfig;
 	private filePath: string;
@@ -21,7 +22,6 @@ class GlobalConfig {
 	public getFilePath(): string {
 		return this.filePath;
 	}
-
 }
 
 export default GlobalConfig;

@@ -7,6 +7,7 @@ import process = require('process');
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
+import GlobalConfig from '../../globalConfig';
 import {
 	CommandArgs,
 	checkCargoExist,
@@ -14,7 +15,6 @@ import {
 	showErrorWithReportIssueButton,
 	splitCommand,
 } from '../../utils';
-import GlobalConfig from '../../globalConfig';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');

@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
+import GlobalConfig from '../globalConfig';
 import {
 	CommandArgs,
 	getRootDir,
@@ -15,7 +16,6 @@ import {
 	splitCommand,
 } from '../utils';
 import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
-import GlobalConfig from '../globalConfig';
 
 // Store the output from process into a object with this type
 interface CommandOutput {
