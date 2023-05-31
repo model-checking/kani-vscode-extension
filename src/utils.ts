@@ -126,6 +126,19 @@ export async function getPackageName(dirName: string): Promise<any> {
 	}
 }
 
+export async function isLibraryProject(dirName: string): Promise<boolean> {
+	const cargoTomlUri = vscode.Uri.file(`${dirName}/Cargo.toml`);
+
+	try {
+		const tomlFile = await vscode.workspace.fs.readFile(cargoTomlUri);
+		const cargoTomlObject = toml.parse(tomlFile.toString());
+		return Boolean(cargoTomlObject.lib);
+	} catch (error) {
+		console.error(error);
+		return false;
+	}
+}
+
 // Create a timestamp to help differentiate strings
 export function getTimeBasedUniqueId(): string {
 	const timestamp = new Date().getTime().toString();

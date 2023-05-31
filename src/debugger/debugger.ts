@@ -1,12 +1,19 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { execFile, execFileSync, execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import path from 'path';
 
 import * as vscode from 'vscode';
 
 import GlobalConfig from '../globalConfig';
-import { CommandArgs, getPackageName, getRootDir, getRootDirURI, splitCommand } from '../utils';
+import {
+	CommandArgs,
+	getPackageName,
+	getRootDir,
+	getRootDirURI,
+	isLibraryProject,
+	splitCommand,
+} from '../utils';
 
 // Extracts the path for the cargo artifact for the user's crate which we shall plug into the debugger
 // by connecting to the vscode debugger controller
@@ -28,6 +35,12 @@ async function getBinaryPath(): Promise<string | undefined> {
 
 		// Execute the concrete-playback to generate the binary, and get the binary from the artifacts
 		const commandSplit: CommandArgs = splitCommand(playbackCommand);
+
+		const isLib: boolean = await isLibraryProject(getRootDir());
+		if (isLib) {
+			commandSplit.args.push('--lib');
+		}
+
 		const output = execFileSync(kaniBinaryPath, commandSplit.args, options);
 		const outputString = output.toString();
 
