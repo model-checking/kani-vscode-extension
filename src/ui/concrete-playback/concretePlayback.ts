@@ -7,8 +7,8 @@ import process = require('process');
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
-import { CommandArgs, getPackageName, getRootDir, splitCommand } from '../../utils';
 import GlobalConfig from '../../globalConfig';
+import { CommandArgs, getPackageName, getRootDir, splitCommand } from '../../utils';
 
 /**
  * Call the visualize flag on the harness and render the html page
