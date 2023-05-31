@@ -24,6 +24,36 @@ interface CommandOutput {
 	error: any;
 }
 
+// Displays the version of kani being used to the user as a status bar icon
+export async function getKaniVersion(pathKani: string): Promise<void> {
+	try {
+		execFile(pathKani, ['--version'], (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error: ${error}`);
+				return;
+			}
+
+			if (stdout) {
+				// Split the stdout by whitespace to separate words
+				const words = stdout.split(/\s+/);
+				// Find the word that contains the version number
+				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word));
+				const versionMessage = `$(gear~spin) Kani ${versionWord} being used to verify`;
+
+				vscode.window.setStatusBarMessage(versionMessage, 6000);
+				return;
+			}
+
+			console.log(`stdout: ${stdout}`);
+			console.error(`stderr: ${stderr}`);
+		});
+	} catch (error) {
+		// Ignore command error
+		return;
+	}
+	return;
+}
+
 /**
  * Get the system resolved path to the cargo-kani command
  *
