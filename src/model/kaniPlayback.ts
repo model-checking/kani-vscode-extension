@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
+import GlobalConfig from '../globalConfig';
 import { getPackageName, getRootDir } from '../utils';
 
 /**
@@ -18,7 +19,10 @@ export async function runKaniPlayback(functionName: string): Promise<void> {
 		args: [functionName],
 	};
 
-	const playbackCommand: string = `cargo kani playback --package ${packageName} -Z concrete-playback -- ${functionName} --nocapture`;
+	const globalConfig = GlobalConfig.getInstance();
+	const kaniBinaryPath = globalConfig.getFilePath();
+
+	const playbackCommand: string = `${kaniBinaryPath} playback --package ${packageName} -Z concrete-playback -- ${functionName} --nocapture`;
 	const task = new vscode.Task(
 		taskDefinition,
 		vscode.TaskScope.Workspace,
