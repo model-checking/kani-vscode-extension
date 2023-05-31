@@ -7,7 +7,7 @@ import process = require('process');
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants } from '../../constants';
-import { getKaniPath } from '../../model/kaniRunner';
+import GlobalConfig from '../../globalConfig';
 import {
 	CommandArgs,
 	checkCargoExist,
@@ -165,7 +165,9 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 			cwd: directory,
 		};
 
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
+
 		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
 		vscode.window.showWarningMessage(warningMessage);
 		const { stdout, stderr } = await execPromise(kaniBinaryPath, args, options);

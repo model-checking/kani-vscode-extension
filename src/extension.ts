@@ -4,8 +4,9 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
+import GlobalConfig from './globalConfig';
 import { runKaniPlayback } from './model/kaniPlayback';
-import { getKaniPath } from './model/kaniRunner';
+import { getKaniPath, getKaniVersion } from './model/kaniRunner';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -37,7 +38,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	try {
 		// GET binary path
+		const globalConfig = GlobalConfig.getInstance();
+
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		globalConfig.setFilePath(kaniBinaryPath);
+
+		// GET Version number and display to user
+		await getKaniVersion(globalConfig.getFilePath());
 	} catch (error) {
 		showErrorWithReportIssueButton(
 			'The Kani executable was not found in PATH. Please install it using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
