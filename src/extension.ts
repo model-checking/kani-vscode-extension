@@ -216,17 +216,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Allows VSCode to enable code lens globally.
 	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
-	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
-		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
+	vscode.commands.registerCommand('codelens-kani.enableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', true, true);
 	});
 
 	// Allows VSCode to disable VSCode globally
-	vscode.commands.registerCommand('codelens-sample.disableCodeLens', () => {
-		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
+	vscode.commands.registerCommand('codelens-kani.disableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', false, true);
 	});
 
 	// Register the command for the code lens Kani test runner function
-	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
+	vscode.commands.registerCommand('codelens-kani.codelensAction', (args: any) => {
 		runKaniPlayback(args);
 	});
 
