@@ -19,7 +19,7 @@ A Visual Studio Code test extension that allows users to run their [Kani Rust Ve
 ## Requirements
 
 -   Visual Studio Code 1.50 or newer
--   [Kani](https://github.com/model-checking/kani) 0.12 or newer
+-   [Kani](https://github.com/model-checking/kani) 0.29 or newer
 
 ## Installation
 
