@@ -31,6 +31,7 @@ async function getBinaryPath(): Promise<string | undefined> {
 		const globalConfig = GlobalConfig.getInstance();
 		const kaniBinaryPath = globalConfig.getFilePath();
 
+		// This command string is used to create the argument array. The file passed to execFile is still the full path to the cargo-kani binary
 		const playbackCommand: string = `cargo kani playback -Z concrete-playback --only-codegen --message-format=json`;
 
 		// Execute the concrete-playback to generate the binary, and get the binary from the artifacts
