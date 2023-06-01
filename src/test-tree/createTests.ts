@@ -13,7 +13,12 @@ import {
 } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
 import { FileMetaData } from '../ui/sourceMap';
-import { getContentFromFilesystem, getPackageName, getPackageNameFromFilePath } from '../utils';
+import {
+	extractFileName,
+	getContentFromFilesystem,
+	getPackageName,
+	getPackageNameFromFilePath,
+} from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
 
@@ -162,11 +167,14 @@ export class TestFile {
 
 		// Trigger the parser and process extracted metadata to create a test case
 		await SourceCodeParser.parseRustfile(content, {
-			onTest: (range, harnessName, proofBoolean, stubAttribute) => {
+			onTest: (range, harnessName, proofBoolean, stubAttribute, moduleName) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {
 					throw new Error('No item or item path found');
 				}
+				// get file name as well (we already do, so it's fine)
+
+				// pass in the module name as well if present
 				const packageName = typeof metadata?.fileName === 'undefined' ? '' : metadata?.filePackage;
 				const data: TestCase = new TestCase(
 					item.uri.fsPath,
@@ -174,6 +182,7 @@ export class TestFile {
 					packageName,
 					proofBoolean,
 					stubAttribute,
+					moduleName,
 				);
 				const id: string = `${item.uri}/${data.getLabel()}`;
 
@@ -213,6 +222,7 @@ export class TestFile {
  * @param package_name - Name of the package the harness is under that is extracted from cargo.toml
  * @param proof_boolean - True if proof, false if bolero harness
  * @param stubbing - True if the Kani harness is annotated with stubs
+ * @param module_name - Name of the module containing the harness if present
  * @returns verification status (i.e success or failure)
  */
 export class TestCase {
@@ -222,21 +232,48 @@ export class TestCase {
 		readonly package_name: string,
 		readonly proof_boolean: boolean,
 		readonly stubbing_request?: boolean,
+		readonly module_name?: string,
 	) {}
 
 	getLabel(): string {
 		return `${this.harness_name}`;
 	}
 
+	getFullyQualifiedName(): string {
+		if (this.module_name === '') {
+			const fileName = extractFileName(this.file_name);
+			if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
+				return `${this.harness_name}`;
+			}
+			return `${this.module_name}::${this.harness_name}`;
+		} else if (this.module_name !== '') {
+			// expand on this logic
+			if (this.file_name !== '') {
+				const fileName = extractFileName(this.file_name);
+				if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
+					return `${this.module_name}::${this.harness_name}`;
+				}
+				return `${fileName}::${this.module_name}::${this.harness_name}`;
+			}
+		}
+
+		return this.harness_name;
+	}
+
 	// Run Kani on the harness, create links and pass/fail ui, present to the user
 	async run(item: vscode.TestItem, options: vscode.TestRun): Promise<void> {
 		const start: number = Date.now();
+		const qualified_name = this.getFullyQualifiedName();
+
+		// console.log(`Running the proof on ${qualified_name}`);
+
 		if (this.proof_boolean) {
 			const actual: number = await this.evaluate(
 				this.file_name,
 				this.harness_name,
 				this.package_name,
 				this.stubbing_request,
+				qualified_name,
 			);
 			const duration: number = Date.now() - start;
 			if (actual === 0) {
@@ -317,16 +354,23 @@ export class TestCase {
 		harness_name: string,
 		package_name: string,
 		stubbing?: boolean,
+		qualified_name?: string,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (stubbing === false || undefined || NaN) {
-				const outputKani: number = await runKaniHarnessInterface(harness_name, package_name);
+				const outputKani: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					undefined,
+					qualified_name,
+				);
 				return outputKani;
 			} else {
 				const outputKani: number = await runKaniHarnessInterface(
 					harness_name,
 					package_name,
 					stubbing,
+					qualified_name,
 				);
 				return outputKani;
 			}
