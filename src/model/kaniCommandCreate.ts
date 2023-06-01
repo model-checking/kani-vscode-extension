@@ -48,11 +48,7 @@ export async function runKaniHarnessInterface(
 	}
 }
 
-function createCommand(
-	harnessName: string,
-	packageName: string,
-	stubbing_args?: boolean,
-): string {
+function createCommand(harnessName: string, packageName: string, stubbing_args?: boolean): string {
 	let harnessCommand = '';
 	if (stubbing_args === undefined || !stubbing_args) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
