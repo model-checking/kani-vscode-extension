@@ -17,15 +17,50 @@ export async function runKaniHarnessInterface(
 	harnessName: string,
 	packageName: string,
 	stubbing_args?: boolean,
+	qualified_name?: string,
 ): Promise<any> {
+	// Implement disambiguation logic here
+	if (qualified_name != undefined && qualified_name != '') {
+		try {
+			const fullyQualifiedCommand = createCommand(qualified_name, packageName, stubbing_args);
+			console.log(`Fully qualified name is ${fullyQualifiedCommand}`);
+			const kaniOutput = await catchOutput(fullyQualifiedCommand);
+			return kaniOutput;
+		} catch (error) {
+			try {
+				const harnessCommand = createCommand(harnessName, packageName, stubbing_args);
+				console.log(`Just the harness name is (backup) ${harnessCommand}`);
+				const kaniOutput = await catchOutput(harnessCommand);
+				return kaniOutput;
+			} catch (error) {
+				return -1;
+			}
+		}
+	} else {
+		const harnessCommand = createCommand(harnessName, packageName, stubbing_args);
+		try {
+			console.log(`Just the harness name is (NOT backup) ${harnessCommand}`);
+			const kaniOutput = await catchOutput(harnessCommand);
+			return kaniOutput;
+		} catch (error) {
+			return -1;
+		}
+	}
+}
+
+function createCommand(
+	harnessName: string,
+	packageName: string,
+	stubbing_args?: boolean,
+): string {
 	let harnessCommand = '';
 	if (stubbing_args === undefined || !stubbing_args) {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	} else {
 		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
 	}
-	const kaniOutput = await catchOutput(harnessCommand);
-	return kaniOutput;
+
+	return harnessCommand;
 }
 
 /**

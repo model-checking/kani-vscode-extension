@@ -36,10 +36,52 @@ export namespace SourceCodeParser {
 		const parser = await loadParser();
 		const tree = parser.parse(file);
 		const harnesses = searchParseTreeForFunctions(tree.rootNode);
-		const sortedHarnessByline = [...harnesses].sort(
+		const harnessesMapped = addModuleToFunction(tree.rootNode, harnesses);
+		const sortedHarnessByline = [...harnessesMapped].sort(
 			(a, b) => a.endPosition.row - b.endPosition.row,
 		);
 		return sortedHarnessByline;
+	}
+
+	export function addModuleToFunction(rootNode: any, harnesses: any): any {
+		const modMap = findModulesForFunctions(rootNode);
+		for (const harness of harnesses) {
+			harness.module = modMap.get(harness.harnessName);
+		}
+		return harnesses;
+	}
+
+	export function findModulesForFunctions(rootNode: any): any {
+		const moduleDeclarationNodes = mapModulesToHarness(rootNode);
+		const mapFromFunctionMod = new Map<any, any>();
+		for (const [moduleItem, functionItems] of moduleDeclarationNodes) {
+			// console.log(`${moduleItem} has the following functions ${functionItems}`);
+			for (const functionItem of functionItems) {
+				mapFromFunctionMod.set(functionItem, moduleItem);
+			}
+		}
+
+		return mapFromFunctionMod;
+	}
+
+	export function mapModulesToHarness(rootNode: any): any {
+		const moduleDeclarationNodes = rootNode.descendantsOfType('mod_item');
+
+		// Extract the functions from each module
+		const mapFromModFunction = new Map<any, any>();
+		for (const item of moduleDeclarationNodes) {
+			// Extract the functions from each module
+			const moduleName = item.namedChildren[0].text.trim();
+			// Find all function declaration nodes within this module
+			const functionDeclarationNodes = item.descendantsOfType('function_item');
+			// Extract the function names
+			const functionNames = functionDeclarationNodes.map((functionDeclarationNode: any) => {
+				return functionDeclarationNode.namedChildren[0].text.trim();
+			});
+			mapFromModFunction.set(moduleName, functionNames);
+		}
+
+		return mapFromModFunction;
 	}
 
 	// Do DFS to get all harnesses
@@ -190,11 +232,22 @@ export namespace SourceCodeParser {
 	export const parseRustfile = async (
 		text: string,
 		events: {
-			onTest(range: vscode.Range, name: string, proofBoolean: boolean, stub?: boolean): void;
+			onTest(
+				range: vscode.Range,
+				name: string,
+				proofBoolean: boolean,
+				stub?: boolean,
+				moduleName?: string,
+			): void;
 		},
 	): Promise<void> => {
 		// Create harness metadata for the entire file
 		const allHarnesses: HarnessMetadata[] = await getAttributeFromRustFile(text);
+
+		// Print harnesses
+		// console.log(`All harnesses for the current file\n`);
+		// console.log(allHarnesses);
+
 		const lines = text.split('\n');
 		if (allHarnesses.length > 0) {
 			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
@@ -214,11 +267,13 @@ export namespace SourceCodeParser {
 						new vscode.Position(lineNo, line.length),
 					);
 
+					// Optional args
 					const stub: boolean = harness.args.stub;
+					const module_name: string = harness.module ?? '';
 
 					// Check if it's a proof (true) or a bolero case (false)
 					const proofBoolean = !harness.args.test;
-					events.onTest(range, name, proofBoolean, stub);
+					events.onTest(range, name, proofBoolean, stub, module_name);
 				}
 			}
 		}

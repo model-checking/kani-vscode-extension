@@ -187,3 +187,10 @@ export async function showErrorWithReportIssueButton(message: string): Promise<v
 		vscode.env.openExternal(uriLink);
 	}
 }
+
+// get the file name only
+export function extractFileName(filePath: string): string {
+	const fileNameWithExtension = path.basename(filePath);
+	const fileName = path.parse(fileNameWithExtension).name;
+	return fileName;
+}
