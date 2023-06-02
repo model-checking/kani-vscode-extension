@@ -182,7 +182,7 @@ export function extractFileName(filePath: string): string {
 	return fileName;
 }
 
-export function getKeysWithSameValue(map: Map<string, string[]>): Map<string, string> {
+export function getConcatenatedModuleName(map: Map<string, string[]>): Map<string, string> {
 	const reverseMap = new Map<string, string[]>();
 
 	// Create the reverse map

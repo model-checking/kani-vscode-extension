@@ -6,7 +6,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import Parser from 'web-tree-sitter';
 
-import { countOccurrences, getKeysWithSameValue } from '../utils';
+import { countOccurrences, getConcatenatedModuleName } from '../utils';
 import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
@@ -53,7 +53,7 @@ export namespace SourceCodeParser {
 
 	export function findModulesForFunctions(rootNode: any): Map<string, string> {
 		const moduleDeclarationNodes: Map<string, string[]> = mapModulesToHarness(rootNode);
-		const resultMap: Map<string, string> = getKeysWithSameValue(moduleDeclarationNodes);
+		const resultMap: Map<string, string> = getConcatenatedModuleName(moduleDeclarationNodes);
 		return resultMap;
 	}
 
