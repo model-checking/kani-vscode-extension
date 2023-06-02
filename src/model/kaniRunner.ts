@@ -47,7 +47,7 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 				return;
 			}
 			const cargoKaniPath = stdout.trim();
-			console.log(`Cargo is located at: ${cargoKaniPath}`);
+			// console.log(`Cargo is located at: ${cargoKaniPath}`);
 
 			// Check if cargo path is valid
 			try {

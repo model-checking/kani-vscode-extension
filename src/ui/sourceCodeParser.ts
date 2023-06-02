@@ -6,7 +6,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import Parser from 'web-tree-sitter';
 
-import { countOccurrences } from '../utils';
+import { countOccurrences, getKeysWithSameValue } from '../utils';
 import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
@@ -51,31 +51,35 @@ export namespace SourceCodeParser {
 		return harnesses;
 	}
 
-	export function findModulesForFunctions(rootNode: any): any {
-		const moduleDeclarationNodes = mapModulesToHarness(rootNode);
-		const mapFromFunctionMod = new Map<any, any>();
+	export function findModulesForFunctions(rootNode: any): Map<string, string> {
+		const moduleDeclarationNodes: Map<string, string[]> = mapModulesToHarness(rootNode);
+		const mapFromFunctionMod = new Map<string, string>();
 		for (const [moduleItem, functionItems] of moduleDeclarationNodes) {
-			// console.log(`${moduleItem} has the following functions ${functionItems}`);
 			for (const functionItem of functionItems) {
 				mapFromFunctionMod.set(functionItem, moduleItem);
 			}
 		}
 
-		return mapFromFunctionMod;
+		const resultMap: Map<string, string> = getKeysWithSameValue(moduleDeclarationNodes);
+		const jsonString = JSON.stringify(Array.from(resultMap.entries()));
+
+		console.log(jsonString)
+
+		return resultMap;
 	}
 
-	export function mapModulesToHarness(rootNode: any): any {
+	export function mapModulesToHarness(rootNode: any): Map<string, string[]> {
 		const moduleDeclarationNodes = rootNode.descendantsOfType('mod_item');
 
 		// Extract the functions from each module
-		const mapFromModFunction = new Map<any, any>();
+		const mapFromModFunction = new Map<string, string[]>();
 		for (const item of moduleDeclarationNodes) {
 			// Extract the functions from each module
 			const moduleName = item.namedChildren[0].text.trim();
 			// Find all function declaration nodes within this module
 			const functionDeclarationNodes = item.descendantsOfType('function_item');
 			// Extract the function names
-			const functionNames = functionDeclarationNodes.map((functionDeclarationNode: any) => {
+			const functionNames: string[] = functionDeclarationNodes.map((functionDeclarationNode: any) => {
 				return functionDeclarationNode.namedChildren[0].text.trim();
 			});
 			mapFromModFunction.set(moduleName, functionNames);
@@ -245,8 +249,6 @@ export namespace SourceCodeParser {
 		const allHarnesses: HarnessMetadata[] = await getAttributeFromRustFile(text);
 
 		// Print harnesses
-		// console.log(`All harnesses for the current file\n`);
-		// console.log(allHarnesses);
 
 		const lines = text.split('\n');
 		if (allHarnesses.length > 0) {

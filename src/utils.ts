@@ -181,3 +181,36 @@ export function extractFileName(filePath: string): string {
 	const fileName = path.parse(fileNameWithExtension).name;
 	return fileName;
 }
+
+export function getKeysWithSameValue(map: Map<string, string[]>): Map<string, string> {
+	const reverseMap = new Map<string, string[]>();
+
+	// Create the reverse map
+	for (const [key, values] of map) {
+	  for (const value of values) {
+		if (reverseMap.has(value)) {
+		  reverseMap.get(value)!.push(key);
+		} else {
+		  reverseMap.set(value, [key]);
+		}
+	  }
+	}
+
+	const jsonString = JSON.stringify(Array.from(reverseMap.entries()));
+	// console.log(`STEP 1 \n ${jsonString}`);
+
+	// Get the keys with the same value
+	const keysWithSameValue = new Map<string, string>();
+	// console.log(`\n STEP 2 \n`);
+	for (const [keys, values] of reverseMap) {
+		if (values.length > 1) {
+			const concatenatedValue = values.join('::');
+			keysWithSameValue.set(keys, concatenatedValue);
+		}
+		else if (values.length == 1) {
+			keysWithSameValue.set(keys, values.pop()!);
+		}
+	}
+
+	return keysWithSameValue;
+  }

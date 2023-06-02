@@ -245,7 +245,7 @@ export class TestCase {
 			if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
 				return `${this.harness_name}`;
 			}
-			return `${this.module_name}::${this.harness_name}`;
+			return `${fileName}::${this.harness_name}`;
 		} else if (this.module_name !== '') {
 			// expand on this logic
 			if (this.file_name !== '') {
