@@ -70,7 +70,9 @@ export namespace SourceCodeParser {
 			// Extract the function names
 			const functionNames: string[] = functionDeclarationNodes.map(
 				(functionDeclarationNode: any) => {
-					return functionDeclarationNode.namedChildren[0].text.trim();
+					return functionDeclarationNode.namedChildren.find(
+						(p: { type: string }) => p.type === 'identifier',
+					).text.trim();
 				},
 			);
 			mapFromModFunction.set(moduleName, functionNames);
