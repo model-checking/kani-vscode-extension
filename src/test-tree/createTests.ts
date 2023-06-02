@@ -6,11 +6,7 @@ import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import {
-	captureFailedChecks,
-
-	runKaniHarnessInterface,
-} from '../model/kaniCommandCreate';
+import { captureFailedChecks, runKaniHarnessInterface } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
 import { FileMetaData } from '../ui/sourceMap';
 import {
@@ -311,7 +307,7 @@ export class TestCase {
 				this.harness_name,
 				this.package_name,
 				this.stubbing_request,
-				qualified_name
+				qualified_name,
 			);
 			const duration = Date.now() - start;
 			if (actual === 0) {
@@ -385,11 +381,17 @@ export class TestCase {
 		harness_name: string,
 		package_name: string,
 		stubbing?: boolean,
-		qualified_name?: string
+		qualified_name?: string,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (stubbing === false || undefined || NaN) {
-				const outputKaniTest: number = await runKaniHarnessInterface(harness_name, package_name, true, false, qualified_name);
+				const outputKaniTest: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					true,
+					false,
+					qualified_name,
+				);
 				return outputKaniTest;
 			} else {
 				const outputKaniTest: number = await runKaniHarnessInterface(
@@ -397,7 +399,7 @@ export class TestCase {
 					package_name,
 					true,
 					stubbing,
-					qualified_name
+					qualified_name,
 				);
 				return outputKaniTest;
 			}

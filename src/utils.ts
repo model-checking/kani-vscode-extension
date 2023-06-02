@@ -196,12 +196,8 @@ export function getKeysWithSameValue(map: Map<string, string[]>): Map<string, st
 		}
 	}
 
-	const jsonString = JSON.stringify(Array.from(reverseMap.entries()));
-	// console.log(`STEP 1 \n ${jsonString}`);
-
 	// Get the keys with the same value
 	const keysWithSameValue = new Map<string, string>();
-	// console.log(`\n STEP 2 \n`);
 	for (const [keys, values] of reverseMap) {
 		if (values.length > 1) {
 			const concatenatedValue = values.join('::');

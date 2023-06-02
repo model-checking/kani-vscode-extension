@@ -29,13 +29,11 @@ export async function runKaniHarnessInterface(
 				testFlag,
 				stubbing_args,
 			);
-			console.log(`Fully qualified command is ${fullyQualifiedCommand}`);
 			const kaniOutput = await catchOutput(fullyQualifiedCommand);
 			return kaniOutput;
 		} catch (error) {
 			try {
 				const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
-				console.log(`Just the harness name is (backup) ${harnessCommand}`);
 				const kaniOutput = await catchOutput(harnessCommand);
 				return kaniOutput;
 			} catch (error) {
@@ -45,7 +43,6 @@ export async function runKaniHarnessInterface(
 	} else {
 		const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
 		try {
-			console.log(`Just the harness name is (NOT backup) ${harnessCommand}`);
 			const kaniOutput = await catchOutput(harnessCommand);
 			return kaniOutput;
 		} catch (error) {
@@ -94,7 +91,6 @@ export async function captureFailedChecks(
 	stubbing_args?: boolean,
 ): Promise<KaniResponse> {
 	const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
-	console.log(`Fully qualified command (for failed diff message) is ${harnessCommand}`);
 	const kaniOutput = await createFailedDiffMessage(harnessCommand);
 	return kaniOutput;
 }
