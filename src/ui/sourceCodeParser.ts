@@ -63,7 +63,7 @@ export namespace SourceCodeParser {
 		const resultMap: Map<string, string> = getKeysWithSameValue(moduleDeclarationNodes);
 		const jsonString = JSON.stringify(Array.from(resultMap.entries()));
 
-		console.log(jsonString)
+		console.log(jsonString);
 
 		return resultMap;
 	}
@@ -79,9 +79,11 @@ export namespace SourceCodeParser {
 			// Find all function declaration nodes within this module
 			const functionDeclarationNodes = item.descendantsOfType('function_item');
 			// Extract the function names
-			const functionNames: string[] = functionDeclarationNodes.map((functionDeclarationNode: any) => {
-				return functionDeclarationNode.namedChildren[0].text.trim();
-			});
+			const functionNames: string[] = functionDeclarationNodes.map(
+				(functionDeclarationNode: any) => {
+					return functionDeclarationNode.namedChildren[0].text.trim();
+				},
+			);
 			mapFromModFunction.set(moduleName, functionNames);
 		}
 

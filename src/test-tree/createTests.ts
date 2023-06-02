@@ -6,11 +6,7 @@ import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import {
-	captureFailedChecks,
-	runCargoKaniTest,
-	runKaniHarnessInterface,
-} from '../model/kaniCommandCreate';
+import { captureFailedChecks, runKaniHarnessInterface } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
 import { FileMetaData } from '../ui/sourceMap';
 import {
@@ -265,11 +261,8 @@ export class TestCase {
 		const start: number = Date.now();
 		const qualified_name = this.getFullyQualifiedName();
 
-		// console.log(`Running the proof on ${qualified_name}`);
-
 		if (this.proof_boolean) {
 			const actual: number = await this.evaluate(
-				this.file_name,
 				this.harness_name,
 				this.package_name,
 				this.stubbing_request,
@@ -281,7 +274,9 @@ export class TestCase {
 			} else if (actual == 1) {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await captureFailedChecks(
-					this.harness_name,
+					qualified_name,
+					this.package_name,
+					false,
 					this.stubbing_request,
 				);
 				const failedChecks: string = responseObject.failedProperty;
@@ -312,14 +307,15 @@ export class TestCase {
 				this.harness_name,
 				this.package_name,
 				this.stubbing_request,
+				qualified_name,
 			);
 			const duration = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
 			} else if (actual == 1) {
 				const location = new vscode.Location(item.uri!, item.range!);
-				const responseObject: KaniResponse = await runCargoKaniTest(
-					this.harness_name,
+				const responseObject: KaniResponse = await captureFailedChecks(
+					qualified_name,
 					this.package_name,
 					true,
 					this.stubbing_request,
@@ -350,7 +346,6 @@ export class TestCase {
 
 	// Run kani on the file, crate with given arguments
 	async evaluate(
-		rsFile: string,
 		harness_name: string,
 		package_name: string,
 		stubbing?: boolean,
@@ -361,6 +356,7 @@ export class TestCase {
 				const outputKani: number = await runKaniHarnessInterface(
 					harness_name,
 					package_name,
+					false,
 					undefined,
 					qualified_name,
 				);
@@ -369,6 +365,7 @@ export class TestCase {
 				const outputKani: number = await runKaniHarnessInterface(
 					harness_name,
 					package_name,
+					false,
 					stubbing,
 					qualified_name,
 				);
@@ -384,17 +381,25 @@ export class TestCase {
 		harness_name: string,
 		package_name: string,
 		stubbing?: boolean,
+		qualified_name?: string,
 	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
 			if (stubbing === false || undefined || NaN) {
-				const outputKaniTest: number = await runCargoKaniTest(harness_name, package_name, false);
-				return outputKaniTest;
-			} else {
-				const outputKaniTest: number = await runCargoKaniTest(
+				const outputKaniTest: number = await runKaniHarnessInterface(
 					harness_name,
 					package_name,
+					true,
 					false,
+					qualified_name,
+				);
+				return outputKaniTest;
+			} else {
+				const outputKaniTest: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					true,
 					stubbing,
+					qualified_name,
 				);
 				return outputKaniTest;
 			}

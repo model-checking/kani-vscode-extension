@@ -187,13 +187,13 @@ export function getKeysWithSameValue(map: Map<string, string[]>): Map<string, st
 
 	// Create the reverse map
 	for (const [key, values] of map) {
-	  for (const value of values) {
-		if (reverseMap.has(value)) {
-		  reverseMap.get(value)!.push(key);
-		} else {
-		  reverseMap.set(value, [key]);
+		for (const value of values) {
+			if (reverseMap.has(value)) {
+				reverseMap.get(value)!.push(key);
+			} else {
+				reverseMap.set(value, [key]);
+			}
 		}
-	  }
 	}
 
 	const jsonString = JSON.stringify(Array.from(reverseMap.entries()));
@@ -206,11 +206,10 @@ export function getKeysWithSameValue(map: Map<string, string[]>): Map<string, st
 		if (values.length > 1) {
 			const concatenatedValue = values.join('::');
 			keysWithSameValue.set(keys, concatenatedValue);
-		}
-		else if (values.length == 1) {
+		} else if (values.length == 1) {
 			keysWithSameValue.set(keys, values.pop()!);
 		}
 	}
 
 	return keysWithSameValue;
-  }
+}
