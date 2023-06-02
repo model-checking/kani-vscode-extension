@@ -235,6 +235,7 @@ export class TestCase {
 		return `${this.harness_name}`;
 	}
 
+	// Get the fully qualified name for a harness from the file name, module name and harness name
 	getFullyQualifiedName(): string {
 		if (this.module_name === '') {
 			const fileName = extractFileName(this.file_name);

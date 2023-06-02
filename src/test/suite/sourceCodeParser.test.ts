@@ -80,7 +80,7 @@ suite('Test Module Extraction and Full Path to Proof', () => {
 		);
 	});
 
-	// Parse for modules and test that the metadata is as per expectations
+	// Parse for modules and test that the metadata is as per expectations for bolero proofs
 	test('Test if bolero modules are parsed as required from a file', async () => {
 		assert.deepStrictEqual(
 			await SourceCodeParser.getAttributeFromRustFile(boleroProofs),

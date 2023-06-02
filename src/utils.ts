@@ -175,13 +175,15 @@ export async function showErrorWithReportIssueButton(message: string): Promise<v
 	}
 }
 
-// get the file name only
+// Get the file name only from the given file path
 export function extractFileName(filePath: string): string {
 	const fileNameWithExtension = path.basename(filePath);
 	const fileName = path.parse(fileNameWithExtension).name;
 	return fileName;
 }
 
+// Generate a reverse map from harness -> fully qualified module name
+// Example - harness_1 -> outer::middle::inner, harness_2 -> tests ...
 export function getConcatenatedModuleName(map: Map<string, string[]>): Map<string, string> {
 	const reverseMap = new Map<string, string[]>();
 

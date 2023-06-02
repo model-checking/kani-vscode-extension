@@ -6,11 +6,13 @@ import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
- * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani
+ * Generate command and Run Cargo Kani on the command, and return the output status code of the subprocess
  *
- * @param rsFile - Path to the file that is to be verified
  * @param harnessName - name of the harness that is to be verified
- * @param args - arguments to Kani if provided
+ * @param packageName - name of the package containing the harnesses
+ * @param testFlag - if True, this means that it is a bolero proof. By default, it is false for kani proofs
+ * @param stubbing_args - if stubbing attribute is present on the harness, we pass this flag
+ * @param qualified_name - fully qualified harness name. Example - outer::middle::inner::harness_name
  * @returns verification status (i.e success or failure)
  */
 export async function runKaniHarnessInterface(
@@ -20,7 +22,7 @@ export async function runKaniHarnessInterface(
 	stubbing_args?: boolean,
 	qualified_name?: string,
 ): Promise<any> {
-	// Implement disambiguation logic here
+	// Disambiguation logic
 	if (qualified_name != undefined && qualified_name != '') {
 		try {
 			const fullyQualifiedCommand = createCommand(
@@ -115,7 +117,7 @@ export async function runCommandPure(command: string): Promise<void> {
 }
 
 // Run a command and capture the command line output into a string
-async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<any> {
+async function catchOutput(command: string): Promise<any> {
 	try {
 		const process = await runKaniCommand(command);
 		return process;

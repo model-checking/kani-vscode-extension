@@ -43,6 +43,7 @@ export namespace SourceCodeParser {
 		return sortedHarnessByline;
 	}
 
+	// Add module metadata to each of the harnesses from the reverse map
 	export function addModuleToFunction(rootNode: any, harnesses: any): any {
 		const modMap = findModulesForFunctions(rootNode);
 		for (const harness of harnesses) {
@@ -51,12 +52,15 @@ export namespace SourceCodeParser {
 		return harnesses;
 	}
 
+	// For each module, find the harnesses inside them and generate a reverse map
+	// from harness to module path
 	export function findModulesForFunctions(rootNode: any): Map<string, string> {
 		const moduleDeclarationNodes: Map<string, string[]> = mapModulesToHarness(rootNode);
 		const resultMap: Map<string, string> = getConcatenatedModuleName(moduleDeclarationNodes);
 		return resultMap;
 	}
 
+	// For each module, find the harnesses inside them
 	export function mapModulesToHarness(rootNode: any): Map<string, string[]> {
 		const moduleDeclarationNodes = rootNode.descendantsOfType('mod_item');
 
@@ -240,9 +244,6 @@ export namespace SourceCodeParser {
 	): Promise<void> => {
 		// Create harness metadata for the entire file
 		const allHarnesses: HarnessMetadata[] = await getAttributeFromRustFile(text);
-
-		// Print harnesses
-
 		const lines = text.split('\n');
 		if (allHarnesses.length > 0) {
 			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
