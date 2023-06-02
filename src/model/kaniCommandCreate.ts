@@ -6,7 +6,7 @@ import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
- * Generate command and Run Cargo Kani on the command, and return the output status code of the subprocess
+ * Generate command and run `cargo-kani` on the command, and return the output status code of the sub-process
  *
  * @param harnessName - name of the harness that is to be verified
  * @param packageName - name of the package containing the harnesses

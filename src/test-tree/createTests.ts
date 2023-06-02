@@ -244,7 +244,6 @@ export class TestCase {
 			}
 			return `${fileName}::${this.harness_name}`;
 		} else if (this.module_name !== '') {
-			// expand on this logic
 			if (this.file_name !== '') {
 				const fileName = extractFileName(this.file_name);
 				if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
@@ -377,7 +376,7 @@ export class TestCase {
 		return 0;
 	}
 
-	// Run kani on bolero test case, file, crate with given arguments
+	// Run kani on Bolero test case, file, crate with given arguments
 	async evaluateTest(
 		harness_name: string,
 		package_name: string,
