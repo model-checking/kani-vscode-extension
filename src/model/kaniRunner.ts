@@ -254,7 +254,10 @@ async function executeKaniProcess(
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
 function sendErrorToChannel(output: CommandOutput, args: string[]): void {
-	const harnessName = args.at(1)!;
+	if (args.length == 0) {
+		return;
+	}
+	const harnessName = args.at(args.length - 1)!;
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
@@ -268,6 +271,9 @@ function sendErrorToChannel(output: CommandOutput, args: string[]): void {
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
 function sendOutputToChannel(output: CommandOutput, args: string[]): void {
+	if (args.length == 0) {
+		return;
+	}
 	const harnessName = args.at(args.length - 1)!;
 
 	// Create unique ID for the output channel
