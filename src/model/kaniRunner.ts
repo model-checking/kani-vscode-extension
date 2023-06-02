@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
+import GlobalConfig from '../globalConfig';
 import {
 	CommandArgs,
 	getRootDir,
@@ -22,6 +23,36 @@ interface CommandOutput {
 	stderr: string;
 	errorCode: any;
 	error: any;
+}
+
+// Displays the version of kani being used to the user as a status bar icon
+export async function getKaniVersion(pathKani: string): Promise<void> {
+	try {
+		execFile(pathKani, ['--version'], (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error: ${error}`);
+				return;
+			}
+
+			if (stdout) {
+				// Split the stdout by whitespace to separate words
+				const words = stdout.split(/\s+/);
+				// Find the word that contains the version number
+				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word));
+				const versionMessage = `$(gear~spin) Kani ${versionWord} being used to verify`;
+
+				vscode.window.setStatusBarMessage(versionMessage, 6000);
+				return;
+			}
+
+			console.log(`stdout: ${stdout}`);
+			console.error(`stderr: ${stderr}`);
+		});
+	} catch (error) {
+		// Ignore command error
+		return;
+	}
+	return;
 }
 
 /**
@@ -47,7 +78,6 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 				return;
 			}
 			const cargoKaniPath = stdout.trim();
-			// console.log(`Cargo is located at: ${cargoKaniPath}`);
 
 			// Check if cargo path is valid
 			try {
@@ -83,7 +113,8 @@ export async function runKaniCommand(
 	const args = commandSplit.args;
 
 	if (command == 'cargo' || command == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -122,7 +153,8 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 
 	// Check the command running and execute that with the full path and safe options
 	if (commandSplit.commandPath == 'cargo' || commandSplit.commandPath == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -233,6 +265,14 @@ function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 
 	// Append stdout to the output channel
 	channel.appendLine(output.stdout);
-	// Open channel but don't change focus
-	channel.show(true);
+
+	// Access the configuration
+	const config = vscode.workspace.getConfiguration('Kani');
+	const showOutputWindow = config.get('showOutputWindow');
+
+	// Use the value to show or hide the output window
+	if (showOutputWindow) {
+		// Open channel but don't change focus
+		channel.show(true);
+	}
 }
