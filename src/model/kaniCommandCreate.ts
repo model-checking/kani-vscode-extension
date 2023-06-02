@@ -29,7 +29,7 @@ export async function runKaniHarnessInterface(
 				testFlag,
 				stubbing_args,
 			);
-			console.log(`Fully qualified name is ${fullyQualifiedCommand}`);
+			console.log(`Fully qualified command is ${fullyQualifiedCommand}`);
 			const kaniOutput = await catchOutput(fullyQualifiedCommand);
 			return kaniOutput;
 		} catch (error) {
@@ -78,50 +78,6 @@ function createCommand(
 	return harnessCommand;
 }
 
-// /**
-//  * Run cargo Kani --tests as a command line binary for harness declared
-//  * under #[test]
-//  *
-//  * @param harnessName - name of the harness that is to be verified
-//  * @param failedCheck - If the verification has already failed, then process the kani output lazily
-//  * @param args - arguments to Kani if provided
-//  * @returns verification status (i.e success or failure)
-//  */
-// export async function runCargoKaniTest(
-// 	harnessName: string,
-// 	packageName: string,
-// 	stubbing_args?: boolean,
-// 	qualified_name?: string,
-// ): Promise<any> {
-// 	// Implement disambiguation logic here
-// 	if (qualified_name != undefined && qualified_name != '') {
-// 		try {
-// 			const fullyQualifiedCommand = createCommand(qualified_name, packageName, true, stubbing_args);
-// 			console.log(`Fully qualified name is ${fullyQualifiedCommand}`);
-// 			const kaniOutput = await catchOutput(fullyQualifiedCommand);
-// 			return kaniOutput;
-// 		} catch (error) {
-// 			try {
-// 				const harnessCommand = createCommand(harnessName, packageName, true, stubbing_args);
-// 				console.log(`Just the harness name is (backup) ${harnessCommand}`);
-// 				const kaniOutput = await catchOutput(harnessCommand);
-// 				return kaniOutput;
-// 			} catch (error) {
-// 				return -1;
-// 			}
-// 	}
-// 	} else {
-// 		const harnessCommand = createCommand(harnessName, packageName, true, stubbing_args);
-// 		try {
-// 			console.log(`Just the harness name is (NOT backup) ${harnessCommand}`);
-// 			const kaniOutput = await catchOutput(harnessCommand);
-// 			return kaniOutput;
-// 		} catch (error) {
-// 			return -1;
-// 		}
-// 	}
-// }
-
 /**
  *
  * Return failed checks as a lazy process when run by test case
@@ -138,6 +94,7 @@ export async function captureFailedChecks(
 	stubbing_args?: boolean,
 ): Promise<KaniResponse> {
 	const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
+	console.log(`Fully qualified command (for failed diff message) is ${harnessCommand}`);
 	const kaniOutput = await createFailedDiffMessage(harnessCommand);
 	return kaniOutput;
 }

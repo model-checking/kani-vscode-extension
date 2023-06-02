@@ -53,18 +53,7 @@ export namespace SourceCodeParser {
 
 	export function findModulesForFunctions(rootNode: any): Map<string, string> {
 		const moduleDeclarationNodes: Map<string, string[]> = mapModulesToHarness(rootNode);
-		const mapFromFunctionMod = new Map<string, string>();
-		for (const [moduleItem, functionItems] of moduleDeclarationNodes) {
-			for (const functionItem of functionItems) {
-				mapFromFunctionMod.set(functionItem, moduleItem);
-			}
-		}
-
 		const resultMap: Map<string, string> = getKeysWithSameValue(moduleDeclarationNodes);
-		const jsonString = JSON.stringify(Array.from(resultMap.entries()));
-
-		console.log(jsonString);
-
 		return resultMap;
 	}
 
