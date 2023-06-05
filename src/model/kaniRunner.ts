@@ -38,7 +38,17 @@ export async function getKaniVersion(pathKani: string): Promise<void> {
 				// Split the stdout by whitespace to separate words
 				const words = stdout.split(/\s+/);
 				// Find the word that contains the version number
-				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word));
+				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word))!;
+				const versionNum: number = parseFloat(versionWord);
+
+				console.log(`Kani version is ${versionNum}`);
+
+				if (versionNum < 0.29) {
+					vscode.window.showWarningMessage(
+						'Please install Kani 0.29 or later using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
+					);
+				}
+
 				const versionMessage = `$(gear~spin) Kani ${versionWord} being used to verify`;
 
 				vscode.window.setStatusBarMessage(versionMessage, 6000);
@@ -243,7 +253,10 @@ async function executeKaniProcess(
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
 function sendErrorToChannel(output: CommandOutput, args: string[]): void {
-	const harnessName = args.at(1)!;
+	if (args.length == 0) {
+		return;
+	}
+	const harnessName = args.at(args.length - 1)!;
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
@@ -257,7 +270,10 @@ function sendErrorToChannel(output: CommandOutput, args: string[]): void {
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
 function sendOutputToChannel(output: CommandOutput, args: string[]): void {
-	const harnessName = args.at(1)!;
+	if (args.length == 0) {
+		return;
+	}
+	const harnessName = args.at(args.length - 1)!;
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
