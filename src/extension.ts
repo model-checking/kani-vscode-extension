@@ -5,7 +5,6 @@ import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
 import GlobalConfig from './globalConfig';
-import { runKaniPlayback } from './model/kaniPlayback';
 import { getKaniPath, getKaniVersion } from './model/kaniRunner';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
@@ -19,6 +18,7 @@ import {
 } from './test-tree/createTests';
 import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
+import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
@@ -39,9 +39,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	try {
 		// GET binary path
 		const globalConfig = GlobalConfig.getInstance();
-
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
 		globalConfig.setFilePath(kaniBinaryPath);
+
+		vscode.window.showInformationMessage(
+			`Kani located at ${kaniBinaryPath} being used for verification`,
+		);
 
 		// GET Version number and display to user
 		await getKaniVersion(globalConfig.getFilePath());
