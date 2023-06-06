@@ -3,8 +3,8 @@
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
-import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 import { KaniResponseError } from './kaniOutputParser';
+import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
  * Generate command and run `cargo-kani` on the command, and return the output status code of the sub-process
@@ -132,6 +132,7 @@ async function catchOutput(command: string): Promise<any> {
 		const process = await runKaniCommand(command);
 		return process;
 	} catch (error) {
+		console.error(error);
 		throw error;
 	}
 }
