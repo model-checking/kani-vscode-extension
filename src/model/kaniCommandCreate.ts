@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
+import { KaniResponseError } from './kaniOutputParser';
 
 /**
  * Generate command and run `cargo-kani` on the command, and return the output status code of the sub-process
@@ -34,12 +35,21 @@ export async function runKaniHarnessInterface(
 			const kaniOutput = await catchOutput(fullyQualifiedCommand);
 			return kaniOutput;
 		} catch (error) {
-			try {
-				const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
-				const kaniOutput = await catchOutput(harnessCommand);
-				return kaniOutput;
-			} catch (error) {
-				return -1;
+			if ( error instanceof KaniResponseError) {
+				// Try to re-run kani on just the harness name only if the response contains
+				// the string that it couldn't find a harness with the expanded
+				if (error.name === 'NoHarnessesError') {
+					try {
+						const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
+						const kaniOutput = await catchOutput(harnessCommand);
+						return kaniOutput;
+					} catch (error) {
+						return -1;
+					}
+				} else {
+					console.error(error.message, error.cause);
+					return -1;
+				}
 			}
 		}
 	} else {
@@ -122,6 +132,6 @@ async function catchOutput(command: string): Promise<any> {
 		const process = await runKaniCommand(command);
 		return process;
 	} catch (error) {
-		return new Error('compilation failed');
+		throw error;
 	}
 }

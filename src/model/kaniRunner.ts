@@ -15,7 +15,7 @@ import {
 	showErrorWithReportIssueButton,
 	splitCommand,
 } from '../utils';
-import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
+import { KaniResponseError, checkOutputForError, responseParserInterface } from './kaniOutputParser';
 
 // Store the output from process into a object with this type
 interface CommandOutput {
@@ -140,7 +140,7 @@ export async function runKaniCommand(
 			return executionResult;
 		} catch (error: any) {
 			showErrorWithReportIssueButton(`Could not run Kani on harness: ${error}`);
-			return new Error(`Kani executable was unable to detect or run harness.`);
+			throw error;
 		}
 	} else {
 		return false;
@@ -214,11 +214,21 @@ async function executeKaniProcess(
 
 			// Send output to diagnostics and return if there is an error in stdout
 			// this means that the command could not be executed.
-			if (checkOutputForError(output.stdout, output.stderr)) {
-				sendErrorToChannel(output, args);
-				reject(new Error(error?.message));
+			try {
+				const result = checkOutputForError(output.stdout, output.stderr);
+				if (result) {
+					sendErrorToChannel(output, args);
+					reject(new Error(error?.message));
+				}
+			} catch (error) {
+				if (error instanceof KaniResponseError) {
+					if (error.name === 'KaniCompilationError') {
+						sendErrorToChannel(output, args);
+						reject(new Error(error?.message));
+					}
+				}
+				reject(error);
 			}
-
 			// Send output to output channel specific to the harness
 			sendOutputToChannel(output, args);
 
@@ -252,7 +262,7 @@ async function executeKaniProcess(
 }
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
-function sendErrorToChannel(output: CommandOutput, args: string[]): void {
+export function sendErrorToChannel(output: CommandOutput, args: string[]): void {
 	if (args.length == 0) {
 		return;
 	}
@@ -269,7 +279,7 @@ function sendErrorToChannel(output: CommandOutput, args: string[]): void {
 }
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
-function sendOutputToChannel(output: CommandOutput, args: string[]): void {
+export function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 	if (args.length == 0) {
 		return;
 	}
