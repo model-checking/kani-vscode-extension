@@ -2,29 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import { KaniResponse } from '../constants';
 
-type ErrorName = 'KaniCompilationError' | 'NoHarnessesError'
+type ErrorName = 'KaniCompilationError' | 'NoHarnessesError';
 
 export class KaniResponseError extends Error {
 	name: ErrorName;
 	message: string;
 	cause: any;
 
-	constructor({
-		name,
-		message,
-		cause
-	}: {
-		name: ErrorName;
-		message: string;
-		cause?: any;
-	}) {
+	constructor({ name, message, cause }: { name: ErrorName; message: string; cause?: any }) {
 		super();
 		this.name = name;
 		this.message = message;
 		this.cause = cause;
 	}
 }
-
 
 /**
  * Metadata about the property that needs to be processed before presenting to the UI
@@ -84,7 +75,7 @@ export function checkOutputForError(outString: string, errString: string): any {
 		throw new KaniResponseError({
 			name: 'NoHarnessesError',
 			message: 'No harnesses found with the request',
-			cause: errString
+			cause: errString,
 		});
 	}
 
@@ -93,7 +84,7 @@ export function checkOutputForError(outString: string, errString: string): any {
 		throw new KaniResponseError({
 			name: 'KaniCompilationError',
 			message: 'Kani Compilation error found',
-			cause: errString
+			cause: errString,
 		});
 	}
 

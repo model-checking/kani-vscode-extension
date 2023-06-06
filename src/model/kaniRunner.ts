@@ -15,7 +15,11 @@ import {
 	showErrorWithReportIssueButton,
 	splitCommand,
 } from '../utils';
-import { KaniResponseError, checkOutputForError, responseParserInterface } from './kaniOutputParser';
+import {
+	KaniResponseError,
+	checkOutputForError,
+	responseParserInterface,
+} from './kaniOutputParser';
 
 // Store the output from process into a object with this type
 interface CommandOutput {

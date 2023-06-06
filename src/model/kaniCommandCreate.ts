@@ -35,7 +35,7 @@ export async function runKaniHarnessInterface(
 			const kaniOutput = await catchOutput(fullyQualifiedCommand);
 			return kaniOutput;
 		} catch (error) {
-			if ( error instanceof KaniResponseError) {
+			if (error instanceof KaniResponseError) {
 				// Try to re-run kani on just the harness name only if the response contains
 				// the string that it couldn't find a harness with the expanded
 				if (error.name === 'NoHarnessesError') {
