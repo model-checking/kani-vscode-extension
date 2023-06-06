@@ -11,7 +11,7 @@ import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
  *
  * @param harnessName - name of the harness that is to be verified
  * @param packageName - name of the package containing the harnesses
- * @param testFlag - if True, this means that it is a bolero proof. By default, it is false for kani proofs
+ * @param testFlag - if True, this means that it is a proof declared under #[cfg(test)]. By default, it is false for kani proofs
  * @param stubbing_args - if stubbing attribute is present on the harness, we pass this flag
  * @param qualified_name - fully qualified harness name. Example - outer::middle::inner::harness_name
  * @returns verification status (i.e success or failure)
@@ -23,7 +23,8 @@ export async function runKaniHarnessInterface(
 	stubbing_args?: boolean,
 	qualified_name?: string,
 ): Promise<any> {
-	// Disambiguation logic
+	// If we have an expanded or qualified name from the parser, then we try running kani with that
+	// or else we try it with just the harness name
 	if (qualified_name != undefined && qualified_name != '') {
 		try {
 			const fullyQualifiedCommand = createCommand(
@@ -41,6 +42,8 @@ export async function runKaniHarnessInterface(
 				if (error.name === 'NoHarnessesError') {
 					try {
 						const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
+						// catchOutput contains error handling already in case even the command with pure harness name fails.
+						// We are just trying to reduce the output to a statusCode in this function.
 						const kaniOutput = await catchOutput(harnessCommand);
 						return kaniOutput;
 					} catch (error) {
