@@ -235,8 +235,9 @@ export class TestCase {
 		return `${this.harness_name}`;
 	}
 
-	// Get the fully qualified name for a harness from the file name, module name and harness name
-	getFullyQualifiedName(): string {
+	// Expand the harness name to include the name of the file and module name as an attempt to narrow down the number of matches for this harness.
+	// This is a heuristic, and it may generate an identifier that does not match any symbol.
+	expandFunctionName(): string {
 		if (this.module_name === '') {
 			const fileName = extractFileName(this.file_name);
 			if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
@@ -259,7 +260,7 @@ export class TestCase {
 	// Run Kani on the harness, create links and pass/fail ui, present to the user
 	async run(item: vscode.TestItem, options: vscode.TestRun): Promise<void> {
 		const start: number = Date.now();
-		const qualified_name = this.getFullyQualifiedName();
+		const qualified_name = this.expandFunctionName();
 
 		if (this.proof_boolean) {
 			const actual: number = await this.evaluate(
