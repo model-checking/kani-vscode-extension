@@ -8,6 +8,11 @@ import {
 	rustFileWithUnitTestsOnly,
 } from '../test-programs/concretePlaybackTests';
 import {
+	allProofSamples,
+	sortedHarnessMapForAllProofs,
+	sortedMapForAllTests,
+} from '../test-programs/proofsAndTests';
+import {
 	attributeMetadataUnsupported,
 	boleroProofs,
 	findHarnessesResultBolero,
@@ -19,15 +24,7 @@ import {
 	rustFileWithoutProof,
 } from '../test-programs/sampleRustString';
 
-const listofHarnesses: Set<string> = new Set<string>([
-	'insert_test',
-	'insert_test_2',
-	'random_name',
-	'function_abc',
-	'function_xyz',
-]);
-
-suite('test source code parsing', () => {
+suite('Test source code parsing', () => {
 	// Parse for kani::proof helper function
 	test('Test if proofs exist in file', async () => {
 		assert.strictEqual(await SourceCodeParser.checkFileForProofs(fullProgramSource), true);
@@ -70,6 +67,24 @@ suite('test source code parsing', () => {
 		assert.deepStrictEqual(
 			await SourceCodeParser.extractKaniTestMetadata(rustFileWithUnitTestsOnly),
 			kaniConcreteTestsMetaData,
+		);
+	});
+});
+
+suite('Test Module Extraction and Full Path to Proof', () => {
+	// Parse for modules and test that the metadata is as per expectations
+	test('Test if modules are parsed as required from a file', async () => {
+		assert.deepStrictEqual(
+			await SourceCodeParser.getAttributeFromRustFile(allProofSamples),
+			sortedHarnessMapForAllProofs,
+		);
+	});
+
+	// Parse for modules and test that the metadata is as per expectations for Bolero proofs
+	test('Test if Bolero modules are parsed as required from a file', async () => {
+		assert.deepStrictEqual(
+			await SourceCodeParser.getAttributeFromRustFile(boleroProofs),
+			sortedMapForAllTests,
 		);
 	});
 });

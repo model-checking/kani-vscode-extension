@@ -187,3 +187,40 @@ export async function showErrorWithReportIssueButton(message: string): Promise<v
 		vscode.env.openExternal(uriLink);
 	}
 }
+
+// Get the file name only from the given file path
+export function extractFileName(filePath: string): string {
+	const fileNameWithExtension = path.basename(filePath);
+	const fileName = path.parse(fileNameWithExtension).name;
+	return fileName;
+}
+
+// Generate a reverse map from harness -> fully qualified module name
+// Example - harness_1 -> outer::middle::inner, harness_2 -> tests ...
+export function getConcatenatedModuleName(map: Map<string, string[]>): Map<string, string> {
+	const reverseMap = new Map<string, string[]>();
+
+	// Create the reverse map
+	for (const [key, values] of map) {
+		for (const value of values) {
+			if (reverseMap.has(value)) {
+				reverseMap.get(value)!.push(key);
+			} else {
+				reverseMap.set(value, [key]);
+			}
+		}
+	}
+
+	// Get the keys with the same value
+	const keysWithSameValue = new Map<string, string>();
+	for (const [keys, values] of reverseMap) {
+		if (values.length > 1) {
+			const concatenatedValue = values.join('::');
+			keysWithSameValue.set(keys, concatenatedValue);
+		} else if (values.length == 1) {
+			keysWithSameValue.set(keys, values.pop()!);
+		}
+	}
+
+	return keysWithSameValue;
+}
