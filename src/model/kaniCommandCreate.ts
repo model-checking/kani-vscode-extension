@@ -3,59 +3,91 @@
 import * as vscode from 'vscode';
 
 import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
+import { KaniResponseError } from './kaniOutputParser';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
 
 /**
- * Run Kani as a command line binary and cargo kani command as a backup option in case there are rustc errors with running single script kani
+ * Generate command and run `cargo-kani` on the command, and return the output status code of the sub-process
  *
- * @param rsFile - Path to the file that is to be verified
  * @param harnessName - name of the harness that is to be verified
- * @param args - arguments to Kani if provided
+ * @param packageName - name of the package containing the harnesses
+ * @param testFlag - if True, this means that it is a proof declared under #[cfg(test)]. By default, it is false for kani proofs
+ * @param stubbing_args - if stubbing attribute is present on the harness, we pass this flag
+ * @param qualified_name - fully qualified harness name. Example - outer::middle::inner::harness_name
  * @returns verification status (i.e success or failure)
  */
 export async function runKaniHarnessInterface(
 	harnessName: string,
 	packageName: string,
+	testFlag: boolean = false,
 	stubbing_args?: boolean,
+	qualified_name?: string,
 ): Promise<any> {
-	let harnessCommand = '';
-	if (stubbing_args === undefined || !stubbing_args) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
+	// If we have an expanded or qualified name from the parser, then we try running kani with that
+	// or else we try it with just the harness name
+	if (qualified_name != undefined && qualified_name != '') {
+		try {
+			const fullyQualifiedCommand = createCommand(
+				qualified_name,
+				packageName,
+				testFlag,
+				stubbing_args,
+			);
+			const kaniOutput = await catchOutput(fullyQualifiedCommand);
+			return kaniOutput;
+		} catch (error) {
+			if (error instanceof KaniResponseError) {
+				// Try to re-run kani on just the harness name only if the response contains
+				// the string that it couldn't find a harness with the expanded
+				if (error.name === 'NoHarnessesError') {
+					try {
+						const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
+						// catchOutput contains error handling already in case even the command with pure harness name fails.
+						// We are just trying to reduce the output to a statusCode in this function.
+						const kaniOutput = await catchOutput(harnessCommand);
+						return kaniOutput;
+					} catch (error) {
+						return -1;
+					}
+				} else {
+					console.error(error.message, error.cause);
+					return -1;
+				}
+			}
+		}
 	} else {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
+		const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
+		try {
+			const kaniOutput = await catchOutput(harnessCommand);
+			return kaniOutput;
+		} catch (error) {
+			return -1;
+		}
 	}
-	const kaniOutput = await catchOutput(harnessCommand);
-	return kaniOutput;
 }
 
-/**
- * Run cargo Kani --tests as a command line binary for harness declared
- * under #[test]
- *
- * @param harnessName - name of the harness that is to be verified
- * @param failedCheck - If the verification has already failed, then process the kani output lazily
- * @param args - arguments to Kani if provided
- * @returns verification status (i.e success or failure)
- */
-export async function runCargoKaniTest(
+function createCommand(
 	harnessName: string,
 	packageName: string,
-	failedCheck?: boolean,
-	args?: boolean,
-): Promise<any> {
+	testFlag: boolean = false,
+	stubbing_args?: boolean,
+): string {
 	let harnessCommand = '';
-	if (args === undefined || !args) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName}`;
+	if (!testFlag) {
+		if (stubbing_args === undefined || !stubbing_args) {
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
+		} else {
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
+		}
 	} else {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.testsFlag} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
+		if (stubbing_args === undefined || !stubbing_args) {
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.packageFlag} ${packageName}  ${KaniArguments.harnessFlag} ${harnessName}`;
+		} else {
+			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
+		}
 	}
-	if (failedCheck) {
-		const kaniOutput: KaniResponse = await createFailedDiffMessage(harnessCommand);
-		return kaniOutput;
-	} else {
-		const kaniOutput: number = await catchOutput(harnessCommand);
-		return kaniOutput;
-	}
+
+	return harnessCommand;
 }
 
 /**
@@ -69,15 +101,11 @@ export async function runCargoKaniTest(
  */
 export async function captureFailedChecks(
 	harnessName: string,
-	args?: boolean,
+	packageName: string,
+	testFlag: boolean,
+	stubbing_args?: boolean,
 ): Promise<KaniResponse> {
-	let harnessCommand = '';
-
-	if (args === undefined || !args) {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName}`;
-	} else {
-		harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.harnessFlag} ${harnessName} ${KaniArguments.unwindFlag} ${args}`;
-	}
+	const harnessCommand = createCommand(harnessName, packageName, testFlag, stubbing_args);
 	const kaniOutput = await createFailedDiffMessage(harnessCommand);
 	return kaniOutput;
 }
@@ -102,11 +130,12 @@ export async function runCommandPure(command: string): Promise<void> {
 }
 
 // Run a command and capture the command line output into a string
-async function catchOutput(command: string, cargoKaniMode: boolean = false): Promise<any> {
+async function catchOutput(command: string): Promise<any> {
 	try {
 		const process = await runKaniCommand(command);
 		return process;
 	} catch (error) {
-		return new Error('compilation failed');
+		console.error(error);
+		throw error;
 	}
 }

@@ -126,6 +126,19 @@ export async function getPackageName(dirName: string): Promise<any> {
 	}
 }
 
+export async function isLibraryProject(dirName: string): Promise<boolean> {
+	const cargoTomlUri = vscode.Uri.file(`${dirName}/Cargo.toml`);
+
+	try {
+		const tomlFile = await vscode.workspace.fs.readFile(cargoTomlUri);
+		const cargoTomlObject = toml.parse(tomlFile.toString());
+		return Boolean(cargoTomlObject.lib);
+	} catch (error) {
+		console.error(error);
+		return false;
+	}
+}
+
 // Create a timestamp to help differentiate strings
 export function getTimeBasedUniqueId(): string {
 	const timestamp = new Date().getTime().toString();
@@ -173,4 +186,41 @@ export async function showErrorWithReportIssueButton(message: string): Promise<v
 		const uriLink = vscode.Uri.parse(linkToBugReportTemplate);
 		vscode.env.openExternal(uriLink);
 	}
+}
+
+// Get the file name only from the given file path
+export function extractFileName(filePath: string): string {
+	const fileNameWithExtension = path.basename(filePath);
+	const fileName = path.parse(fileNameWithExtension).name;
+	return fileName;
+}
+
+// Generate a reverse map from harness -> fully qualified module name
+// Example - harness_1 -> outer::middle::inner, harness_2 -> tests ...
+export function getConcatenatedModuleName(map: Map<string, string[]>): Map<string, string> {
+	const reverseMap = new Map<string, string[]>();
+
+	// Create the reverse map
+	for (const [key, values] of map) {
+		for (const value of values) {
+			if (reverseMap.has(value)) {
+				reverseMap.get(value)!.push(key);
+			} else {
+				reverseMap.set(value, [key]);
+			}
+		}
+	}
+
+	// Get the keys with the same value
+	const keysWithSameValue = new Map<string, string>();
+	for (const [keys, values] of reverseMap) {
+		if (values.length > 1) {
+			const concatenatedValue = values.join('::');
+			keysWithSameValue.set(keys, concatenatedValue);
+		} else if (values.length == 1) {
+			keysWithSameValue.set(keys, values.pop()!);
+		}
+	}
+
+	return keysWithSameValue;
 }

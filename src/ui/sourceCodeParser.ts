@@ -6,7 +6,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import Parser from 'web-tree-sitter';
 
-import { countOccurrences } from '../utils';
+import { countOccurrences, getConcatenatedModuleName } from '../utils';
 import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
@@ -36,10 +36,53 @@ export namespace SourceCodeParser {
 		const parser = await loadParser();
 		const tree = parser.parse(file);
 		const harnesses = searchParseTreeForFunctions(tree.rootNode);
-		const sortedHarnessByline = [...harnesses].sort(
+		const harnessesMapped = addModuleToFunction(tree.rootNode, harnesses);
+		const sortedHarnessByline = [...harnessesMapped].sort(
 			(a, b) => a.endPosition.row - b.endPosition.row,
 		);
 		return sortedHarnessByline;
+	}
+
+	// Add module metadata to each of the harnesses from the reverse map
+	export function addModuleToFunction(rootNode: any, harnesses: any): any {
+		const modMap = findModulesForFunctions(rootNode);
+		for (const harness of harnesses) {
+			harness.module = modMap.get(harness.harnessName);
+		}
+		return harnesses;
+	}
+
+	// For each module, find the harnesses inside them and generate a reverse map
+	// from harness to module path
+	export function findModulesForFunctions(rootNode: any): Map<string, string> {
+		const moduleDeclarationNodes: Map<string, string[]> = mapModulesToHarness(rootNode);
+		const resultMap: Map<string, string> = getConcatenatedModuleName(moduleDeclarationNodes);
+		return resultMap;
+	}
+
+	// For each module, find the harnesses inside them
+	export function mapModulesToHarness(rootNode: any): Map<string, string[]> {
+		const moduleDeclarationNodes = rootNode.descendantsOfType('mod_item');
+
+		// Extract the functions from each module
+		const mapFromModFunction = new Map<string, string[]>();
+		for (const item of moduleDeclarationNodes) {
+			// Extract the functions from each module
+			const moduleName = item.namedChildren[0].text.trim();
+			// Find all function declaration nodes within this module
+			const functionDeclarationNodes = item.descendantsOfType('function_item');
+			// Extract the function names
+			const functionNames: string[] = functionDeclarationNodes.map(
+				(functionDeclarationNode: any) => {
+					return functionDeclarationNode.namedChildren
+						.find((p: { type: string }) => p.type === 'identifier')
+						.text.trim();
+				},
+			);
+			mapFromModFunction.set(moduleName, functionNames);
+		}
+
+		return mapFromModFunction;
 	}
 
 	// Do DFS to get all harnesses
@@ -190,7 +233,13 @@ export namespace SourceCodeParser {
 	export const parseRustfile = async (
 		text: string,
 		events: {
-			onTest(range: vscode.Range, name: string, proofBoolean: boolean, stub?: boolean): void;
+			onTest(
+				range: vscode.Range,
+				name: string,
+				proofBoolean: boolean,
+				stub?: boolean,
+				moduleName?: string,
+			): void;
 		},
 	): Promise<void> => {
 		// Create harness metadata for the entire file
@@ -214,11 +263,13 @@ export namespace SourceCodeParser {
 						new vscode.Position(lineNo, line.length),
 					);
 
+					// Optional args
 					const stub: boolean = harness.args.stub;
+					const module_name: string = harness.module ?? '';
 
 					// Check if it's a proof (true) or a bolero case (false)
 					const proofBoolean = !harness.args.test;
-					events.onTest(range, name, proofBoolean, stub);
+					events.onTest(range, name, proofBoolean, stub, module_name);
 				}
 			}
 		}

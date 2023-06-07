@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
-import { getPackageName, getRootDir } from '../utils';
+import GlobalConfig from '../../globalConfig';
+import { getPackageName, getRootDir, isLibraryProject } from '../../utils';
 
 /**
  * Runs the cargo test task whenever the user clicks on a codelens button
@@ -18,7 +19,18 @@ export async function runKaniPlayback(functionName: string): Promise<void> {
 		args: [functionName],
 	};
 
-	const playbackCommand: string = `cargo kani playback --package ${packageName} -Z concrete-playback -- ${functionName} --nocapture`;
+	const globalConfig = GlobalConfig.getInstance();
+	const kaniBinaryPath = globalConfig.getFilePath();
+
+	let playbackCommand: string = `${kaniBinaryPath} playback --package ${packageName} -Z concrete-playback`;
+
+	const isLib: boolean = await isLibraryProject(getRootDir());
+	if (isLib) {
+		playbackCommand += ` --lib`;
+	}
+
+	playbackCommand += ` -- ${functionName} --nocapture`;
+
 	const task = new vscode.Task(
 		taskDefinition,
 		vscode.TaskScope.Workspace,

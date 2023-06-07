@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
-import { runKaniPlayback } from './model/kaniPlayback';
-import { getKaniPath } from './model/kaniRunner';
+import GlobalConfig from './globalConfig';
+import { getKaniPath, getKaniVersion } from './model/kaniRunner';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -18,6 +18,7 @@ import {
 } from './test-tree/createTests';
 import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
+import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
@@ -37,7 +38,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	try {
 		// GET binary path
+		const globalConfig = GlobalConfig.getInstance();
 		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		globalConfig.setFilePath(kaniBinaryPath);
+
+		vscode.window.showInformationMessage(
+			`Kani located at ${kaniBinaryPath} being used for verification`,
+		);
+
+		// GET Version number and display to user
+		await getKaniVersion(globalConfig.getFilePath());
 	} catch (error) {
 		showErrorWithReportIssueButton(
 			'The Kani executable was not found in PATH. Please install it using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
@@ -209,17 +219,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Allows VSCode to enable code lens globally.
 	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
-	vscode.commands.registerCommand('codelens-sample.enableCodeLens', () => {
-		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', true, true);
+	vscode.commands.registerCommand('codelens-kani.enableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', true, true);
 	});
 
 	// Allows VSCode to disable VSCode globally
-	vscode.commands.registerCommand('codelens-sample.disableCodeLens', () => {
-		vscode.workspace.getConfiguration('codelens-sample').update('enableCodeLens', false, true);
+	vscode.commands.registerCommand('codelens-kani.disableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', false, true);
 	});
 
 	// Register the command for the code lens Kani test runner function
-	vscode.commands.registerCommand('codelens-sample.codelensAction', (args: any) => {
+	vscode.commands.registerCommand('codelens-kani.codelensAction', (args: any) => {
 		runKaniPlayback(args);
 	});
 
