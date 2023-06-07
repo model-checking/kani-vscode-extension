@@ -2,12 +2,12 @@
   "name": "kani-vscode-extension",
   "displayName": "Kani",
   "description": "VSCode IDE integration for Kani",
-  "publisher": "Kani",
+  "publisher": "model-checking",
   "repository": {
     "type": "git",
     "url": "https://github.com/model-checking/kani-vscode-extension"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.70.0"
   },
