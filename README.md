@@ -23,6 +23,14 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 -   Visual Studio Code 1.50 or newer
 -   [Kani](https://github.com/model-checking/kani) 0.29 or newer
 
+## Extension Settings
+
+| Setting                           | Description                                                                                                                                                                                        | Default                                                        |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| `kani.enable-codelens` | Enable Codelens actions for `Run Test (kani)` & `Debug Test (kani)`.                                                                                                      | `true`                                                         |
+| `kani.show-output-window`     | Optional string to control when the document should be verified (choose between `true` or `false`.                                                                                 | `false`                                                     |
+
+
 ## Installation
 
 Kani Extension is available as a VSCode plugin. You can install [Kani Extension](https://marketplace.visualstudio.com/items?itemName=model-checking.kani-vscode-extension) from the Visual Studio Marketplace or the Open VSX Registry.
@@ -32,6 +40,8 @@ If you want to build and package from source directly, see [dev-documentation](d
 ## Troubleshooting
 
 1. If verification seems to be taking too much time, stop the verification using the stop button on the testing panel.
+2. Some times it the output seems unexpected, it might because an old result is cached in. It helps to run `cargo clean` and re-running the proof.
+3. If the screen seems frozen, or inactive, try reloading the vscode window.
 
 ## Security
 
