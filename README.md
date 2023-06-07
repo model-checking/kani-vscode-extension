@@ -4,6 +4,8 @@ A Visual Studio Code test extension that allows users to run their [Kani Rust Ve
 
 ## Usage
 
+Check [user guide](docs/user-guide.md) for more detailed information.
+
 ![Kani Usage](resources/screenshots/kani-demo.png)
 
 1.  Open a rust crate or workspace in Visual Studio Code
@@ -19,48 +21,17 @@ A Visual Studio Code test extension that allows users to run their [Kani Rust Ve
 ## Requirements
 
 -   Visual Studio Code 1.50 or newer
--   [Kani](https://github.com/model-checking/kani) 0.12 or newer
+-   [Kani](https://github.com/model-checking/kani) 0.29 or newer
 
 ## Installation
 
-This extension is still in beta and has not yet been published on the marketplace. If you wish to use it now, you can [download the binary](https://github.com/model-checking/kani-vscode-extension) and install it manually.
-
-### Install through the Binary
-
-1.  If you have not already done so, [Install kani](https://github.com/model-checking/kani#installation).
-1.  If you have not already done so, [install VSCode](https://code.visualstudio.com/download).
-1.  Download the Kani extension binary [from our release page](https://github.com/model-checking/kani-vscode-extension/releases/).
-1.  In VSCode, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type ext install
-1.  Select the `Extensions: Install from VSIX...` command.
-1.  In the file dialog that opens, navigate to the location where you downloaded the `.vsix` file and select it.
-1.  The extension should be installed and you should see a message in the VS Code output pane saying that the extension was installed successfully.
-
-
-![Kani install vsix](resources/screenshots/install-kani-extension.png)
-
+Kani Extension is available as a VSCode plugin. You can install [Kani Extension](https://marketplace.visualstudio.com/items?itemName=model-checking.kani-vscode-extension) from the Visual Studio Marketplace or the Open VSX Registry.
 
 If you want to build and package from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
 
 ## Troubleshooting
 
-### Stuck at *Verifying...*
-
-There is a known [issue](https://github.com/model-checking/kani-vscode-extension/issues/6) where the extension appears to get stuck if the stack size is too small.
-If you experience this issue, you can increase the stack size or stop the verification. We are working to removing the need to increase the stack size.
-
-Here is the workaround for the issue,
-The user can set the environment variable `COMPlus_DefaultStackSize` to a sufficiently large value before starting VSCode. For example:
-
-```sh
-# Increase the stack size
-export COMPlus_DefaultStackSize=100000
-# Launch VSCode
-code
-```
-
-OR
-
-stop the verification using the stop button on the testing panel.
+1. If verification seems to be taking too much time, stop the verification using the stop button on the testing panel.
 
 ## Security
 
