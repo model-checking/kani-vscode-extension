@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { KaniResponse } from '../constants';
+import GlobalConfig from '../globalConfig';
 import {
 	CommandArgs,
 	getRootDir,
@@ -14,7 +15,11 @@ import {
 	showErrorWithReportIssueButton,
 	splitCommand,
 } from '../utils';
-import { checkOutputForError, responseParserInterface } from './kaniOutputParser';
+import {
+	KaniResponseError,
+	checkOutputForError,
+	responseParserInterface,
+} from './kaniOutputParser';
 
 // Store the output from process into a object with this type
 interface CommandOutput {
@@ -22,6 +27,46 @@ interface CommandOutput {
 	stderr: string;
 	errorCode: any;
 	error: any;
+}
+
+// Displays the version of kani being used to the user as a status bar icon
+export async function getKaniVersion(pathKani: string): Promise<void> {
+	try {
+		execFile(pathKani, ['--version'], (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error: ${error}`);
+				return;
+			}
+
+			if (stdout) {
+				// Split the stdout by whitespace to separate words
+				const words = stdout.split(/\s+/);
+				// Find the word that contains the version number
+				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word))!;
+				const versionNum: number = parseFloat(versionWord);
+
+				console.log(`Kani version is ${versionNum}`);
+
+				if (versionNum < 0.29) {
+					vscode.window.showWarningMessage(
+						'Please install Kani 0.29 or later using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
+					);
+				}
+
+				const versionMessage = `$(gear~spin) Kani ${versionWord} being used to verify`;
+
+				vscode.window.setStatusBarMessage(versionMessage, 6000);
+				return;
+			}
+
+			console.log(`stdout: ${stdout}`);
+			console.error(`stderr: ${stderr}`);
+		});
+	} catch (error) {
+		// Ignore command error
+		return;
+	}
+	return;
 }
 
 /**
@@ -47,7 +92,6 @@ export function getKaniPath(kaniCommand: string): Promise<string> {
 				return;
 			}
 			const cargoKaniPath = stdout.trim();
-			console.log(`Cargo is located at: ${cargoKaniPath}`);
 
 			// Check if cargo path is valid
 			try {
@@ -83,7 +127,8 @@ export async function runKaniCommand(
 	const args = commandSplit.args;
 
 	if (command == 'cargo' || command == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -99,7 +144,7 @@ export async function runKaniCommand(
 			return executionResult;
 		} catch (error: any) {
 			showErrorWithReportIssueButton(`Could not run Kani on harness: ${error}`);
-			return new Error(`Kani executable was unable to detect or run harness.`);
+			throw error;
 		}
 	} else {
 		return false;
@@ -122,7 +167,8 @@ export async function createFailedDiffMessage(command: string): Promise<KaniResp
 
 	// Check the command running and execute that with the full path and safe options
 	if (commandSplit.commandPath == 'cargo' || commandSplit.commandPath == 'cargo kani') {
-		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = globalConfig.getFilePath();
 		const options = {
 			shell: false,
 			cwd: directory,
@@ -172,11 +218,21 @@ async function executeKaniProcess(
 
 			// Send output to diagnostics and return if there is an error in stdout
 			// this means that the command could not be executed.
-			if (checkOutputForError(output.stdout, output.stderr)) {
-				sendErrorToChannel(output, args);
-				reject(new Error(error?.message));
+			try {
+				const result = checkOutputForError(output.stdout, output.stderr);
+				if (result) {
+					sendErrorToChannel(output, args);
+					reject(new Error(error?.message));
+				}
+			} catch (error) {
+				if (error instanceof KaniResponseError) {
+					if (error.name === 'KaniCompilationError') {
+						sendErrorToChannel(output, args);
+						reject(new Error(error?.message));
+					}
+				}
+				reject(error);
 			}
-
 			// Send output to output channel specific to the harness
 			sendOutputToChannel(output, args);
 
@@ -210,8 +266,11 @@ async function executeKaniProcess(
 }
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
-function sendErrorToChannel(output: CommandOutput, args: string[]): void {
-	const harnessName = args.at(1)!;
+export function sendErrorToChannel(output: CommandOutput, args: string[]): void {
+	if (args.length == 0) {
+		return;
+	}
+	const harnessName = args.at(args.length - 1)!;
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
@@ -224,8 +283,11 @@ function sendErrorToChannel(output: CommandOutput, args: string[]): void {
 }
 
 // Creates a unique name and adds a channel for the harness output to Output Logs
-function sendOutputToChannel(output: CommandOutput, args: string[]): void {
-	const harnessName = args.at(1)!;
+export function sendOutputToChannel(output: CommandOutput, args: string[]): void {
+	if (args.length == 0) {
+		return;
+	}
+	const harnessName = args.at(args.length - 1)!;
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
@@ -233,6 +295,14 @@ function sendOutputToChannel(output: CommandOutput, args: string[]): void {
 
 	// Append stdout to the output channel
 	channel.appendLine(output.stdout);
-	// Open channel but don't change focus
-	channel.show(true);
+
+	// Access the configuration
+	const config = vscode.workspace.getConfiguration('Kani');
+	const showOutputWindow = config.get('showOutputWindow');
+
+	// Use the value to show or hide the output window
+	if (showOutputWindow) {
+		// Open channel but don't change focus
+		channel.show(true);
+	}
 }

@@ -316,6 +316,7 @@ export const harnessMetadata = [
 			test: true,
 			stub: false,
 		},
+		module: 'test',
 	},
 	{
 		harnessName: 'insert_test_2',
@@ -330,6 +331,7 @@ export const harnessMetadata = [
 			test: true,
 			stub: false,
 		},
+		module: 'test',
 	},
 	{
 		harnessName: 'random_name',
@@ -344,6 +346,7 @@ export const harnessMetadata = [
 			test: true,
 			stub: false,
 		},
+		module: 'test',
 	},
 	{
 		harnessName: 'function_abc',
@@ -358,6 +361,7 @@ export const harnessMetadata = [
 			test: false,
 			stub: false,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'function_xyz',
@@ -372,6 +376,7 @@ export const harnessMetadata = [
 			test: false,
 			stub: false,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'function_xyz_2',
@@ -386,6 +391,7 @@ export const harnessMetadata = [
 			test: false,
 			stub: false,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'function_xyz_3',
@@ -400,6 +406,7 @@ export const harnessMetadata = [
 			test: false,
 			stub: false,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'function_xyz_7',
@@ -414,6 +421,7 @@ export const harnessMetadata = [
 			test: false,
 			stub: false,
 		},
+		module: undefined,
 	},
 ];
 
@@ -431,6 +439,7 @@ export const attributeMetadataUnsupported = [
 			test: false,
 			stub: false,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'encrypt_then_decrypt_is_identity',
@@ -445,6 +454,7 @@ export const attributeMetadataUnsupported = [
 			test: false,
 			stub: true,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'function_2',
@@ -464,6 +474,7 @@ export const attributeMetadataUnsupported = [
 			test: false,
 			stub: true,
 		},
+		module: undefined,
 	},
 	{
 		harnessName: 'function_3',
@@ -480,5 +491,6 @@ export const attributeMetadataUnsupported = [
 			test: true,
 			stub: true,
 		},
+		module: undefined,
 	},
 ];

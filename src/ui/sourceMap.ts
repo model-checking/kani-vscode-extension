@@ -20,6 +20,8 @@ export interface HarnessMetadata {
 	endPosition: Position;
 	attributes: string[];
 	args: AttributeMetaData;
+	module?: string;
+	fileMetadata?: FileMetaData;
 }
 
 export interface AttributeMetaData {
