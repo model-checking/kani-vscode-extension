@@ -1,16 +1,20 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+import * as path from 'path';
+
 import * as vscode from 'vscode';
 import { MarkdownString, TestMessage, Uri } from 'vscode';
 
 import { KaniResponse } from '../constants';
-import {
-	captureFailedChecks,
-	runCargoKaniTest,
-	runKaniHarnessInterface,
-} from '../model/kaniCommandCreate';
+import { captureFailedChecks, runKaniHarnessInterface } from '../model/kaniCommandCreate';
 import { SourceCodeParser } from '../ui/sourceCodeParser';
-import { getContentFromFilesystem } from '../utils';
+import { FileMetaData } from '../ui/sourceMap';
+import {
+	extractFileName,
+	getContentFromFilesystem,
+	getPackageName,
+	getPackageNameFromFilePath,
+} from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
 
@@ -57,9 +61,9 @@ export async function findInitialFiles(
 		);
 		if (fileHasProofs) {
 			if (rootItem) {
-				getOrCreateFile(controller, file, rootItem);
+				await getOrCreateFile(controller, file, rootItem);
 			} else {
-				getOrCreateFile(controller, file);
+				await getOrCreateFile(controller, file);
 			}
 		} else {
 			console.log(fileHasProofs, file);
@@ -75,21 +79,27 @@ export async function findInitialFiles(
  * @param rootItem - root node of the test tree
  * @returns - Test File and it's metadata as a record
  */
-export function getOrCreateFile(
+export async function getOrCreateFile(
 	controller: vscode.TestController,
 	uri: Uri,
 	rootItem?: vscode.TestItem,
-): TestFileMetaData {
+): Promise<TestFileMetaData> {
 	const existing = controller.items.get(uri.toString());
 	if (existing) {
 		return { file: existing, data: testData.get(existing) as TestFile };
 	}
 
-	const file: vscode.TestItem = controller.createTestItem(
-		uri.toString(),
-		uri.path.split('/').pop()!,
-		uri,
-	);
+	let testLabel = '';
+
+	// Label from the file URI
+	const packageName = await getPackageNameFromFilePath(uri);
+	if (packageName !== undefined) {
+		testLabel = packageName + '/' + uri.fsPath.split('/').pop()!;
+	} else {
+		testLabel = uri.fsPath.split('/').pop()!;
+	}
+
+	const file: vscode.TestItem = controller.createTestItem(uri.toString(), testLabel, uri);
 
 	const data: TestFile = new TestFile();
 	testData.set(file, data);
@@ -149,14 +159,27 @@ export class TestFile {
 			}
 		};
 
+		const metadata = await getCurrentRustFileMetadata(item)!;
+
 		// Trigger the parser and process extracted metadata to create a test case
 		await SourceCodeParser.parseRustfile(content, {
-			onTest: (range, name, proofBoolean, args) => {
+			onTest: (range, harnessName, proofBoolean, stubAttribute, moduleName) => {
 				const parent = ancestors[ancestors.length - 1];
 				if (!item.uri || !item.uri.fsPath) {
 					throw new Error('No item or item path found');
 				}
-				const data: TestCase = new TestCase(item.uri.fsPath, name, proofBoolean, args);
+				// get file name as well (we already do, so it's fine)
+
+				// pass in the module name as well if present
+				const packageName = typeof metadata?.fileName === 'undefined' ? '' : metadata?.filePackage;
+				const data: TestCase = new TestCase(
+					item.uri.fsPath,
+					harnessName,
+					packageName,
+					proofBoolean,
+					stubAttribute,
+					moduleName,
+				);
 				const id: string = `${item.uri}/${data.getLabel()}`;
 
 				const tcase: vscode.TestItem = controller.createTestItem(id, data.getLabel(), item.uri);
@@ -192,46 +215,78 @@ export class TestFile {
  *
  * @param file_name - name of the harness that is to be verified
  * @param harness_name - name of harness to be verified
+ * @param package_name - Name of the package the harness is under that is extracted from cargo.toml
  * @param proof_boolean - True if proof, false if bolero harness
- * @param harness_unwind_value - unwind value of the harness (if it exists)
+ * @param stubbing - True if the Kani harness is annotated with stubs
+ * @param module_name - Name of the module containing the harness if present
  * @returns verification status (i.e success or failure)
  */
 export class TestCase {
 	constructor(
 		readonly file_name: string,
 		readonly harness_name: string,
+		readonly package_name: string,
 		readonly proof_boolean: boolean,
-		readonly harness_unwind_value?: number,
+		readonly stubbing_request?: boolean,
+		readonly module_name?: string,
 	) {}
 
 	getLabel(): string {
 		return `${this.harness_name}`;
 	}
 
+	// Expand the harness name to include the name of the file and module name as an attempt to narrow down the number of matches for this harness.
+	// This is a heuristic, and it may generate an identifier that does not match any symbol.
+	expandFunctionName(): string {
+		if (this.module_name === '') {
+			const fileName = extractFileName(this.file_name);
+			if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
+				return `${this.harness_name}`;
+			}
+			return `${fileName}::${this.harness_name}`;
+		} else if (this.module_name !== '') {
+			if (this.file_name !== '') {
+				const fileName = extractFileName(this.file_name);
+				if (fileName === 'main' || fileName === 'lib' || fileName === 'mod') {
+					return `${this.module_name}::${this.harness_name}`;
+				}
+				return `${fileName}::${this.module_name}::${this.harness_name}`;
+			}
+		}
+
+		return this.harness_name;
+	}
+
 	// Run Kani on the harness, create links and pass/fail ui, present to the user
 	async run(item: vscode.TestItem, options: vscode.TestRun): Promise<void> {
 		const start: number = Date.now();
+		const qualified_name = this.expandFunctionName();
+
 		if (this.proof_boolean) {
 			const actual: number = await this.evaluate(
-				this.file_name,
 				this.harness_name,
-				this.harness_unwind_value,
+				this.package_name,
+				this.stubbing_request,
+				qualified_name,
 			);
 			const duration: number = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
-			} else {
+			} else if (actual == 1) {
 				const location = new vscode.Location(item.uri!, item.range!);
 				const responseObject: KaniResponse = await captureFailedChecks(
-					this.harness_name,
-					this.harness_unwind_value,
+					qualified_name,
+					this.package_name,
+					false,
+					this.stubbing_request,
 				);
 				const failedChecks: string = responseObject.failedProperty;
 				const failedMessage: string = responseObject.failedMessages;
 				const currentCase = new FailedCase(
 					failedChecks,
 					this.file_name,
-					this.harness_name,
+					qualified_name,
+					this.package_name,
 					this.proof_boolean,
 					failedMessage,
 				);
@@ -240,43 +295,81 @@ export class TestCase {
 				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
+			} else {
+				options.errored(
+					item,
+					new TestMessage(
+						'Kani executable was unable to detect or run harness. Please check Output (Kani) channel in the Output window for more information.',
+					),
+				);
 			}
 		} else {
-			const actual = await this.evaluateTest(this.harness_name, this.harness_unwind_value);
+			const actual = await this.evaluateTest(
+				this.harness_name,
+				this.package_name,
+				this.stubbing_request,
+				qualified_name,
+			);
 			const duration = Date.now() - start;
 			if (actual === 0) {
 				options.passed(item, duration);
-			} else {
+			} else if (actual == 1) {
 				const location = new vscode.Location(item.uri!, item.range!);
-				const responseObject: KaniResponse = await runCargoKaniTest(
-					this.harness_name,
+				const responseObject: KaniResponse = await captureFailedChecks(
+					qualified_name,
+					this.package_name,
 					true,
-					this.harness_unwind_value,
+					this.stubbing_request,
 				);
 				const failedChecks: string = responseObject.failedProperty;
 				const failedMessage: string = responseObject.failedMessages;
 				const currentCase = new FailedCase(
 					failedChecks,
 					this.file_name,
-					this.harness_name,
+					qualified_name,
+					this.package_name,
 					this.proof_boolean,
 					failedMessage,
 				);
 				const messageWithLink: vscode.TestMessage = currentCase.handleFailure();
 				options.appendOutput(failedMessage, location, item);
 				options.failed(item, messageWithLink, duration);
+			} else {
+				options.errored(
+					item,
+					new TestMessage(
+						'Kani executable was unable to detect or run harness. Please check Output (Kani) channel in the Output window for more information.',
+					),
+				);
 			}
 		}
 	}
 
 	// Run kani on the file, crate with given arguments
-	async evaluate(rsFile: string, harness_name: string, args?: number): Promise<number> {
+	async evaluate(
+		harness_name: string,
+		package_name: string,
+		stubbing?: boolean,
+		qualified_name?: string,
+	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			if (args === undefined || NaN) {
-				const outputKani: number = await runKaniHarnessInterface(harness_name);
+			if (stubbing === false || undefined || NaN) {
+				const outputKani: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					false,
+					undefined,
+					qualified_name,
+				);
 				return outputKani;
 			} else {
-				const outputKani: number = await runKaniHarnessInterface(harness_name, args);
+				const outputKani: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					false,
+					stubbing,
+					qualified_name,
+				);
 				return outputKani;
 			}
 		}
@@ -284,14 +377,31 @@ export class TestCase {
 		return 0;
 	}
 
-	// Run kani on bolero test case, file, crate with given arguments
-	async evaluateTest(harness_name: string, harness_args?: number): Promise<number> {
+	// Run kani on Bolero test case, file, crate with given arguments
+	async evaluateTest(
+		harness_name: string,
+		package_name: string,
+		stubbing?: boolean,
+		qualified_name?: string,
+	): Promise<number> {
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			if (harness_args === undefined || NaN) {
-				const outputKaniTest: number = await runCargoKaniTest(harness_name, false);
+			if (stubbing === false || undefined || NaN) {
+				const outputKaniTest: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					true,
+					false,
+					qualified_name,
+				);
 				return outputKaniTest;
 			} else {
-				const outputKaniTest: number = await runCargoKaniTest(harness_name, false, harness_args);
+				const outputKaniTest: number = await runKaniHarnessInterface(
+					harness_name,
+					package_name,
+					true,
+					stubbing,
+					qualified_name,
+				);
 				return outputKaniTest;
 			}
 		}
@@ -310,10 +420,11 @@ class FailedCase extends TestCase {
 		failed_checks: string,
 		file_name: string,
 		harness_name: string,
+		package_name: string,
 		harness_type: boolean,
 		failed_message?: string,
 	) {
-		super(file_name, harness_name, harness_type);
+		super(file_name, harness_name, package_name, harness_type);
 		this.failed_checks = failed_checks;
 		if (failed_message) {
 			this.failed_message = failed_message;
@@ -364,7 +475,7 @@ class FailedCase extends TestCase {
 			`command:Kani.runConcretePlayback?${encodeURIComponent(JSON.stringify(args))}`,
 		);
 		sample.appendMarkdown(
-			`[Run concrete playback for ${this.harness_name}](${concretePlaybackUri})`,
+			`[Generate concrete test for ${this.harness_name}](${concretePlaybackUri})`,
 		);
 
 		return sample;
@@ -389,4 +500,47 @@ class FailedCase extends TestCase {
 
 		return placeholderMarkdown;
 	}
+}
+
+async function getCurrentRustFileMetadata(item: any): Promise<FileMetaData | undefined> {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return undefined;
+	}
+
+	const fileName = path.basename(item.uri.fsPath);
+	const filePath = item.uri.fsPath;
+
+	const workspace = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+
+	if (!workspace) {
+		return undefined;
+	}
+
+	const workspacePath = workspace.uri.fsPath;
+	const crateName = path.basename(workspacePath);
+	const cratePath = workspacePath;
+
+	const fs = require('fs');
+	let tomlsInFolder = '';
+	let tomlFilePath: string = filePath;
+
+	do {
+		tomlFilePath = path.dirname(tomlFilePath);
+		tomlsInFolder = fs
+			.readdirSync(tomlFilePath)
+			.filter((file: string) => path.extname(file) === '.toml');
+	} while (!tomlsInFolder.includes('Cargo.toml') && tomlFilePath.length > 0);
+
+	const filePackage = await getPackageName(tomlFilePath);
+
+	const file_metadata: FileMetaData = {
+		fileName: fileName,
+		filePath: filePath,
+		filePackage: filePackage,
+		crateName: crateName,
+		cratePath: cratePath,
+	};
+
+	return file_metadata;
 }

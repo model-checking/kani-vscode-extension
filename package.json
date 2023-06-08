@@ -14,6 +14,9 @@
   "categories": [
     "Testing"
   ],
+  "permissions": [
+    "debug"
+  ],
   "activationEvents": [
     "onLanguage:rust"
   ],
@@ -31,8 +34,32 @@
         "when": "editorLangId == rust",
         "category": "Kani",
         "title": "Run Cargo Kani"
+      },
+      {
+        "title": "Enable CodeLens",
+        "command": "codelens-kani.enableCodeLens",
+        "category": "CodeLens Sample"
+      },
+      {
+        "title": "Disable Codelens",
+        "command": "codelens-kani.disableCodeLens",
+        "category": "CodeLens Sample"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Kani",
+      "properties": {
+        "codelens-kani.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        },
+        "Kani.showOutputWindow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Controls the visibility of the output window by default."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -72,6 +99,7 @@
   "dependencies": {
     "esbuild": "0.16.2",
     "readline": "^1.3.0",
+    "toml": "^3.0.0",
     "web-tree-sitter": "^0.20.8"
   }
 }

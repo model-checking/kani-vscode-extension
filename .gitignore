@@ -41,7 +41,6 @@ __pycache__/
 
 ## Node
 node_modules
-package-lock.json
 
 # VSCode
 npm-debug.log

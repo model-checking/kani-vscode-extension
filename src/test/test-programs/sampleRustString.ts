@@ -5,21 +5,18 @@ export const fullProgramSource = `
 mod test {
     #[test]
     #[cfg_attr(kani, kani::proof, kani::unwind(0))]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_80978342() {
         assert!(1==3);
     }
 
     #[test]
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
         assert!(1==1);
     }
 
     #[test]
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
         assert!(1==2);
     }
@@ -68,21 +65,18 @@ export const boleroProofs = `
 mod test {
     #[test]
     #[cfg_attr(kani, kani::proof, kani::unwind(0))]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_80978342() {
         assert!(1==3);
     }
 
     #[test]
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
         assert!(1==1);
     }
 
     #[test]
     #[cfg_attr(kani, kani::proof, kani::unwind(1))]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
         assert!(1==2);
     }
@@ -137,12 +131,36 @@ fn function_1() {
     assert!(1 == 2);
 }
 
+#[cfg(kani)]
+fn mock_random<T: kani::Arbitrary>() -> T {
+    kani::any()
+}
 
 #[cfg(kani)]
 #[kani::proof]
-#[kani::stub]
-pub fn function_2() {
-    assert!(1 == 2);
+#[kani::stub(rand::random, mock_random)]
+fn encrypt_then_decrypt_is_identity() {
+    let data: u32 = kani::any();
+    let encryption_key: u32 = rand::random();
+    let encrypted_data = data ^ encryption_key;
+    let decrypted_data = encrypted_data ^ encryption_key;
+    assert_eq!(data, decrypted_data);
+}
+
+#[cfg(kani)]
+#[kani::proof]
+#[kani::stub(rand::random, mock_random)]
+#[kani::unwind(2)]
+#[kani::solver(kissat)]
+#[kani::should_panic]
+fn function_2() {
+    assert_eq!(1, 1);
+}
+
+#[test]
+#[cfg_attr(kani, kani::proof, kani::unwind(1), kani::stub(rand::random, mock_random), kani::solver(kissat))]
+fn function_3() {
+    assert_eq!(1, 1);
 }
 `;
 
@@ -150,19 +168,16 @@ export const rustFileWithoutProof = `
 #[cfg(test)]
 mod test {
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test() {
         assert!(1==2);
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn insert_test_2() {
         assert!(1==1);
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this test is too expensive for miri
     fn random_name() {
         assert!(1==1);
     }
@@ -171,7 +186,7 @@ mod test {
 
 export const findHarnessesResultKani = [
 	{
-		name: 'function_abc',
+		harnessName: 'function_abc',
 		fullLine: 'fn function_abc() {',
 		endPosition: {
 			row: 4,
@@ -181,10 +196,11 @@ export const findHarnessesResultKani = [
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
 	},
 	{
-		name: 'function_xyz',
+		harnessName: 'function_xyz',
 		fullLine: 'pub fn function_xyz() {',
 		endPosition: {
 			row: 11,
@@ -194,10 +210,11 @@ export const findHarnessesResultKani = [
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
 	},
 	{
-		name: 'function_xyz_2',
+		harnessName: 'function_xyz_2',
 		fullLine: 'unsafe fn function_xyz_2() {',
 		endPosition: {
 			row: 20,
@@ -207,10 +224,11 @@ export const findHarnessesResultKani = [
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
 	},
 	{
-		name: 'function_xyz_3',
+		harnessName: 'function_xyz_3',
 		fullLine: 'pub unsafe fn function_xyz_3() {',
 		endPosition: {
 			row: 26,
@@ -220,10 +238,11 @@ export const findHarnessesResultKani = [
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
 	},
 	{
-		name: 'function_xyz_7',
+		harnessName: 'function_xyz_7',
 		fullLine: 'fn function_xyz_7() {',
 		endPosition: {
 			row: 34,
@@ -233,162 +252,182 @@ export const findHarnessesResultKani = [
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
 	},
 ];
 
 export const findHarnessesResultBolero = [
 	{
-		name: 'insert_test_80978342',
+		harnessName: 'insert_test_80978342',
 		fullLine: 'fn insert_test_80978342() {',
 		endPosition: {
-			row: 6,
+			row: 5,
 			column: 27,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(0))]'],
 		args: {
 			proof: true,
 			test: true,
+			stub: false,
 		},
 	},
 	{
-		name: 'insert_test_2',
+		harnessName: 'insert_test_2',
 		fullLine: 'fn insert_test_2() {',
 		endPosition: {
-			row: 13,
+			row: 11,
 			column: 20,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
 		args: {
 			proof: true,
 			test: true,
+			stub: false,
 		},
 	},
 	{
-		name: 'random_name',
+		harnessName: 'random_name',
 		fullLine: 'fn random_name() {',
 		endPosition: {
-			row: 20,
+			row: 17,
 			column: 18,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
 		args: {
 			proof: true,
 			test: true,
+			stub: false,
 		},
 	},
 ];
 
 export const harnessMetadata = [
 	{
-		name: 'insert_test_80978342',
+		harnessName: 'insert_test_80978342',
 		fullLine: 'fn insert_test_80978342() {',
 		endPosition: {
-			row: 6,
+			row: 5,
 			column: 27,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(0))]'],
 		args: {
 			proof: true,
 			test: true,
+			stub: false,
 		},
+		module: 'test',
 	},
 	{
-		name: 'insert_test_2',
+		harnessName: 'insert_test_2',
 		fullLine: 'fn insert_test_2() {',
 		endPosition: {
-			row: 13,
+			row: 11,
 			column: 20,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
 		args: {
 			proof: true,
 			test: true,
+			stub: false,
 		},
+		module: 'test',
 	},
 	{
-		name: 'random_name',
+		harnessName: 'random_name',
 		fullLine: 'fn random_name() {',
 		endPosition: {
-			row: 20,
+			row: 17,
 			column: 18,
 		},
 		attributes: ['#[cfg_attr(kani, kani::proof, kani::unwind(1))]'],
 		args: {
 			proof: true,
 			test: true,
+			stub: false,
 		},
+		module: 'test',
 	},
 	{
-		name: 'function_abc',
+		harnessName: 'function_abc',
 		fullLine: 'fn function_abc() {',
 		endPosition: {
-			row: 28,
+			row: 25,
 			column: 15,
 		},
 		attributes: ['#[kani::unwind(0)]'],
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
+		module: undefined,
 	},
 	{
-		name: 'function_xyz',
+		harnessName: 'function_xyz',
 		fullLine: 'pub fn function_xyz() {',
 		endPosition: {
-			row: 35,
+			row: 32,
 			column: 19,
 		},
 		attributes: [],
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
+		module: undefined,
 	},
 	{
-		name: 'function_xyz_2',
+		harnessName: 'function_xyz_2',
 		fullLine: 'unsafe fn function_xyz_2() {',
 		endPosition: {
-			row: 44,
+			row: 41,
 			column: 24,
 		},
 		attributes: ['#[kani::unwind(2)]', '#[kani::solver(kissat)]', '#[kani::should_panic]'],
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
+		module: undefined,
 	},
 	{
-		name: 'function_xyz_3',
+		harnessName: 'function_xyz_3',
 		fullLine: 'pub unsafe fn function_xyz_3() {',
 		endPosition: {
-			row: 50,
+			row: 47,
 			column: 28,
 		},
 		attributes: [],
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
+		module: undefined,
 	},
 	{
-		name: 'function_xyz_7',
+		harnessName: 'function_xyz_7',
 		fullLine: 'fn function_xyz_7() {',
 		endPosition: {
-			row: 58,
+			row: 55,
 			column: 17,
 		},
 		attributes: ['#[kani::unwind(0)]', '#[kani::solver(kissat)]'],
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
+		module: undefined,
 	},
 ];
 
 export const attributeMetadataUnsupported = [
 	{
-		name: 'function_1',
+		harnessName: 'function_1',
 		fullLine: 'fn function_1() {',
 		endPosition: {
 			row: 6,
@@ -398,19 +437,60 @@ export const attributeMetadataUnsupported = [
 		args: {
 			proof: true,
 			test: false,
+			stub: false,
 		},
+		module: undefined,
 	},
 	{
-		name: 'function_2',
-		fullLine: 'pub fn function_2() {',
+		harnessName: 'encrypt_then_decrypt_is_identity',
+		fullLine: 'fn encrypt_then_decrypt_is_identity() {',
 		endPosition: {
-			row: 14,
-			column: 17,
+			row: 18,
+			column: 35,
 		},
-		attributes: ['#[kani::stub]'],
+		attributes: ['#[kani::stub(rand::random, mock_random)]'],
 		args: {
 			proof: true,
 			test: false,
+			stub: true,
 		},
+		module: undefined,
+	},
+	{
+		harnessName: 'function_2',
+		fullLine: 'fn function_2() {',
+		endPosition: {
+			row: 32,
+			column: 13,
+		},
+		attributes: [
+			'#[kani::stub(rand::random, mock_random)]',
+			'#[kani::unwind(2)]',
+			'#[kani::solver(kissat)]',
+			'#[kani::should_panic]',
+		],
+		args: {
+			proof: true,
+			test: false,
+			stub: true,
+		},
+		module: undefined,
+	},
+	{
+		harnessName: 'function_3',
+		fullLine: 'fn function_3() {',
+		endPosition: {
+			row: 38,
+			column: 13,
+		},
+		attributes: [
+			'#[cfg_attr(kani, kani::proof, kani::unwind(1), kani::stub(rand::random, mock_random), kani::solver(kissat))]',
+		],
+		args: {
+			proof: true,
+			test: true,
+			stub: true,
+		},
+		module: undefined,
 	},
 ];

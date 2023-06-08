@@ -2,6 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import { KaniResponse } from '../constants';
 
+type ErrorName = 'KaniCompilationError' | 'NoHarnessesError';
+
+export class KaniResponseError extends Error {
+	name: ErrorName;
+	message: string;
+	cause: any;
+
+	constructor({ name, message, cause }: { name: ErrorName; message: string; cause?: any }) {
+		super();
+		this.name = name;
+		this.message = message;
+		this.cause = cause;
+	}
+}
+
 /**
  * Metadata about the property that needs to be processed before presenting to the UI
  *
@@ -36,7 +51,7 @@ class CheckInstance {
 	 * Structured Response for the Diff Output
 	 */
 	public createFailureMessage(): string {
-		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nLocation - ${this.location}`;
+		const responseMessage: string = `Property - ${this.propertyName}\nMessage - ${this.description}\nStatus - ${this.status}\nLocation - ${this.location}\n`;
 		return responseMessage;
 	}
 
@@ -47,6 +62,33 @@ class CheckInstance {
 		const responseMessage: string = `${this.description}`;
 		return responseMessage;
 	}
+}
+
+// Check if stderr and std out contain the error strings or the strings indicating successful compilation and verification
+export function checkOutputForError(outString: string, errString: string): any {
+	if (errString.includes('Finished dev') && outString.includes('VERIFICATION:-')) {
+		return false;
+	}
+
+	// add multiple harnesses detection also error
+	if (errString.includes('no harnesses matched the harness filter')) {
+		throw new KaniResponseError({
+			name: 'NoHarnessesError',
+			message: 'No harnesses found with the request',
+			cause: errString,
+		});
+	}
+
+	// If by this point, we havent returned false, it usually happens only because there was an error with kani itself
+	if (outString.includes('error') && errString.includes('error')) {
+		throw new KaniResponseError({
+			name: 'KaniCompilationError',
+			message: 'Kani Compilation error found',
+			cause: errString,
+		});
+	}
+
+	return false;
 }
 
 // Expose output parser to other modules
@@ -95,20 +137,29 @@ function cleanChecksArray(checksArray: Array<string>): Array<string> {
 }
 
 function parseChecksArray(checksArray: Array<string>): KaniResponse {
-	let responseMessage = ``;
-	let displayMessage = ``;
+	let failureResponseMessage = ``;
+	let failureDisplayMessage = ``;
+	const failure_statuses = ['FAILURE', 'UNDETERMINED', 'UNREACHABLE', 'UNSATISFIABLE'];
+	const success_statuses = ['SATISFIED', 'SUCCESS'];
+
 	for (let i = 0; i < checksArray.length; i++) {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
-		if (checkInstanceObject.status !== 'SUCCESS') {
-			responseMessage += checkInstanceObject.createFailureMessage();
-			displayMessage = checkInstanceObject.createDisplayMessage();
+		if (failure_statuses.includes(checkInstanceObject.status)) {
+			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
+			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
+		} else if (!success_statuses.includes(checkInstanceObject.status)) {
+			failureResponseMessage +=
+				checkInstanceObject.createFailureMessage() +
+				'WARNING: unknown status returned from Kani.\n\n';
+			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
 		}
 	}
 	const failureResponse: KaniResponse = {
-		failedProperty: responseMessage,
-		failedMessages: displayMessage,
+		failedProperty: failureResponseMessage,
+		failedMessages: failureDisplayMessage,
 	};
+
 	return failureResponse;
 }
 

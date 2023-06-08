@@ -3,6 +3,9 @@
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
+import { connectToDebugger } from './debugger/debugger';
+import GlobalConfig from './globalConfig';
+import { getKaniPath, getKaniVersion } from './model/kaniRunner';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
 	KaniData,
@@ -13,17 +16,43 @@ import {
 	getWorkspaceTestPatterns,
 	testData,
 } from './test-tree/createTests';
+import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
+import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
-import { checkCargoExist, getContentFromFilesystem, getRootDirURI } from './utils';
+import {
+	checkCargoExist,
+	getContentFromFilesystem,
+	getRootDirURI,
+	showErrorWithReportIssueButton,
+} from './utils';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
-		vscode.window.showErrorMessage('Cannot find Cargo.toml to run Cargo Kani on crate');
+		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
+		return;
+	}
+	try {
+		// GET binary path
+		const globalConfig = GlobalConfig.getInstance();
+		const kaniBinaryPath = await getKaniPath('cargo-kani');
+		globalConfig.setFilePath(kaniBinaryPath);
+
+		vscode.window.showInformationMessage(
+			`Kani located at ${kaniBinaryPath} being used for verification`,
+		);
+
+		// GET Version number and display to user
+		await getKaniVersion(globalConfig.getFilePath());
+	} catch (error) {
+		showErrorWithReportIssueButton(
+			'The Kani executable was not found in PATH. Please install it using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
+		);
+		return;
 	}
 
 	const controller: vscode.TestController = vscode.tests.createTestController(
@@ -157,7 +186,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const runningConcretePlayback = vscode.commands.registerCommand(
 		'Kani.runConcretePlayback',
 		async (harnessArgs) => {
-			callConcretePlayback('Kani.runConcretePlayback', harnessArgs);
+			callConcretePlayback(harnessArgs);
 		},
 	);
 
@@ -175,19 +204,49 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			return;
 		}
 
-		const { file, data } = getOrCreateFile(controller, e.uri);
-		data.updateFromContents(controller, e.getText(), file);
+		const { file, data } = await getOrCreateFile(controller, e.uri);
+		await data.updateFromContents(controller, e.getText(), file);
 		data.addToCrate(controller, file, treeRoot);
 	}
+
+	const codelensProvider = new CodelensProvider();
+	const rustLanguageSelector = { scheme: 'file', language: 'rust' };
+
+	const providerDisposable = vscode.languages.registerCodeLensProvider(
+		rustLanguageSelector,
+		codelensProvider,
+	);
+
+	// Allows VSCode to enable code lens globally.
+	// If the user switches off code lens in settings, the Kani code lens action will be switched off too.
+	vscode.commands.registerCommand('codelens-kani.enableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', true, true);
+	});
+
+	// Allows VSCode to disable VSCode globally
+	vscode.commands.registerCommand('codelens-kani.disableCodeLens', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', false, true);
+	});
+
+	// Register the command for the code lens Kani test runner function
+	vscode.commands.registerCommand('codelens-kani.codelensAction', (args: any) => {
+		runKaniPlayback(args);
+	});
 
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
-		// vscode.workspace.onDidChangeTextDocument(e => updateNodeForDocument(e.document)),
+		vscode.workspace.onDidSaveTextDocument(async (e) => await updateNodeForDocument(e)),
 	);
 
 	context.subscriptions.push(runKani);
 	context.subscriptions.push(runcargoKani);
 	context.subscriptions.push(runningViewerReport);
 	context.subscriptions.push(runningConcretePlayback);
+	context.subscriptions.push(providerDisposable);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extension.connectToDebugger', (programName) =>
+			connectToDebugger(programName),
+		),
+	);
 }

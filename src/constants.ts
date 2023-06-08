@@ -11,8 +11,11 @@ export namespace KaniConstants {
 }
 
 export namespace KaniArguments {
+	export const packageFlag: string = `-p`;
 	export const unwindFlag: string = `--unwind`;
 	export const harnessFlag: string = `--harness`;
 	export const testsFlag: string = `--tests`;
 	export const outputFormatFlag: string = `--output-format`;
+	export const unstableFormatFlag: string = `--enable-unstable`;
+	export const stubbingFlag: string = `--enable-stubbing`;
 }

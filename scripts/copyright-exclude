@@ -17,8 +17,6 @@ gitmodules
 makefile
 ignore
 tree-sitter-rust.wasm
-*.yml
-*.yaml
 scripts/copyright-exclude
 .json
 eslintrc.js

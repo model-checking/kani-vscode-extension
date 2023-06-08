@@ -28,3 +28,8 @@ jobs:
         run : |
           npm ci
           npm run prettier:check:ci
+
+
+      - name: Check Compilation Compatibility
+        run : |
+          npm run compile
