@@ -1,39 +1,40 @@
 # Kani Visual Studio Code Extension
 
-A Visual Studio Code test extension that allows users to run their [Kani Rust Verifier](https://github.com/model-checking/kani) proofs and view traces natively in vscode.
+A [Visual Studio Code](https://code.visualstudio.com/) extension that allows users to run and debug their [Kani Rust Verifier](https://github.com/model-checking/kani) harnesses in vscode.
 
 ## Usage
 
-Check [user guide](docs/user-guide.md) for more detailed information.
-
 ![Kani Usage](resources/screenshots/kani-demo.png)
 
-1.  Open a rust crate or workspace in Visual Studio Code
+1.  Open a Rust Package in Visual Studio Code
 2.  Navigate to the testing panel and expand on the Kani Proofs tree where the proofs are stored
 3.  Click on the play button beside the harness or the filename or the crate to run Kani on the respective test case.
 
+Check [user guide](docs/user-guide.md) for more detailed information.
+
 ## Features
 
--   Run proofs natively the same way you run your test
--   View verification result and failed properties
--   View counter example report for failed proofs
+-   Kani harness Tree view
+-   Proof Runner
+-   Counter Example unit test generator (Concrete Playback)
+-   Proof debugger
 
 ## Requirements
 
--   Visual Studio Code 1.50 or newer
+-   [Visual Studio Code](https://code.visualstudio.com/) 1.50 or newer
 -   [Kani](https://github.com/model-checking/kani) 0.29 or newer
 
 ## Extension Settings
 
 | Setting                           | Description                                                                                                                                                                                        | Default                                                        |
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| `kani.enable-codelens` | Enable Codelens actions for `Run Test (kani)` & `Debug Test (kani)`.                                                                                                      | `true`                                                         |
-| `kani.show-output-window`     | Optional string to control when the document should be verified (choose between `true` or `false`.                                                                                 | `false`                                                     |
+| `kani.enable-codelens` | Enable Codelens actions for `Run Test (Kani)` & `Debug Test (Kani)`.                                                                                                      | `true`                                                         |
+| `kani.show-output-window`     | Toggle to show the output terminal window containing the full output from Kani.                                                                  | `false`                                                     |
 
 
 ## Installation
 
-Kani Extension is available as a VSCode plugin. You can install [Kani Extension](https://marketplace.visualstudio.com/items?itemName=model-checking.kani-vscode-extension) from the Visual Studio Marketplace or the Open VSX Registry.
+Kani VSCode Extension is available as a VSCode plugin. You can install [Kani Extension](https://marketplace.visualstudio.com/items?itemName=model-checking.kani-vscode-extension) from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/).
 
 If you want to build and package from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
 

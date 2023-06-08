@@ -1,28 +1,34 @@
 # User Guide
 
-## Features
+## Workflows
 
-### How to verify a kani harness using the extension
+## View and Run Kani Proof harnesses
 
+### How to verify a Kani harness using the extension
 
-As soon as the rust file containing the proofs is opened using the Kani extension in a VSCode instance, you should see the Kani proofs loaded as regular unit tests in the Testing Panel on the left border of VSCode. This is how the testing page looks like when you click on the panel.
+As soon as the Rust file containing the proofs is opened using the Kani extension in a VSCode instance, you should see the Kani proofs loaded as regular unit tests in the Testing Panel on the left border of VSCode.
+This is how the testing page looks like when you click on the panel.
 
 ![Verify Proofs](../resources/screenshots/first.png)
 
 ### Running Proofs
 
-
-You can then run your proofs using the test tree by clicking the play button beside the harness that was automatically picked up by the Kani Extension. Once you run the proof using the extension, you are shown an error message if the proof has failed. We are then presented with two buttons, to generate the full report for the harness or to run concrete playback to generate unit tests with the counter examples loaded.
+You can then run your proofs using the test tree by clicking the play button beside the harness that was automatically picked up by the Kani VSCode Extension.
+Once you run the proof using the extension, you are shown an error message if the proof has failed.
+You are then presented with two buttons, to generate the full report for the harness or to run concrete playback to generate unit tests with the counter examples loaded.
 
 ![Image: run proof.gif](../resources/screenshots/run%20proof.gif)
 
-### View and Debug Proofs through the Trace
 
-You can generate the unit test with the counter examples by clicking on the **Run Concrete Playback for (your harness name)`** Button that appears through a blue link on the error banner.
+## Use Concrete Playback to debug Kani Proof harness
+
+### Generate Counter Example unit test
+
+You can generate the unit test with the counter examples by clicking on the **`Run Concrete Playback for (your harness name)`** Button that appears through a blue link on the error banner.
 
 ![Image: generate counter example.gif](../resources/screenshots/generate%20counter%20example.gif)
 
-You can see that the source is annotated with two buttons that hover over the unit test generated called → `Run Test (Kani) | Debug Test (Kani)` which allow you to run and debug the test just like any other rust unit test.
+You can see that the source is annotated with two buttons that hover over the unit test generated called → `Run Test (Kani) | Debug Test (Kani)` which allow you to run and debug the test just like any other Rust unit test.
 
 ### Running Kani-generated test
 
@@ -32,7 +38,7 @@ Clicking the unit test using the `Run Test (Kani)` button, runs the unit test ge
 
 ### Debug Kani unit test
 
-By setting breakpoints and clicking the debug test (kani) button, you are taken into the debugger panel which allows you to peer into the counter examples or values for which the assert fails.
+By setting breakpoints and clicking the `Debug test (Kani)` button, you are taken into the debugger panel which allows you to peer into the counter examples or values for which the assert fails.
 
 ![Image: show debugging.gif](../resources/screenshots/show%20debugging.gif)
 
@@ -42,9 +48,12 @@ By setting breakpoints and clicking the debug test (kani) button, you are taken 
 
 You can then use the debugger controller to step through, into, out of, replay and also change values on the trace panel on the left for interactive debugging.
 
+
+## View Trace Report
+
 ### Generate HTML report
 
-By clicking the view report button in the error message, you can view the trace for the harness in a rendered HTML report.
+By clicking the `Generate report for (your harness)` button in the error message, you can view the trace for the harness in a rendered HTML report.
 
 ![Generate Report](../resources/screenshots/generate-report.png)
 
@@ -55,18 +64,8 @@ You can click on the `Preview in Editor` to view the HTML trace within vscode. I
 ![Generate Report](../resources/screenshots/view-report.png)
 
 
-### View Kani Log
+### View full Kani Log
 
 For every test run, you can view full output from kani logged into the output channel as a text file. To view the log, open the output channel, and click on the channels drop down list to view a channel called `Output (Kani): ...`
 
 ![Generate Report](../resources/screenshots/view-output.png)
-
-
-### Other features
-
-Some other features include -
-
-1. Verify entire crate at once or run your file organized proofs together.
-2. Keybindings, shortcuts, configurations
-3. View output channel
-4. View time based logs of the verification
