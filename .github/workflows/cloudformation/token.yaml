@@ -1,3 +1,5 @@
+# Copyright Kani Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 Description: >
   The personal access token for the Azure DevOps account used to manage the
   model-checking publisher in the Microsoft Marketplace.
