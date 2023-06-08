@@ -13,3 +13,4 @@ src/testFixtures/**
 .prettierrc
 *.d.ts
 *.yml
+*.yaml
