@@ -1,3 +1,5 @@
+# Copyright Kani Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 name: Release Kani extension
 
 # A new tag of the form Kani-VERSION will trigger a new release,

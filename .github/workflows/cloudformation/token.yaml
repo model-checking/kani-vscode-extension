@@ -1,8 +1,10 @@
+# Copyright Kani Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 Description: >
   The personal access token for the Azure DevOps account used to manage the
   model-checking publisher in the Microsoft Marketplace.
   Enable storage of the PAT in the AWS Secrets Manager and access to the PAT
-  from the GitHub workflows in model-checking/cbmc-proof-debugger.
+  from the GitHub workflows in model-checking/kani-vscode-extension
 
 Parameters:
   GithubRepoOrganization:
