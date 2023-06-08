@@ -7,7 +7,7 @@ A [Visual Studio Code](https://code.visualstudio.com/) extension that allows use
 ![Kani Usage](resources/screenshots/kani-demo.png)
 
 1.  Open a Rust Package in Visual Studio Code
-2.  Navigate to the testing panel and expand on the Kani Proofs tree where the proofs are stored
+2.  Navigate to the testing panel and expand on the Kani harnesses tree where the harnesses are stored
 3.  Click on the play button beside the harness or the filename or the crate to run Kani on the respective test case.
 
 Check [user guide](docs/user-guide.md) for more detailed information.
@@ -15,9 +15,9 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 ## Features
 
 -   Kani harness Tree view
--   Proof Runner
+-   Kani harness Runner
 -   Counter Example unit test generator (Concrete Playback)
--   Proof debugger
+-   Harness debugger
 
 ## Requirements
 
@@ -41,7 +41,7 @@ If you want to build and package from source directly, see [dev-documentation](d
 ## Troubleshooting
 
 1. If verification seems to be taking too much time, stop the verification using the stop button on the testing panel.
-2. Some times it the output seems unexpected, it might because an old result is cached in. It helps to run `cargo clean` and re-running the proof.
+2. Some times it the output seems unexpected, it might because an old result is cached in. It helps to run `cargo clean` and re-running the harness.
 3. If the screen seems frozen, or inactive, try reloading the vscode window.
 
 ## Security

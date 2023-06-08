@@ -2,25 +2,25 @@
 
 ## Workflows
 
-## View and Run Kani Proof harnesses
+## View and Run Kani harnesses
 
-### How to verify a Kani harness using the extension
+### View Kani harnesses
 
-As soon as the Rust file containing the proofs is opened using the Kani extension in a VSCode instance, you should see the Kani proofs loaded as regular unit tests in the Testing Panel on the left border of VSCode.
+As soon as the Rust file containing the harnesses is opened using the Kani extension in a VSCode instance, you should see the Kani harnesses loaded as regular unit tests in the Testing Panel on the left border of VSCode.
 This is how the testing page looks like when you click on the panel.
 
 ![Verify Proofs](../resources/screenshots/first.png)
 
-### Running Proofs
+### Running harnesses
 
-You can then run your proofs using the test tree by clicking the play button beside the harness that was automatically picked up by the Kani VSCode Extension.
-Once you run the proof using the extension, you are shown an error message if the proof has failed.
+You can then run your harnesses using the test tree by clicking the play button beside the harness that was automatically picked up by the Kani VSCode Extension.
+Once you run the harness using the extension, you are shown an error message if the verification has failed.
 You are then presented with two buttons, to generate the full report for the harness or to run concrete playback to generate unit tests with the counter examples loaded.
 
-![Image: run proof.gif](../resources/screenshots/run%20proof.gif)
+![Image: run harness.gif](../resources/screenshots/run%20proof.gif)
 
 
-## Use Concrete Playback to debug Kani Proof harness
+## Use Concrete Playback to debug Kani harness
 
 ### Generate Counter Example unit test
 
