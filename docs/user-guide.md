@@ -38,7 +38,7 @@ Clicking the unit test using the `Run Test (Kani)` button, runs the unit test ge
 
 ### Debug Kani unit test
 
-By setting breakpoints and clicking the `Debug test (Kani)` button, you are taken into the debugger panel which allows you to peer into the counter examples or values for which the assert fails.
+By setting breakpoints and clicking the `Debug Test (Kani)` button, you are taken into the debugger panel which allows you to peer into the counter examples or values for which the assert fails.
 
 ![Image: show debugging.gif](../resources/screenshots/show%20debugging.gif)
 
@@ -63,6 +63,8 @@ You can click on the `Preview in Editor` to view the HTML trace within vscode. I
 
 ![Generate Report](../resources/screenshots/view-report.png)
 
+
+## Kani Output logging
 
 ### View full Kani Log
 
