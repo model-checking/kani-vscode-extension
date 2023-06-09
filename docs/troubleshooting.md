@@ -13,7 +13,7 @@ If verification seems to be taking too much time, stop the verification using th
 
 ### Output seems unexpected
 
-Some times it the output seems unexpected, it might because an old result is cached in. It helps to run `cargo clean` and re-running the harness.
+If the output seems unexpected, it might be because of an old result cached in. It helps to run `cargo clean` and re-running the harness.
 
 ### Screen seems frozen
 
