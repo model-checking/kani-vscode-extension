@@ -41,12 +41,9 @@ Clicking the `Run Test (Kani)` button on top of a unit test, runs the unit test 
 
 ### Debug Kani-generated unit test
 
-By setting breakpoints and clicking the `Debug Test (Kani)` button, you are taken into the debugger panel which allows you to inspect the trace using the counterexample. 
+By setting breakpoints and clicking the `Debug Test (Kani)` button, you are taken into the debugger panel which allows you to inspect the trace using the counterexample.
 
 ![Image: show debugging.gif](../resources/screenshots/show-debugging.gif)
-
-
-(**NOTE TO READER -** Try reloading page to view the gif).
 
 
 You can then use the debugger controller to step through, into, out of, replay and also change values on the trace panel on the left for interactive debugging.
