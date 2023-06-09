@@ -1,6 +1,7 @@
 # User Guide
 
-This is the user guide for Kani VSCode Extension. This guide provides the various workflows that you can use to verify and debug your Kani harnesses.
+This is the user guide for Kani VSCode Extension.
+This guide provides the various workflows that you can use to verify and debug your Kani harnesses.
 ## Workflows
 
 ## Table of Contents
@@ -23,7 +24,6 @@ This is the user guide for Kani VSCode Extension. This guide provides the variou
 #### View Kani harnesses
 
 As soon as the Rust package containing the harnesses is opened using the Kani extension in a VSCode instance, you should see the Kani harnesses loaded as regular unit tests in the testing panel on the left border of the VSCode window.
-
 This is how the VSCode window looks like when you click on the panel:
 
 ![Verify Proofs](../resources/screenshots/first.png)
@@ -80,7 +80,8 @@ By clicking the `Generate report for (your harness)` option in the error banner,
 
 #### View trace report in window
 
-You can click on the `Preview in Editor` button to view the HTML trace within VSCode. It should look like this:
+You can click on the `Preview in Editor` button to view the HTML trace within VSCode.
+It should look like this:
 
 ![Generate Report](../resources/screenshots/view-report.png)
 
