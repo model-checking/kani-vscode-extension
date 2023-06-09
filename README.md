@@ -6,8 +6,8 @@ A [Visual Studio Code](https://code.visualstudio.com/) extension that allows use
 
 ![Kani Usage](resources/screenshots/kani-demo.png)
 
-1.  Open a Rust Package in Visual Studio Code
-2.  Navigate to the testing panel and expand on the Kani harnesses tree where the harnesses are stored
+1.  Open a Rust package in Visual Studio Code.
+2.  Navigate to the testing panel and expand on the Kani harness tree view where the harnesses are shown.
 3.  Click on the play button beside the harness or the filename or the crate to run Kani on the respective test case.
 
 Check [user guide](docs/user-guide.md) for more detailed information.
@@ -34,7 +34,7 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 
 ## Installation
 
-Kani VSCode Extension is available as a VSCode plugin. You can install [Kani Extension](https://marketplace.visualstudio.com/items?itemName=model-checking.kani-vscode-extension) from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/).
+The Kani VSCode Extension is available as a VSCode plugin. You can install the [Kani VSCode Extension](https://marketplace.visualstudio.com/items?itemName=model-checking.kani-vscode-extension) from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/).
 
 If you want to build and package from source directly, see [dev-documentation](docs/dev-documentation.md) for more information.
 
