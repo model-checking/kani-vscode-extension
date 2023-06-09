@@ -159,7 +159,11 @@ export class TestFile {
 			}
 		};
 
-		const metadata = await getCurrentRustFileMetadata(item)!;
+		const metadata = await getCurrentRustFileMetadata(item);
+		if(metadata === undefined) {
+			vscode.window.showErrorMessage(`Could not find workspace for ${item.uri}. Please add ${item.uri} to your VSCode workspace.`)
+			return;
+		}
 
 		// Trigger the parser and process extracted metadata to create a test case
 		await SourceCodeParser.parseRustfile(content, {
@@ -504,18 +508,20 @@ class FailedCase extends TestCase {
 
 async function getCurrentRustFileMetadata(item: any): Promise<FileMetaData | undefined> {
 	const editor = vscode.window.activeTextEditor;
-	if (!editor) {
+	const workspaceFolders = vscode.workspace.workspaceFolders;
+
+	if(workspaceFolders?.length == 0) {
+		return undefined;
+	}
+
+	const workspace = workspaceFolders?.at(0);
+
+	if (!workspace) {
 		return undefined;
 	}
 
 	const fileName = path.basename(item.uri.fsPath);
 	const filePath = item.uri.fsPath;
-
-	const workspace = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-
-	if (!workspace) {
-		return undefined;
-	}
 
 	const workspacePath = workspace.uri.fsPath;
 	const crateName = path.basename(workspacePath);
