@@ -160,8 +160,10 @@ export class TestFile {
 		};
 
 		const metadata = await getCurrentRustFileMetadata(item);
-		if(metadata === undefined) {
-			vscode.window.showErrorMessage(`Could not find workspace for ${item.uri}. Please add ${item.uri} to your VSCode workspace.`)
+		if (metadata === undefined) {
+			vscode.window.showErrorMessage(
+				`Could not find workspace for ${item.uri}. Please add ${item.uri} to your VSCode workspace.`,
+			);
 			return;
 		}
 
@@ -510,11 +512,11 @@ async function getCurrentRustFileMetadata(item: any): Promise<FileMetaData | und
 	const editor = vscode.window.activeTextEditor;
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 
-	if(workspaceFolders?.length == 0) {
+	if (workspaceFolders === undefined || workspaceFolders?.length == 0) {
 		return undefined;
 	}
 
-	const workspace = workspaceFolders?.at(0);
+	const workspace = workspaceFolders[0];
 
 	if (!workspace) {
 		return undefined;
