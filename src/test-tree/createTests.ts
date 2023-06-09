@@ -509,7 +509,6 @@ class FailedCase extends TestCase {
 }
 
 async function getCurrentRustFileMetadata(item: any): Promise<FileMetaData | undefined> {
-	const editor = vscode.window.activeTextEditor;
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 
 	if (workspaceFolders === undefined || workspaceFolders?.length == 0) {
