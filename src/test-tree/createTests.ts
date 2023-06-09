@@ -14,6 +14,7 @@ import {
 	getContentFromFilesystem,
 	getPackageName,
 	getPackageNameFromFilePath,
+	showErrorWithReportIssueButton,
 } from '../utils';
 
 export type KaniData = TestFile | TestCase | string;
@@ -161,7 +162,7 @@ export class TestFile {
 
 		const metadata = await getCurrentRustFileMetadata(item);
 		if (metadata === undefined) {
-			vscode.window.showErrorMessage(
+			showErrorWithReportIssueButton(
 				`Could not find workspace for ${item.uri}. Please add ${item.uri} to your VSCode workspace.`,
 			);
 			return;
