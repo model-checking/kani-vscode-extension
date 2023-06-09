@@ -11,18 +11,10 @@ Parameters:
     Type: String
     Description: GitHub organization for the cbmc-proof-debugger
     Default: model-checking
-  CbmcRepoName:
-    Type: String
-    Description: GitHub repository for the cbmc-proof-debugger
-    Default: cbmc-proof-debugger
   KaniRepoName:
     Type: String
     Description: GitHub repository for the kani extension
     Default: kani-vscode-extension
-  CbmcPublicationTag:
-    Type: String
-    Description: GitHub tag for proof debugger triggering the GitHub publication workflow
-    Default: debugger-*
   KaniPublicationTag:
     Type: String
     Description: GitHub tag for kani extension triggering the GitHub publication workflow
@@ -58,7 +50,6 @@ Resources:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
                 token.actions.githubusercontent.com:sub:
-                  !Sub repo:${GithubRepoOrganization}/${CbmcRepoName}:ref:refs/tags/${CbmcPublicationTag}
                   !Sub repo:${GithubRepoOrganization}/${KaniRepoName}:ref:refs/tags/${KaniPublicationTag}
 
       Policies:
