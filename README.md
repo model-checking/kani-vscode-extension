@@ -14,10 +14,10 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 
 ## Features
 
--   Kani harness Tree view
--   Kani harness Runner
--   Counter Example unit test generator (Concrete Playback)
--   Harness debugger
+-   Automatically indexes and shows Kani harnesses in a tree view.
+-   One-click button for verifying Kani harnesses.
+-   Generate counterexamples as Rust unit tests.
+-   Debug counterexamples using a standard debugger.
 
 ## Requirements
 
@@ -40,9 +40,10 @@ If you want to build and package from source directly, see [dev-documentation](d
 
 ## Troubleshooting
 
-1. If verification seems to be taking too much time, stop the verification using the stop button on the testing panel.
-2. Some times it the output seems unexpected, it might because an old result is cached in. It helps to run `cargo clean` and re-running the harness.
-3. If the screen seems frozen, or inactive, try reloading the vscode window.
+Check [troubleshooting](docs/troubleshooting.md) for frequently asked questions and potential fixes.
+
+If you have a question that is not answered there, please file an [issue](https://github.com/model-checking/kani-vscode-extension/issues/new/choose) with your question.
+
 
 ## Security
 

@@ -17,7 +17,7 @@ You can then run your harnesses using the test tree by clicking the play button 
 Once you run the harness using the extension, you are shown an error message if the verification has failed.
 You are then presented with two buttons, to generate the full report for the harness or to run concrete playback to generate unit tests with the counter examples loaded.
 
-![Image: run harness.gif](../resources/screenshots/run%20proof.gif)
+![Image: run harness.gif](../resources/screenshots/run-proof.gif)
 
 
 ## Use Concrete Playback to debug Kani harness
@@ -26,7 +26,7 @@ You are then presented with two buttons, to generate the full report for the har
 
 You can generate the unit test with the counter examples by clicking on the **`Run Concrete Playback for (your harness name)`** Button that appears through a blue link on the error banner.
 
-![Image: generate counter example.gif](../resources/screenshots/generate%20counter%20example.gif)
+![Image: generate counter example.gif](../resources/screenshots/generate-counter-example.gif)
 
 You can see that the source is annotated with two buttons that hover over the unit test generated called → `Run Test (Kani) | Debug Test (Kani)` which allow you to run and debug the test just like any other Rust unit test.
 
@@ -40,7 +40,7 @@ Clicking the unit test using the `Run Test (Kani)` button, runs the unit test ge
 
 By setting breakpoints and clicking the `Debug Test (Kani)` button, you are taken into the debugger panel which allows you to peer into the counter examples or values for which the assert fails.
 
-![Image: show debugging.gif](../resources/screenshots/show%20debugging.gif)
+![Image: show debugging.gif](../resources/screenshots/show-debugging.gif)
 
 
 (**NOTE TO READER -** Try reloading page to view the gif).
