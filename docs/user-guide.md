@@ -4,8 +4,6 @@ This is the user guide for Kani VSCode Extension.
 This guide provides the various workflows that you can use to verify and debug your Kani harnesses.
 ## Workflows
 
-## Table of Contents
-
 - [Verify Kani harnesses](#verify-kani-harnesses)
   - [View Kani harnesses](#view-kani-harnesses)
   - [Run Kani harnesses](#run-kani-harnesses)
