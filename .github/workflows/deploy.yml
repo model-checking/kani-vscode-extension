@@ -1,0 +1,55 @@
+# Copyright Kani Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+name: Deploy Extension
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+  deploy:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: "Prepare: Get the version"
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+
+      - run: npm install -g vsce@1.70.0
+
+      - name: Package extension
+        run: npx vsce package --out kani-vscode-extension-${VERSION}.vsix
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Publish extension
+        env:
+          MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+        run: npx vsce publish --packagePath kani-vscode-extension-${VERSION}.vsix
