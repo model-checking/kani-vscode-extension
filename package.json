@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/model-checking/kani-vscode-extension/issues"
   },
-  "version": "0.0.3-alpha",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.70.0"
   },
