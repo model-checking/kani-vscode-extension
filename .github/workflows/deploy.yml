@@ -52,4 +52,4 @@ jobs:
         env:
           MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
           VERSION: ${{ steps.get_version.outputs.VERSION }}
-        run: npx vsce publish --packagePath kani-vscode-extension-${VERSION}.vsix
+        run: npx vsce publish -p "${MARKETPLACE_TOKEN}" --packagePath kani-vscode-extension-${VERSION}.vsix
