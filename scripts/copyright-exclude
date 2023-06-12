@@ -9,6 +9,7 @@
 Cargo.lock
 LICENSE-APACHE
 LICENSE-MIT
+LICENSE-THIRD-PARTY
 editorconfig
 expected
 gitattributes
