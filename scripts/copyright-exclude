@@ -3,11 +3,13 @@
 .ico
 .md
 .png
+.gif
 .props
 .public.key
 Cargo.lock
 LICENSE-APACHE
 LICENSE-MIT
+LICENSE-THIRD-PARTY
 editorconfig
 expected
 gitattributes

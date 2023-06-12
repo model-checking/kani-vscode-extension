@@ -7,7 +7,14 @@
     "type": "git",
     "url": "https://github.com/model-checking/kani-vscode-extension"
   },
-  "version": "0.0.3",
+  "icon": "kani-logo.png",
+  "galleryBanner": {
+    "theme": "light"
+  },
+  "bugs": {
+    "url": "https://github.com/model-checking/kani-vscode-extension/issues"
+  },
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.70.0"
   },
