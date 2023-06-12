@@ -3,6 +3,7 @@
 .ico
 .md
 .png
+.gif
 .props
 .public.key
 Cargo.lock

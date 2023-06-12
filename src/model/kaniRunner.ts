@@ -274,7 +274,7 @@ export function sendErrorToChannel(output: CommandOutput, args: string[]): void 
 
 	// Create unique ID for the output channel
 	const timestamp = getTimeBasedUniqueId();
-	const channel = vscode.window.createOutputChannel(`Error: ${harnessName} - ${timestamp}`);
+	const channel = vscode.window.createOutputChannel(`Error (Kani): ${harnessName} - ${timestamp}`);
 
 	// Append stdout to the output channel
 	channel.appendLine(output.error?.message);
