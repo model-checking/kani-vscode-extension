@@ -512,7 +512,7 @@ class FailedCase extends TestCase {
 async function getCurrentRustFileMetadata(item: any): Promise<FileMetaData | undefined> {
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 
-	if (!Array.isArray(workspaceFolders) || workspaceFolders?.length == 0) {
+	if (!workspaceFolders || workspaceFolders.length === 0) {
 		return undefined;
 	}
 
