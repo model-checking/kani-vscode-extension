@@ -25,7 +25,8 @@
     "debug"
   ],
   "activationEvents": [
-    "onLanguage:rust"
+    "onLanguage:rust",
+    "workspaceContains:*Cargo.toml"
   ],
   "main": "./out/extension.js",
   "contributes": {
