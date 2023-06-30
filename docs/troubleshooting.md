@@ -10,7 +10,7 @@ If there is no helpful information available there, please file an [issue](https
 ### Kani VS Code extension does not run on standalone Rust file
 
 The extension runs on Cargo packges exclusively. For standalone Rust files, Kani is only available on the command line.
-You can initiate a new Cargo package using `Cargo init` or `Cargo new`.
+You can create a new Cargo package using `cargo init` or `cargo new`.
 
 ### Kani verification seems stuck
 

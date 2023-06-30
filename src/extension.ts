@@ -34,7 +34,7 @@ import {
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
 		showErrorWithReportIssueButton(
-			'Could not find Cargo package to run Kani. Please initiate a Cargo package using `Cargo init` or `Cargo new` to run the extension',
+			'Could not find Cargo package to run Kani. Please create a Cargo package using `cargo init` or `cargo new` to run the extension',
 		);
 		return;
 	}
