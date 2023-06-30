@@ -24,6 +24,8 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 -   [Visual Studio Code](https://code.visualstudio.com/) 1.50 or newer
 -   [Kani](https://github.com/model-checking/kani) 0.29 or newer
 
+NOTE: The extension only works on Cargo packages. For standalone Rust files, Kani is only available on the command line.
+
 ## Extension Settings
 
 | Setting                           | Description                                                                                                                                                                                        | Default                                                        |

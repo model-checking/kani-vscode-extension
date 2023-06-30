@@ -7,6 +7,11 @@ You can inspect the crash logs by going to the output channel and searching for 
 
 If there is no helpful information available there, please file an [issue](https://github.com/model-checking/kani-vscode-extension/issues/new/choose).
 
+### Kani VS Code extension does not run on standalone Rust file
+
+The extension runs on Cargo packges exclusively. For standalone Rust files, Kani is only available on the command line.
+You can create a new Cargo package using `cargo init` or `cargo new`.
+
 ### Kani verification seems stuck
 
 If verification seems to be taking too much time, stop the verification using the stop button that looks like a square on the testing panel.

@@ -33,7 +33,9 @@ import {
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	if (!checkCargoExist()) {
-		showErrorWithReportIssueButton('Cannot find Cargo.toml to run Cargo Kani on crate');
+		showErrorWithReportIssueButton(
+			'Could not find Cargo package to run Kani. Please create a Cargo package using `cargo init` or `cargo new` to run the extension',
+		);
 		return;
 	}
 	try {
