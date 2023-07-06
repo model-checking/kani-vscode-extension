@@ -29,6 +29,7 @@ import {
 	getRootDirURI,
 	showErrorWithReportIssueButton,
 } from './utils';
+import { runCodeCoverageAction } from './ui/coverage/coverageInfo';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -251,4 +252,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			connectToDebugger(programName),
 		),
 	);
+	context.subscriptions.push(// Register the command for the code lens Kani test runner function
+		vscode.commands.registerCommand('extension.codeCoverageCommand', (args: any) => {
+			runCodeCoverageAction(args);
+		}));
 }
