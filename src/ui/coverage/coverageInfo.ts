@@ -6,13 +6,43 @@ import * as path from 'path';
 
 import GlobalConfig from '../../globalConfig';
 import { CommandArgs, getRootDir, splitCommand } from '../../utils';
-import { get } from 'http';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');
 const execPromise = promisify(execFile);
 const warningMessage = `Report generation is an unstable feature.
 Coverage information has been disabled due recent issues involving incorrect results.`;
+
+interface CoverageJSON {
+	viewerCoverage: {
+	  coverage: {
+		[filePath: string]: {
+		  [functionName: string]: {
+			[lineNumber: string]: string;
+		  };
+		};
+	  };
+	  functionCoverage: {
+		[filePath: string]: {
+		  [functionName: string]: {
+			hit: number;
+			percentage: number;
+			total: number;
+		  };
+		};
+	  };
+	  lineCoverage: {
+		[filePath: string]: {
+		  [lineNumber: string]: string;
+		};
+	  };
+	  overallCoverage: {
+		hit: number;
+		percentage: number;
+		total: number;
+	  };
+	};
+}
 
 export async function runCodeCoverageAction(functionName: string): Promise<void> {
 	const taskName = `Kani Playback: ${functionName}`;
@@ -101,7 +131,12 @@ async function parseReportOutput(stdout: string): Promise<any | undefined> {
             if(jsonPathexists) {
                 console.log(jsonPath);
                 const data = readJsonFile(jsonPath);
-                console.log(data);
+
+				const outputFilePath = '/home/ubuntu/sample-coverage/lcov.info';
+				const coverageData: CoverageJSON = data as CoverageJSON;
+
+				generateLcovFile(coverageData, outputFilePath);
+				console.log(`LCOV file generated: ${outputFilePath}`);
             }
 		}
 	}
@@ -141,4 +176,32 @@ function readJsonFile(filePath: string) {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const jsonData = JSON.parse(fileContents);
     return jsonData;
+}
+
+function generateLcovFile(coverageData: any, outputFilePath: string): void {
+  let lcovContent = '';
+
+  for (const filePath in coverageData["viewer-coverage"].coverage) {
+    lcovContent += `SF:${filePath}\n`;
+
+    const functionCoverage = coverageData["viewer-coverage"]["function_coverage"][filePath];
+    const lineCoverage = coverageData["viewer-coverage"]["line_coverage"][filePath];
+
+    for (const functionName in functionCoverage) {
+      lcovContent += `FN:${functionCoverage[functionName].total},${functionName}\n`;
+      lcovContent += `FNDA:${functionCoverage[functionName].hit},${functionName}\n`;
+    }
+
+    for (const lineNumber in lineCoverage) {
+      const hitStatus = lineCoverage[lineNumber];
+      lcovContent += `DA:${lineNumber},${hitStatus === 'hit' ? 1 : 0}\n`;
+    }
+
+    lcovContent += `LF:${Object.keys(lineCoverage).length}\n`;
+    lcovContent += `LH:${Object.values(lineCoverage).filter((status) => status === 'hit').length}\n`;
+
+    lcovContent += 'end_of_record\n';
   }
+
+  fs.writeFileSync(outputFilePath, lcovContent, {flag: 'w'});
+}

@@ -252,8 +252,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			connectToDebugger(programName),
 		),
 	);
-	context.subscriptions.push(// Register the command for the code lens Kani test runner function
+	context.subscriptions.push(
+		// Register the command for the code lens Kani test runner function
 		vscode.commands.registerCommand('extension.codeCoverageCommand', (args: any) => {
 			runCodeCoverageAction(args);
-		}));
+		}),
+	);
 }
