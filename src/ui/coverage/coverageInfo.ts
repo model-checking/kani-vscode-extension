@@ -198,3 +198,63 @@ function generateLcovFile(coverageData: any, outputFilePath: string): void {
 
   fs.writeFileSync(outputFilePath, lcovContent, {flag: 'w'});
 }
+
+// Function to parse the lcov file and extract coverage data
+export function parseLcovFile(sourceFilePath: string): Map<number, number> {
+	const lcovContent = fs.readFileSync('/home/ubuntu/sample-coverage/lcov.info', 'utf-8');
+	const lines = lcovContent.split('\n');
+	const coverageMap = new Map<number, number>();
+
+	let isTargetSourceFile = false;
+	for (const line of lines) {
+	  if (line.startsWith('SF:') && line.slice(3) === sourceFilePath) {
+		isTargetSourceFile = true;
+	  } else if (isTargetSourceFile && line.startsWith('DA:')) {
+		const [, lineNumber, executionCount] = line.match(/^DA:(\d+),(\d+)/) || [];
+		if (lineNumber && executionCount) {
+		  const lineNum = parseInt(lineNumber, 10);
+		  const execCount = parseInt(executionCount, 10);
+		  coverageMap.set(lineNum, execCount);
+		}
+	  } else if (isTargetSourceFile && line === 'end_of_record') {
+		break; // Exit loop after processing the coverage data for the specified source file
+	  }
+	}
+
+	return coverageMap;
+}
+
+// Function to highlight the source code based on coverage data
+export function highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, number>) {
+	const decorationTypeGreen = vscode.window.createTextEditorDecorationType({
+	  backgroundColor: 'rgba(0, 255, 0, 0.3)', // Green background
+	});
+
+	const decorationTypeRed = vscode.window.createTextEditorDecorationType({
+	  backgroundColor: 'rgba(255, 0, 0, 0.3)', // Red background
+	});
+
+	const decorationsGreen: vscode.DecorationOptions[] = [];
+	const decorationsRed: vscode.DecorationOptions[] = [];
+
+	for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
+	  const line = doc.lineAt(lineNum - 1);
+
+	  const coverageStatus = coverageMap.get(lineNum);
+
+	  if(coverageStatus === undefined) {
+		continue;
+	  }
+
+	  if (coverageStatus > 0) {
+		const range = new vscode.Range(line.range.start, line.range.end);
+		decorationsGreen.push({ range, hoverMessage: `Executions: ${coverageStatus}` });
+	  } else if (coverageStatus === 0) {
+		const range = new vscode.Range(line.range.start, line.range.end);
+		decorationsRed.push({ range, hoverMessage: `Executions: ${coverageStatus}` });
+	  }
+	}
+
+	vscode.window.activeTextEditor?.setDecorations(decorationTypeGreen, decorationsGreen);
+	vscode.window.activeTextEditor?.setDecorations(decorationTypeRed, decorationsRed);
+  }

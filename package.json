@@ -26,7 +26,8 @@
   ],
   "activationEvents": [
     "onLanguage:rust",
-    "workspaceContains:*Cargo.toml"
+    "workspaceContains:*Cargo.toml",
+    "onCommand:extension.highlightCoverage"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -52,6 +53,10 @@
         "title": "Disable Codelens",
         "command": "codelens-kani.disableCodeLens",
         "category": "CodeLens Sample"
+      },
+      {
+        "command": "extension.highlightCoverage",
+        "title": "Highlight Coverage"
       }
     ],
     "configuration": {

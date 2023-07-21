@@ -29,7 +29,7 @@ import {
 	getRootDirURI,
 	showErrorWithReportIssueButton,
 } from './utils';
-import { runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import { highlightSourceCode, parseLcovFile, runCodeCoverageAction } from './ui/coverage/coverageInfo';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -236,6 +236,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		runKaniPlayback(args);
 	});
 
+	// Register a command to highlight the coverage in the active editor
+	const highlightCoverageCommand = vscode.commands.registerCommand('extension.highlightCoverage', () => {
+		const editor = vscode.window.activeTextEditor;
+		if (editor) {
+			const filePath = editor.document.uri.fsPath;
+			const coverageMap = parseLcovFile(filePath);
+			highlightSourceCode(editor.document, coverageMap);
+		}
+	});
+
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
@@ -258,4 +268,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			runCodeCoverageAction(args);
 		}),
 	);
+
+	context.subscriptions.push(highlightCoverageCommand);
 }
