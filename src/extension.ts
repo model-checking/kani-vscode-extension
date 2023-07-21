@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
-import GlobalConfig from './globalConfig';
+import GlobalConfig  from './globalConfig';
 import { getKaniPath, getKaniVersion } from './model/kaniRunner';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
@@ -29,7 +29,8 @@ import {
 	getRootDirURI,
 	showErrorWithReportIssueButton,
 } from './utils';
-import { highlightSourceCode, parseLcovFile, runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import { Renderer, parseCoverageFormatted, runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import Config from './ui/coverage/config';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -65,6 +66,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// create a uri for the root folder
 	context.subscriptions.push(controller);
+	const config = new Config(context);
 	const crateURI: Uri = getRootDirURI();
 	const treeRoot: vscode.TestItem = controller.createTestItem(
 		'Kani proofs',
@@ -236,13 +238,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		runKaniPlayback(args);
 	});
 
-	// Register a command to highlight the coverage in the active editor
-	const highlightCoverageCommand = vscode.commands.registerCommand('extension.highlightCoverage', () => {
+	const renderer = new Renderer(config);
+
+	// Register a command to de-highlight the coverage in the active editor
+	const dehighlightCoverageCommand = vscode.commands.registerCommand('extension.dehighlightCoverage', () => {
 		const editor = vscode.window.activeTextEditor;
 		if (editor) {
-			const filePath = editor.document.uri.fsPath;
-			const coverageMap = parseLcovFile(filePath);
-			highlightSourceCode(editor.document, coverageMap);
+			const coverageMap = new Map();
+			renderer.highlightSourceCode(editor.document, coverageMap, true);
 		}
 	});
 
@@ -265,9 +268,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(
 		// Register the command for the code lens Kani test runner function
 		vscode.commands.registerCommand('extension.codeCoverageCommand', (args: any) => {
-			runCodeCoverageAction(args);
+			runCodeCoverageAction(renderer, args);
 		}),
 	);
 
-	context.subscriptions.push(highlightCoverageCommand);
+	context.subscriptions.push(dehighlightCoverageCommand);
 }

@@ -6,6 +6,7 @@ import * as path from 'path';
 
 import GlobalConfig from '../../globalConfig';
 import { CommandArgs, getRootDir, splitCommand } from '../../utils';
+import Config from './config';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');
@@ -13,38 +14,7 @@ const execPromise = promisify(execFile);
 const warningMessage = `Report generation is an unstable feature.
 Coverage information has been disabled due recent issues involving incorrect results.`;
 
-interface CoverageJSON {
-	viewerCoverage: {
-	  coverage: {
-		[filePath: string]: {
-		  [functionName: string]: {
-			[lineNumber: string]: string;
-		  };
-		};
-	  };
-	  functionCoverage: {
-		[filePath: string]: {
-		  [functionName: string]: {
-			hit: number;
-			percentage: number;
-			total: number;
-		  };
-		};
-	  };
-	  lineCoverage: {
-		[filePath: string]: {
-		  [lineNumber: string]: string;
-		};
-	  };
-	  overallCoverage: {
-		hit: number;
-		percentage: number;
-		total: number;
-	  };
-	};
-}
-
-export async function runCodeCoverageAction(functionName: string): Promise<void> {
+export async function runCodeCoverageAction(renderer: Renderer, functionName: string): Promise<void> {
 	const taskName = `Kani Playback: ${functionName}`;
 
 	const taskDefinition: vscode.TaskDefinition = {
@@ -62,7 +32,15 @@ export async function runCodeCoverageAction(functionName: string): Promise<void>
 	let playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --enable-unstable --coverage --harness ${functionName}`;
 	const processOutput = await runVisualizeCommand(playbackCommand, functionName);
 
-    // console.log(processOutput);
+	if(processOutput.statusCode == 0) {
+		console.log(processOutput.result);
+
+		const formatted = parseCoverageFormatted(processOutput.result);
+		const editor = vscode.window.activeTextEditor;
+		if(editor) {
+			renderer.highlightSourceCode(editor.document, formatted, false);
+		}
+	}
 }
 
 /**
@@ -118,22 +96,31 @@ async function parseReportOutput(stdout: string): Promise<any | undefined> {
 	const coverageResults = kaniOutputArray.at(1)?.split('\n')!;
 
 	const coverage = parseCoverageData(coverageResults);
-	const lcovFile = convertToLcovFormat(coverage);
-
-	const outputFilePath = '/home/ubuntu/sample-coverage/lcov.info';
-	fs.writeFileSync(outputFilePath, lcovFile, {flag: 'w'});
-
-	console.log(coverage);
 
 	// No command found from Kani
-	return undefined;
+	return coverage;
 }
 
 interface CoverageEntry {
 	filePath: string;
 	lineNumber: number;
 	coverageStatus: string;
-  }
+}
+
+// Function to parse the new format and convert it into a coverageMap
+export function parseCoverageFormatted(coverageData: CoverageEntry[]): Map<number, number> {
+	const coverageMap = new Map<number, number>();
+
+	for (const item of coverageData) {
+		if (item.coverageStatus === 'COVERED') {
+			coverageMap.set(item.lineNumber, 1);
+		} else if (item.coverageStatus === 'UNCOVERED') {
+			coverageMap.set(item.lineNumber, 0);
+		}
+	}
+
+	return coverageMap;
+}
 
 
 function parseCoverageData(data: string[]): CoverageEntry[] {
@@ -157,104 +144,48 @@ function parseCoverageData(data: string[]): CoverageEntry[] {
 	return coverageEntries;
 }
 
-function convertToLcovFormat(coverageArray: CoverageEntry[]): string {
-	let lcovReport = '';
+export class Renderer {
 
-	for (const entry of coverageArray) {
-	  const { filePath, lineNumber, coverageStatus } = entry;
-	  lcovReport += `SF:${filePath}\n`;
-	  lcovReport += `DA:${lineNumber},${coverageStatus === 'COVERED' ? 1 : 0}\n`;
-	}
+	private configStore: Config;
 
-	lcovReport += 'end_of_record\n';
-
-	return lcovReport;
-  }
-
-function generateLcovFile(coverageData: any, outputFilePath: string): void {
-  let lcovContent = '';
-
-  for (const filePath in coverageData["viewer-coverage"].coverage) {
-    lcovContent += `SF:${filePath}\n`;
-
-    const functionCoverage = coverageData["viewer-coverage"]["function_coverage"][filePath];
-    const lineCoverage = coverageData["viewer-coverage"]["line_coverage"][filePath];
-
-    for (const functionName in functionCoverage) {
-      lcovContent += `FN:${functionCoverage[functionName].total},${functionName}\n`;
-      lcovContent += `FNDA:${functionCoverage[functionName].hit},${functionName}\n`;
+	constructor(
+        configStore: Config,
+    ) {
+        this.configStore = configStore;
     }
 
-    for (const lineNumber in lineCoverage) {
-      const hitStatus = lineCoverage[lineNumber];
-      lcovContent += `DA:${lineNumber},${hitStatus === 'hit' ? 1 : 0}\n`;
-    }
+	// Function to highlight the source code based on coverage data
+	public highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, number>, dispose_bool: boolean) {
+		const decorationsGreen: vscode.Range[] = [];
+		const decorationsRed: vscode.Range[] = [];
 
-    lcovContent += `LF:${Object.keys(lineCoverage).length}\n`;
-    lcovContent += `LH:${Object.values(lineCoverage).filter((status) => status === 'hit').length}\n`;
+		for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
+			const line = doc.lineAt(lineNum - 1);
 
-    lcovContent += 'end_of_record\n';
-  }
+			const coverageStatus = coverageMap.get(lineNum);
 
-  fs.writeFileSync(outputFilePath, lcovContent, {flag: 'w'});
-}
+			if(coverageStatus === undefined) {
+				continue;
+			}
 
-// Function to parse the lcov file and extract coverage data
-export function parseLcovFile(sourceFilePath: string): Map<number, number> {
-	const lcovContent = fs.readFileSync('/home/ubuntu/sample-coverage/lcov.info', 'utf-8');
-	const lines = lcovContent.split('\n');
-	const coverageMap = new Map<number, number>();
-
-	let isTargetSourceFile = false;
-	for (const line of lines) {
-	  if (line.startsWith('SF:') && line.slice(3) === sourceFilePath) {
-		isTargetSourceFile = true;
-	  } else if (isTargetSourceFile && line.startsWith('DA:')) {
-		const [, lineNumber, executionCount] = line.match(/^DA:(\d+),(\d+)/) || [];
-		if (lineNumber && executionCount) {
-		  const lineNum = parseInt(lineNumber, 10);
-		  const execCount = parseInt(executionCount, 10);
-		  coverageMap.set(lineNum, execCount);
+			if (coverageStatus > 0) {
+				const range = new vscode.Range(line.range.start, line.range.end);
+				decorationsGreen.push(range);
+			} else if (coverageStatus === 0) {
+				const range = new vscode.Range(line.range.start, line.range.end);
+				decorationsRed.push(range);
+			}
 		}
-	  } else if (isTargetSourceFile && line === 'end_of_record') {
-		break; // Exit loop after processing the coverage data for the specified source file
-	  }
+
+		if(!dispose_bool) {
+			this.renderHighlight(decorationsGreen, decorationsRed);
+		} else{
+			this.renderHighlight([], []);
+		}
 	}
 
-	return coverageMap;
+	public renderHighlight(decorationsGreen: vscode.Range[], decorationsRed: vscode.Range[]) {
+		vscode.window.activeTextEditor?.setDecorations(this.configStore.covered, decorationsGreen);
+		vscode.window.activeTextEditor?.setDecorations(this.configStore.uncovered, decorationsRed);
+	}
 }
-
-// Function to highlight the source code based on coverage data
-export function highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, number>) {
-	const decorationTypeGreen = vscode.window.createTextEditorDecorationType({
-	  backgroundColor: 'rgba(0, 255, 0, 0.3)', // Green background
-	});
-
-	const decorationTypeRed = vscode.window.createTextEditorDecorationType({
-	  backgroundColor: 'rgba(255, 0, 0, 0.3)', // Red background
-	});
-
-	const decorationsGreen: vscode.DecorationOptions[] = [];
-	const decorationsRed: vscode.DecorationOptions[] = [];
-
-	for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
-	  const line = doc.lineAt(lineNum - 1);
-
-	  const coverageStatus = coverageMap.get(lineNum);
-
-	  if(coverageStatus === undefined) {
-		continue;
-	  }
-
-	  if (coverageStatus > 0) {
-		const range = new vscode.Range(line.range.start, line.range.end);
-		decorationsGreen.push({ range, hoverMessage: `Executions: ${coverageStatus}` });
-	  } else if (coverageStatus === 0) {
-		const range = new vscode.Range(line.range.start, line.range.end);
-		decorationsRed.push({ range, hoverMessage: `Executions: ${coverageStatus}` });
-	  }
-	}
-
-	vscode.window.activeTextEditor?.setDecorations(decorationTypeGreen, decorationsGreen);
-	vscode.window.activeTextEditor?.setDecorations(decorationTypeRed, decorationsRed);
-  }
