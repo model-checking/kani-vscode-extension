@@ -56,10 +56,13 @@ export async function runCodeCoverageAction(functionName: string): Promise<void>
 	const globalConfig = GlobalConfig.getInstance();
 	const kaniBinaryPath = globalConfig.getFilePath();
 
-	let playbackCommand: string = `${kaniBinaryPath} --enable-unstable --visualize --harness ${functionName}`;
+	const activeEditor = vscode.window.activeTextEditor;
+	const currentFileUri = activeEditor?.document.uri.fsPath;
+
+	let playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --enable-unstable --coverage --harness ${functionName}`;
 	const processOutput = await runVisualizeCommand(playbackCommand, functionName);
 
-    vscode.window.showInformationMessage(`Done with generating json`);
+    // console.log(processOutput);
 }
 
 /**
@@ -83,7 +86,7 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		};
 
 		const globalConfig = GlobalConfig.getInstance();
-		const kaniBinaryPath = globalConfig.getFilePath();
+		const kaniBinaryPath = `/home/ubuntu/kani/scripts/kani`;
 
 		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
 		const { stdout, stderr } = await execPromise(kaniBinaryPath, args, options);
@@ -110,73 +113,63 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
  */
 async function parseReportOutput(stdout: string): Promise<any | undefined> {
 	const kaniOutput: string = stdout;
-	const kaniOutputArray: string[] = kaniOutput.split('\n');
-	const searchString: string = 'Report written to: ';
+	const kaniOutputArray: string[] = kaniOutput.split('Coverage Results:\n');
 
-	for (const outputString of kaniOutputArray) {
-		if (outputString.startsWith(searchString)) {
-			const reportPath: string = outputString.substring(searchString.length);
+	const coverageResults = kaniOutputArray.at(1)?.split('\n')!;
 
-			// Check if the path exists as expected
-			const filePathExists: boolean = await checkPathExists(reportPath);
-			if (!filePathExists) {
-				return undefined;
-			}
+	const coverage = parseCoverageData(coverageResults);
+	const lcovFile = convertToLcovFormat(coverage);
 
-            // get json file for the harness
-            const grandparentDirectory = getGrandparentDirectoryPath(reportPath);
-            const jsonPath = path.join(grandparentDirectory, "/json/viewer-coverage.json");
+	const outputFilePath = '/home/ubuntu/sample-coverage/lcov.info';
+	fs.writeFileSync(outputFilePath, lcovFile, {flag: 'w'});
 
-            const jsonPathexists = await checkPathExists(jsonPath);
-            if(jsonPathexists) {
-                console.log(jsonPath);
-                const data = readJsonFile(jsonPath);
-
-				const outputFilePath = '/home/ubuntu/sample-coverage/lcov.info';
-				const coverageData: CoverageJSON = data as CoverageJSON;
-
-				generateLcovFile(coverageData, outputFilePath);
-				console.log(`LCOV file generated: ${outputFilePath}`);
-            }
-		}
-	}
+	console.log(coverage);
 
 	// No command found from Kani
 	return undefined;
 }
 
-// Util function to find the path of the report from the harness name
-async function checkPathExists(serverCommand: string): Promise<boolean> {
-	// Kani returns a structured string, using that structure
-	// to find the filepath embedded in the command string
-	const lastSlashIndex: number = serverCommand.lastIndexOf('/');
+interface CoverageEntry {
+	filePath: string;
+	lineNumber: number;
+	coverageStatus: string;
+  }
 
-	if (lastSlashIndex !== -1) {
-		const match: string = serverCommand.substring(lastSlashIndex);
-		if (match) {
-			// Even if the path can be extracted from Kani's output, it's not
-			// necessary that the html file was created, so this needs to be checked
-			const exists: boolean = fs.existsSync(match[0]);
-			return exists;
-		} else {
-			return false;
-		}
-	} else {
-		return false;
+
+function parseCoverageData(data: string[]): CoverageEntry[] {
+	const coverageEntries: CoverageEntry[] = [];
+
+	for (const entry of data) {
+	  const parts = entry.split(', ');
+
+	  if (parts.length === 3) {
+		const [filePath, lineNumberStr, coverageStatus] = parts;
+		const lineNumber = parseInt(lineNumberStr.trim(), 10);
+
+		coverageEntries.push({
+		  filePath,
+		  lineNumber,
+		  coverageStatus,
+		});
+	  }
 	}
+
+	return coverageEntries;
 }
 
-function getGrandparentDirectoryPath(filePath: string): string {
-    const parentDirectory = path.dirname(filePath);
-    const grandparentDirectory = path.dirname(parentDirectory);
-    return grandparentDirectory;
-}
+function convertToLcovFormat(coverageArray: CoverageEntry[]): string {
+	let lcovReport = '';
 
-function readJsonFile(filePath: string) {
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const jsonData = JSON.parse(fileContents);
-    return jsonData;
-}
+	for (const entry of coverageArray) {
+	  const { filePath, lineNumber, coverageStatus } = entry;
+	  lcovReport += `SF:${filePath}\n`;
+	  lcovReport += `DA:${lineNumber},${coverageStatus === 'COVERED' ? 1 : 0}\n`;
+	}
+
+	lcovReport += 'end_of_record\n';
+
+	return lcovReport;
+  }
 
 function generateLcovFile(coverageData: any, outputFilePath: string): void {
   let lcovContent = '';
