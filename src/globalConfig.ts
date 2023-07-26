@@ -32,7 +32,6 @@ class GlobalConfig {
 	public getKanifilePath() {
 		return this.KanifilePath;
 	}
-
 }
 
 export default GlobalConfig;

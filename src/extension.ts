@@ -45,7 +45,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		const KaniPath = await getKaniPath('kani');
 		globalConfig.setFilePath(CargoKaniBinaryPath);
 		globalConfig.setKanifilePath(KaniPath);
-
 	} catch (error) {
 		showErrorWithReportIssueButton(
 			'The Kani executable was not found in PATH. Please install it using the instructions at https://model-checking.github.io/kani/install-guide.html and/or make sure it is in your PATH.',
