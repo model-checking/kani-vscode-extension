@@ -30,12 +30,12 @@ export async function runCodeCoverageAction(renderer: Renderer, functionName: st
 	const currentFileUri = activeEditor?.document.uri.fsPath;
 
 	let playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --enable-unstable --coverage --harness ${functionName}`;
-	const processOutput = await runVisualizeCommand(playbackCommand, functionName);
+	const processOutput = await runCoverageCommand(playbackCommand, functionName);
 
 	if(processOutput.statusCode == 0) {
-		console.log(processOutput.result);
+		const coverageOutputArray = processOutput.result;
 
-		const formatted = parseCoverageFormatted(processOutput.result);
+		const formatted = parseCoverageFormatted(coverageOutputArray);
 		const editor = vscode.window.activeTextEditor;
 		if(editor) {
 			renderer.highlightSourceCode(editor.document, formatted, false);
@@ -49,7 +49,7 @@ export async function runCodeCoverageAction(renderer: Renderer, functionName: st
  * @param command - the cargo kani | kani command to run --visualize
  * @returns - the result of executing the visualize command and parsing the output
  */
-async function runVisualizeCommand(command: string, harnessName: string): Promise<any> {
+async function runCoverageCommand(command: string, harnessName: string): Promise<any> {
 	try {
 		// Get the full resolved path for the root directory of the crate
 		const directory = path.resolve(getRootDir());
@@ -66,7 +66,7 @@ async function runVisualizeCommand(command: string, harnessName: string): Promis
 		const globalConfig = GlobalConfig.getInstance();
 		const kaniBinaryPath = `/home/ubuntu/kani/scripts/kani`;
 
-		vscode.window.showInformationMessage(`Generating viewer report for ${harnessName}`);
+		vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 		const { stdout, stderr } = await execPromise(kaniBinaryPath, args, options);
 		const parseResult = await parseReportOutput(stdout);
 		if (parseResult === undefined) {
@@ -107,15 +107,29 @@ interface CoverageEntry {
 	coverageStatus: string;
 }
 
+enum CoverageStatus {
+	Full = "FULL",
+	Partial = "PARTIAL",
+	None = "NONE"
+}
+
 // Function to parse the new format and convert it into a coverageMap
-export function parseCoverageFormatted(coverageData: CoverageEntry[]): Map<number, number> {
-	const coverageMap = new Map<number, number>();
+export function parseCoverageFormatted(coverageData: CoverageEntry[]): Map<number, CoverageStatus> {
+	const coverageMap = new Map<number, CoverageStatus>();
 
 	for (const item of coverageData) {
-		if (item.coverageStatus === 'COVERED') {
-			coverageMap.set(item.lineNumber, 1);
-		} else if (item.coverageStatus === 'UNCOVERED') {
-			coverageMap.set(item.lineNumber, 0);
+		switch (item.coverageStatus) {
+			case "FULL":
+				coverageMap.set(item.lineNumber, CoverageStatus.Full);
+				break;
+			case "PARTIAL":
+				coverageMap.set(item.lineNumber, CoverageStatus.Partial);
+				break;
+			case "NONE":
+				coverageMap.set(item.lineNumber, CoverageStatus.None);
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -155,37 +169,49 @@ export class Renderer {
     }
 
 	// Function to highlight the source code based on coverage data
-	public highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, number>, dispose_bool: boolean) {
+	public highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, CoverageStatus>, dispose_bool: boolean) {
 		const decorationsGreen: vscode.Range[] = [];
 		const decorationsRed: vscode.Range[] = [];
+		const decorationsYellow: vscode.Range[] = [];
 
 		for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
 			const line = doc.lineAt(lineNum - 1);
 
-			const coverageStatus = coverageMap.get(lineNum);
+			const status = coverageMap.get(lineNum);
 
-			if(coverageStatus === undefined) {
+			if(status === undefined) {
 				continue;
 			}
 
-			if (coverageStatus > 0) {
-				const range = new vscode.Range(line.range.start, line.range.end);
-				decorationsGreen.push(range);
-			} else if (coverageStatus === 0) {
-				const range = new vscode.Range(line.range.start, line.range.end);
-				decorationsRed.push(range);
+			switch (status) {
+				case CoverageStatus.Full:
+					const fullrange = new vscode.Range(line.range.start, line.range.end);
+					decorationsGreen.push(fullrange);
+					break;
+				case CoverageStatus.Partial:
+					const partial = new vscode.Range(line.range.start, line.range.end);
+					decorationsYellow.push(partial);
+					break;
+				case CoverageStatus.None:
+					const norange = new vscode.Range(line.range.start, line.range.end);
+					decorationsRed.push(norange);
+					break;
+				default:
+					break;
 			}
 		}
 
 		if(!dispose_bool) {
-			this.renderHighlight(decorationsGreen, decorationsRed);
+			this.renderHighlight(decorationsGreen, decorationsRed, decorationsYellow);
 		} else{
-			this.renderHighlight([], []);
+			this.renderHighlight([], [], []);
 		}
 	}
 
-	public renderHighlight(decorationsGreen: vscode.Range[], decorationsRed: vscode.Range[]) {
+	public renderHighlight(decorationsGreen: vscode.Range[], decorationsRed: vscode.Range[], decorationsYellow: vscode.Range[]) {
 		vscode.window.activeTextEditor?.setDecorations(this.configStore.covered, decorationsGreen);
+		vscode.window.activeTextEditor?.setDecorations(this.configStore.partialcovered, decorationsYellow);
 		vscode.window.activeTextEditor?.setDecorations(this.configStore.uncovered, decorationsRed);
+
 	}
 }
