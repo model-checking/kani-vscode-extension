@@ -1,10 +1,12 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import * as vscode from 'vscode';
+
 import GlobalConfig from '../../globalConfig';
+import { getKaniPath } from '../../model/kaniRunner';
 import { CommandArgs, getRootDir, splitCommand } from '../../utils';
 import Config from './config';
 
@@ -29,7 +31,7 @@ export async function runCodeCoverageAction(renderer: Renderer, functionName: st
 	const activeEditor = vscode.window.activeTextEditor;
 	const currentFileUri = activeEditor?.document.uri.fsPath;
 
-	let playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --enable-unstable --coverage --harness ${functionName}`;
+	const playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --enable-unstable --coverage --harness ${functionName}`;
 	const processOutput = await runCoverageCommand(playbackCommand, functionName);
 
 	if(processOutput.statusCode == 0) {
@@ -64,7 +66,11 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 		};
 
 		const globalConfig = GlobalConfig.getInstance();
-		const kaniBinaryPath = `/home/ubuntu/kani/scripts/kani`;
+		const kaniBinaryPath = await getKaniPath('kani');
+
+		vscode.window.showInformationMessage(
+			`Kani located at ${kaniBinaryPath} being used for verification`,
+		);
 
 		vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 		const { stdout, stderr } = await execPromise(kaniBinaryPath, args, options);
@@ -93,9 +99,15 @@ async function parseReportOutput(stdout: string): Promise<any | undefined> {
 	const kaniOutput: string = stdout;
 	const kaniOutputArray: string[] = kaniOutput.split('Coverage Results:\n');
 
-	const coverageResults = kaniOutputArray.at(1)?.split('\n')!;
+	const coverageResults = kaniOutputArray.at(1);
 
-	const coverage = parseCoverageData(coverageResults);
+	if(coverageResults === undefined) {
+		return '';
+	}
+
+	const coverageResultsArray = coverageResults.split('\n')!;
+
+	const coverage = parseCoverageData(coverageResultsArray);
 
 	// No command found from Kani
 	return coverage;
@@ -169,7 +181,7 @@ export class Renderer {
     }
 
 	// Function to highlight the source code based on coverage data
-	public highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, CoverageStatus>, dispose_bool: boolean) {
+	public highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, CoverageStatus>, dispose_bool: boolean): void {
 		const decorationsGreen: vscode.Range[] = [];
 		const decorationsRed: vscode.Range[] = [];
 		const decorationsYellow: vscode.Range[] = [];
@@ -183,18 +195,17 @@ export class Renderer {
 				continue;
 			}
 
+			const range = new vscode.Range(line.range.start, line.range.end);
+
 			switch (status) {
 				case CoverageStatus.Full:
-					const fullrange = new vscode.Range(line.range.start, line.range.end);
-					decorationsGreen.push(fullrange);
+					decorationsGreen.push(range);
 					break;
 				case CoverageStatus.Partial:
-					const partial = new vscode.Range(line.range.start, line.range.end);
-					decorationsYellow.push(partial);
+					decorationsYellow.push(range);
 					break;
 				case CoverageStatus.None:
-					const norange = new vscode.Range(line.range.start, line.range.end);
-					decorationsRed.push(norange);
+					decorationsRed.push(range);
 					break;
 				default:
 					break;
@@ -208,7 +219,7 @@ export class Renderer {
 		}
 	}
 
-	public renderHighlight(decorationsGreen: vscode.Range[], decorationsRed: vscode.Range[], decorationsYellow: vscode.Range[]) {
+	public renderHighlight(decorationsGreen: vscode.Range[], decorationsRed: vscode.Range[], decorationsYellow: vscode.Range[]): void {
 		vscode.window.activeTextEditor?.setDecorations(this.configStore.covered, decorationsGreen);
 		vscode.window.activeTextEditor?.setDecorations(this.configStore.partialcovered, decorationsYellow);
 		vscode.window.activeTextEditor?.setDecorations(this.configStore.uncovered, decorationsRed);

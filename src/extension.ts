@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 
 import { connectToDebugger } from './debugger/debugger';
-import GlobalConfig  from './globalConfig';
+import GlobalConfig from './globalConfig';
 import { getKaniPath, getKaniVersion } from './model/kaniRunner';
 import { gatherTestItems } from './test-tree/buildTree';
 import {
@@ -19,6 +19,8 @@ import {
 import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
+import Config from './ui/coverage/config';
+import { Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
@@ -29,8 +31,6 @@ import {
 	getRootDirURI,
 	showErrorWithReportIssueButton,
 } from './utils';
-import { Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
-import Config from './ui/coverage/config';
 
 // Entry point of the extension
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -241,13 +241,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const renderer = new Renderer(config);
 
 	// Register a command to de-highlight the coverage in the active editor
-	const dehighlightCoverageCommand = vscode.commands.registerCommand('extension.dehighlightCoverage', () => {
-		const editor = vscode.window.activeTextEditor;
-		if (editor) {
-			const coverageMap = new Map();
-			renderer.highlightSourceCode(editor.document, coverageMap, true);
-		}
-	});
+	const dehighlightCoverageCommand = vscode.commands.registerCommand(
+		'extension.dehighlightCoverage',
+		() => {
+			const editor = vscode.window.activeTextEditor;
+			if (editor) {
+				const coverageMap = new Map();
+				renderer.highlightSourceCode(editor.document, coverageMap, true);
+			}
+		},
+	);
 
 	// Update the test tree with proofs whenever a test case is opened
 	context.subscriptions.push(

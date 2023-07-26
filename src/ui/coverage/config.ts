@@ -10,10 +10,9 @@ class CoverageConfig {
     constructor(context: ExtensionContext) {
         this.context = context;
         this.setup();
-
     }
 
-    private setup() {
+    private setup(): void {
         const fullDecoration: DecorationRenderOptions = {
             backgroundColor: 'rgba(0, 255, 0, 0.2)', // Green background
             isWholeLine: false
