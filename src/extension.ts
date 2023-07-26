@@ -29,7 +29,7 @@ import {
 	getRootDirURI,
 	showErrorWithReportIssueButton,
 } from './utils';
-import { Renderer, parseCoverageFormatted, runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import { Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
 import Config from './ui/coverage/config';
 
 // Entry point of the extension

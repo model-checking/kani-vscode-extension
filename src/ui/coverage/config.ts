@@ -1,6 +1,6 @@
 import { DecorationRenderOptions, ExtensionContext, TextEditorDecorationType, window } from "vscode";
 
-class Config {
+class CoverageConfig {
     public covered!: TextEditorDecorationType;
     public uncovered!: TextEditorDecorationType;
 
@@ -28,4 +28,4 @@ class Config {
     }
 }
 
-export default Config;
+export default CoverageConfig;
