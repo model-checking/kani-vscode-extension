@@ -1,11 +1,13 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 class GlobalConfig {
-	private static instance: GlobalConfig;
-	private filePath: string;
+	public static instance: GlobalConfig;
+	public filePath: string;
+	public KanifilePath = '';
 
 	private constructor() {
 		this.filePath = '';
+		this.KanifilePath = '';
 	}
 
 	public static getInstance(): GlobalConfig {
@@ -22,6 +24,15 @@ class GlobalConfig {
 	public getFilePath(): string {
 		return this.filePath;
 	}
+
+	public setKanifilePath(filePath: string): void {
+		this.KanifilePath = filePath;
+	}
+
+	public getKanifilePath() {
+		return this.KanifilePath;
+	}
+
 }
 
 export default GlobalConfig;
