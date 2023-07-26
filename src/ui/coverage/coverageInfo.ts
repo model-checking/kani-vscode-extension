@@ -52,39 +52,34 @@ export async function runCodeCoverageAction(renderer: Renderer, functionName: st
  * @returns - the result of executing the visualize command and parsing the output
  */
 async function runCoverageCommand(command: string, harnessName: string): Promise<any> {
-	try {
-		// Get the full resolved path for the root directory of the crate
-		const directory = path.resolve(getRootDir());
-		const commmandSplit = command.split(' ');
+	// Get the full resolved path for the root directory of the crate
+	const directory = path.resolve(getRootDir());
+	const commmandSplit = command.split(' ');
 
-		// Get args for the command to be executed
-		const args = commmandSplit.slice(1);
+	// Get args for the command to be executed
+	const args = commmandSplit.slice(1);
 
-		const options = {
-			shell: false,
-			cwd: directory,
-		};
+	const options = {
+		shell: false,
+		cwd: directory,
+	};
 
-		const globalConfig = GlobalConfig.getInstance();
-		const kaniBinaryPath = await getKaniPath('kani');
+	const globalConfig = GlobalConfig.getInstance();
+	const kaniBinaryPath = '/home/ubuntu/kani/scripts/kani'
 
-		vscode.window.showInformationMessage(
-			`Kani located at ${kaniBinaryPath} being used for verification`,
-		);
+	vscode.window.showInformationMessage(
+		`Kani located at ${kaniBinaryPath} being used for verification`,
+	);
 
-		vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
-		const { stdout, stderr } = await execPromise(kaniBinaryPath, args, options);
-		const parseResult = await parseReportOutput(stdout);
-		if (parseResult === undefined) {
-			return { statusCode: 2, result: undefined, error: stderr };
-		}
-		console.error(`stderr: ${stderr}`);
-
-		return { statusCode: 0, result: parseResult };
-	} catch (error) {
-		console.error(`exec error: ${error}`);
-		return { statusCode: 1, result: undefined, error: error as string };
-	}
+	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
+	return new Promise((resolve, _reject) => {
+		execFile(kaniBinaryPath, args, options, async (_error: any, stdout: any, _stderr: any) => {
+			if (stdout) {
+				const parseResult = await parseReportOutput(stdout);
+				resolve({ statusCode: 0, result: parseResult });
+			}
+		});
+	});
 }
 
 /**
@@ -185,6 +180,8 @@ export class Renderer {
 		const decorationsGreen: vscode.Range[] = [];
 		const decorationsRed: vscode.Range[] = [];
 		const decorationsYellow: vscode.Range[] = [];
+
+		this.renderHighlight([], [], []);
 
 		for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
 			const line = doc.lineAt(lineNum - 1);
