@@ -20,7 +20,7 @@ import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
 import CoverageConfig from './ui/coverage/config';
-import { CoverageInfo, Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import {Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';

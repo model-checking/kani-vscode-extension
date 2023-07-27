@@ -17,12 +17,12 @@ Coverage information has been disabled due recent issues involving incorrect res
 
 export async function runCodeCoverageAction(renderer: Renderer, functionName: string): Promise<void> {
 	const globalConfig = GlobalConfig.getInstance();
-	const kaniBinaryPath = '/home/ubuntu/kani/scripts/kani';
+	const kaniBinaryPath = globalConfig.getFilePath();
 
 	const activeEditor = vscode.window.activeTextEditor;
 	const currentFileUri = activeEditor?.document.uri.fsPath;
 
-	const playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --enable-unstable --coverage --harness ${functionName}`;
+	const playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --coverage -Z line-coverage --harness ${functionName}`;
 	const processOutput = await runCoverageCommand(playbackCommand, functionName);
 
 	if(processOutput.statusCode == 0) {
@@ -58,7 +58,7 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	};
 
 	const globalConfig = GlobalConfig.getInstance();
-	const kaniBinaryPath = '/home/ubuntu/kani/scripts/kani'
+	const kaniBinaryPath = await getKaniPath('kani');
 
 	vscode.window.showInformationMessage(
 		`Kani located at ${kaniBinaryPath} being used for verification`,
