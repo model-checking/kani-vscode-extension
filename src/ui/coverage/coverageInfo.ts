@@ -12,21 +12,12 @@ import Config from './config';
 
 const { execFile } = require('child_process');
 const { promisify } = require('util');
-const execPromise = promisify(execFile);
 const warningMessage = `Report generation is an unstable feature.
 Coverage information has been disabled due recent issues involving incorrect results.`;
 
 export async function runCodeCoverageAction(renderer: Renderer, functionName: string): Promise<void> {
-	const taskName = `Kani Playback: ${functionName}`;
-
-	const taskDefinition: vscode.TaskDefinition = {
-		type: 'cargo',
-		command: 'test',
-		args: [functionName],
-	};
-
 	const globalConfig = GlobalConfig.getInstance();
-	const kaniBinaryPath = globalConfig.getFilePath();
+	const kaniBinaryPath = '/home/ubuntu/kani/scripts/kani';
 
 	const activeEditor = vscode.window.activeTextEditor;
 	const currentFileUri = activeEditor?.document.uri.fsPath;
@@ -38,10 +29,12 @@ export async function runCodeCoverageAction(renderer: Renderer, functionName: st
 		const coverageOutputArray = processOutput.result;
 
 		const formatted = parseCoverageFormatted(coverageOutputArray);
-		const editor = vscode.window.activeTextEditor;
-		if(editor) {
-			renderer.highlightSourceCode(editor.document, formatted, false);
-		}
+		globalConfig.setCoverage(formatted);
+
+		// log global cached map
+		console.log(formatted);
+
+		renderer.renderInterface(vscode.window.visibleTextEditors, formatted);
 	}
 }
 
@@ -75,6 +68,7 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	return new Promise((resolve, _reject) => {
 		execFile(kaniBinaryPath, args, options, async (_error: any, stdout: any, _stderr: any) => {
 			if (stdout) {
+				console.log(stdout);
 				const parseResult = await parseReportOutput(stdout);
 				resolve({ statusCode: 0, result: parseResult });
 			}
@@ -102,6 +96,10 @@ async function parseReportOutput(stdout: string): Promise<any | undefined> {
 
 	const coverageResultsArray = coverageResults.split('\n')!;
 
+	const terminal = vscode.window.createOutputChannel('Coverage Report');
+	terminal.appendLine(coverageResults);
+	terminal.show();
+
 	const coverage = parseCoverageData(coverageResultsArray);
 
 	// No command found from Kani
@@ -114,6 +112,12 @@ interface CoverageEntry {
 	coverageStatus: string;
 }
 
+export interface CoverageInfo {
+    full: vscode.Range[];
+    partial: vscode.Range[];
+    none: vscode.Range[];
+}
+
 enum CoverageStatus {
 	Full = "FULL",
 	Partial = "PARTIAL",
@@ -121,28 +125,27 @@ enum CoverageStatus {
 }
 
 // Function to parse the new format and convert it into a coverageMap
-export function parseCoverageFormatted(coverageData: CoverageEntry[]): Map<number, CoverageStatus> {
-	const coverageMap = new Map<number, CoverageStatus>();
+function parseCoverageFormatted(entries: CoverageEntry[]): Map<string, Map<number, string>> {
+	const nestedMap: Map<string, Map<number, string>> = new Map();
 
-	for (const item of coverageData) {
-		switch (item.coverageStatus) {
-			case "FULL":
-				coverageMap.set(item.lineNumber, CoverageStatus.Full);
-				break;
-			case "PARTIAL":
-				coverageMap.set(item.lineNumber, CoverageStatus.Partial);
-				break;
-			case "NONE":
-				coverageMap.set(item.lineNumber, CoverageStatus.None);
-				break;
-			default:
-				break;
+	for (const entry of entries) {
+		const { filePath, lineNumber, coverageStatus } = entry;
+
+		// Check if the outer map already has an entry for the filePath
+		let innerMap = nestedMap.get(filePath);
+
+		// If not, create a new inner map and set it in the outer map
+		if (!innerMap) {
+			innerMap = new Map<number, CoverageStatus>();
+			nestedMap.set(filePath, innerMap);
 		}
+
+		// Set the coverageStatus in the inner map for the lineNumber
+		innerMap.set(lineNumber, coverageStatus);
 	}
 
-	return coverageMap;
+	return nestedMap;
 }
-
 
 function parseCoverageData(data: string[]): CoverageEntry[] {
 	const coverageEntries: CoverageEntry[] = [];
@@ -152,6 +155,9 @@ function parseCoverageData(data: string[]): CoverageEntry[] {
 
 	  if (parts.length === 3) {
 		const [filePath, lineNumberStr, coverageStatus] = parts;
+		if(filePath.includes('Complete - ')) {
+			return coverageEntries;
+		}
 		const lineNumber = parseInt(lineNumberStr.trim(), 10);
 
 		coverageEntries.push({
@@ -165,28 +171,68 @@ function parseCoverageData(data: string[]): CoverageEntry[] {
 	return coverageEntries;
 }
 
+export interface ICoverageLines {
+    full: vscode.Range[];
+    partial: vscode.Range[];
+    none: vscode.Range[];
+}
+
 export class Renderer {
-
 	private configStore: Config;
-
 	constructor(
         configStore: Config,
     ) {
         this.configStore = configStore;
     }
 
-	// Function to highlight the source code based on coverage data
-	public highlightSourceCode(doc: vscode.TextDocument, coverageMap: Map<number, CoverageStatus>, dispose_bool: boolean): void {
-		const decorationsGreen: vscode.Range[] = [];
-		const decorationsRed: vscode.Range[] = [];
-		const decorationsYellow: vscode.Range[] = [];
+	public renderInterface(editors: readonly vscode.TextEditor[], coverageMap: Map<string, Map<number, string>>) {
+		editors.forEach((editor) => {
+			if(coverageMap.size == 0) {
+				const coverageLines: ICoverageLines = {
+					full: [],
+					none: [],
+					partial: [],
+				};
 
-		this.renderHighlight([], [], []);
+				this.renderHighlight(editor, coverageLines);
+				return;
+			}
+			const fileMap = coverageMap.get(editor.document.fileName)!;
+			const coverageLines = this.createCoverage(editor.document, fileMap);
+			this.renderHighlight(editor, coverageLines);
+			return;
+		});
+	}
+
+	public renderInterfaceForFile(editor: vscode.TextEditor, coverageMap: Map<string, Map<number, string>>) {
+		if(coverageMap.size == 0) {
+			const coverageLines: ICoverageLines = {
+				full: [],
+				none: [],
+				partial: [],
+			};
+
+			this.renderHighlight(editor, coverageLines);
+		}
+		const fileMap = coverageMap.get(editor.document.fileName);
+		if(fileMap === undefined){
+			return;
+		}
+		const coverageLines = this.createCoverage(editor.document, fileMap);
+		this.renderHighlight(editor, coverageLines);
+	}
+
+	public createCoverage(doc: vscode.TextDocument, coverageFileMap: Map<number, string>): ICoverageLines {
+		const coverageLines: ICoverageLines = {
+            full: [],
+            none: [],
+            partial: [],
+        };
 
 		for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
 			const line = doc.lineAt(lineNum - 1);
 
-			const status = coverageMap.get(lineNum);
+			const status = coverageFileMap.get(lineNum);
 
 			if(status === undefined) {
 				continue;
@@ -195,31 +241,26 @@ export class Renderer {
 			const range = new vscode.Range(line.range.start, line.range.end);
 
 			switch (status) {
-				case CoverageStatus.Full:
-					decorationsGreen.push(range);
+				case "FULL":
+					coverageLines.full.push(range);
 					break;
-				case CoverageStatus.Partial:
-					decorationsYellow.push(range);
+				case "PARTIAL":
+					coverageLines.partial.push(range);
 					break;
-				case CoverageStatus.None:
-					decorationsRed.push(range);
+				case "NONE":
+					coverageLines.none.push(range);
 					break;
 				default:
 					break;
 			}
 		}
 
-		if(!dispose_bool) {
-			this.renderHighlight(decorationsGreen, decorationsRed, decorationsYellow);
-		} else{
-			this.renderHighlight([], [], []);
-		}
+		return coverageLines;
 	}
 
-	public renderHighlight(decorationsGreen: vscode.Range[], decorationsRed: vscode.Range[], decorationsYellow: vscode.Range[]): void {
-		vscode.window.activeTextEditor?.setDecorations(this.configStore.covered, decorationsGreen);
-		vscode.window.activeTextEditor?.setDecorations(this.configStore.partialcovered, decorationsYellow);
-		vscode.window.activeTextEditor?.setDecorations(this.configStore.uncovered, decorationsRed);
-
+	public renderHighlight(editor: vscode.TextEditor, z: ICoverageLines): void {
+		editor.setDecorations(this.configStore.covered, z.full);
+		editor.setDecorations(this.configStore.partialcovered, z.partial);
+		editor.setDecorations(this.configStore.uncovered, z.none);
 	}
 }

@@ -19,8 +19,12 @@ import {
 import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
-import Config from './ui/coverage/config';
-import { Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import CoverageConfig from './ui/coverage/config';
+import {
+	CoverageInfo,
+	Renderer,
+	runCodeCoverageAction,
+} from './ui/coverage/coverageInfo';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
@@ -66,7 +70,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// create a uri for the root folder
 	context.subscriptions.push(controller);
-	const config = new Config(context);
+	const coverageConfig = new CoverageConfig(context);
+	const globalConfig = GlobalConfig.getInstance();
 	const crateURI: Uri = getRootDirURI();
 	const treeRoot: vscode.TestItem = controller.createTestItem(
 		'Kani proofs',
@@ -233,22 +238,28 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', false, true);
 	});
 
+	vscode.commands.registerCommand('codelens-kani.enableCoverage', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('highlightCoverage', true, true);
+	});
+
+	// Allows VSCode to disable VSCode globally
+	vscode.commands.registerCommand('codelens-kani.disableCoverage', () => {
+		vscode.workspace.getConfiguration('codelens-kani').update('highlightCoverage', false, true);
+	});
+
 	// Register the command for the code lens Kani test runner function
 	vscode.commands.registerCommand('codelens-kani.codelensAction', (args: any) => {
 		runKaniPlayback(args);
 	});
 
-	const renderer = new Renderer(config);
+	const renderer = new Renderer(coverageConfig);
 
 	// Register a command to de-highlight the coverage in the active editor
 	const dehighlightCoverageCommand = vscode.commands.registerCommand(
-		'extension.dehighlightCoverage',
+		'codelens-kani.dehighlightCoverage',
 		() => {
-			const editor = vscode.window.activeTextEditor;
-			if (editor) {
-				const coverageMap = new Map();
-				renderer.highlightSourceCode(editor.document, coverageMap, true);
-			}
+			globalConfig.setCoverage(new Map());
+			renderer.renderInterface(vscode.window.visibleTextEditors, new Map());
 		},
 	);
 
@@ -256,6 +267,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
 		vscode.workspace.onDidSaveTextDocument(async (e) => await updateNodeForDocument(e)),
+		vscode.window.onDidChangeActiveTextEditor((editor) => {
+			const cache = globalConfig.getCoverage();
+			renderer.renderInterfaceForFile(editor!, cache);
+		}),
 	);
 
 	context.subscriptions.push(runKani);
@@ -270,7 +285,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	);
 	context.subscriptions.push(
 		// Register the command for the code lens Kani test runner function
-		vscode.commands.registerCommand('extension.codeCoverageCommand', (args: any) => {
+		vscode.commands.registerCommand('codelens-kani.highlightCoverage', (args: any) => {
 			runCodeCoverageAction(renderer, args);
 		}),
 	);

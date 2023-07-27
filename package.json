@@ -54,11 +54,11 @@
         "category": "CodeLens Sample"
       },
       {
-        "command": "extension.highlightCoverage",
+        "command": "codelens-kani.highlightCoverage",
         "title": "Highlight Coverage"
       },
       {
-        "command": "extension.dehighlightCoverage",
+        "command": "codelens-kani.dehighlightCoverage",
         "title": "De-Highlight Coverage"
       }
     ],
@@ -66,6 +66,10 @@
       "title": "Kani",
       "properties": {
         "codelens-kani.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        },
+        "codelens-kani.highlightCoverage": {
           "type": "boolean",
           "default": true
         },
