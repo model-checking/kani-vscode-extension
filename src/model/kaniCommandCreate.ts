@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as vscode from 'vscode';
 
+import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 import { KaniResponseError } from './kaniOutputParser';
 import { createFailedDiffMessage, runKaniCommand } from './kaniRunner';
-import { KaniArguments, KaniConstants, KaniResponse } from '../constants';
 
 /**
  * Generate command and run `cargo-kani` on the command, and return the output status code of the sub-process

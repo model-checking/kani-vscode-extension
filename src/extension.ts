@@ -267,9 +267,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
 		vscode.workspace.onDidSaveTextDocument(async (e) => await updateNodeForDocument(e)),
 		vscode.window.onDidChangeActiveTextEditor((editor) => {
-			// VS Code resets highlighting everytime a document is changed or switched
-			// in order to workaround this issue, the highlighting needs to be rendered each time
-			// to keep the rendering time light, we store the coverage metadata as a global cache
+			// VS Code resets highlighting whenever a document is changed or switched.
+			// In order to work around this issue, the highlighting needs to be rendered each time.
+			// To keep the rendering time short, we store the coverage metadata as a global cache.
 			const cache = globalConfig.getCoverage();
 			renderer.renderInterfaceForFile(editor!, cache);
 		}),

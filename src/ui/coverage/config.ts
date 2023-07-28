@@ -3,6 +3,9 @@
 
 import { DecorationRenderOptions, ExtensionContext, TextEditorDecorationType, window } from "vscode";
 
+// Takes the extension context and stores the specified decoration (vs code highliging API) values for that context
+// By storing the decoration values per context, we allow users to de-highlight the same contexts. Without caching these
+// values as a global cache, VS Code does not de-highlight.
 class CoverageConfig {
     public covered!: TextEditorDecorationType;
     public partialcovered!: TextEditorDecorationType;

@@ -16,12 +16,12 @@ class GlobalConfig {
 		return GlobalConfig.instance;
 	}
 
-	// Store coverage as a cache to be accessed everytime a new text page is opened or switched
+	// Store coverage as a cache to be accessed whenever a new text page is opened or switched
 	public setCoverage(coverageMap: any): void {
 		this.coverageMap = coverageMap;
 	}
 
-	// Retrieve coverage as a cache to be accessed everytime a new text page is opened or switched
+	// Retrieve coverage as a cache to be accessed whenever a new text page is opened or switched
 	public getCoverage(): any {
 		return this.coverageMap;
 	}

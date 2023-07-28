@@ -39,7 +39,6 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 
 			// Find the unit tests by searching for its text
 			const kani_concrete_tests = await SourceCodeParser.extractKaniTestMetadata(text);
-			const kani_harnesses = await SourceCodeParser.getAttributeFromRustFile(text);
 
 			for (const item of kani_concrete_tests) {
 				const function_item_name = item.at(0);
@@ -82,6 +81,10 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 			// The setting for the coverage code lens needs to be switched on for the mechanism
 			// to be enabled
 			if (vscode.workspace.getConfiguration('codelens-kani').get('highlightCoverage', true)) {
+				// Retrieve harness metadata from the tree-sitter which will be used to place the
+				// `Get coverage info` code lens button.
+				const kani_harnesses = await SourceCodeParser.getAttributeFromRustFile(text);
+
 				for (const harness of kani_harnesses) {
 					const harness_name = harness.harnessName;
 
@@ -93,10 +96,9 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 
 					// This is the metadata that VSCode needs to place the codelens button
 					const line = document.lineAt(startPosition.row);
-					const regex = /fn\s+([\w_]+)/g;
 					const indexOf = line.text.indexOf(harness_name);
 					const position = new vscode.Position(line.lineNumber, indexOf);
-					const range = document.getWordRangeAtPosition(position, new RegExp(regex));
+					const range = document.getWordRangeAtPosition(position);
 
 					const codeCoverageAction = {
 						title: '$(play) Get coverage info',

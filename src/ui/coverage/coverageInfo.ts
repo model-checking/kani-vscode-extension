@@ -4,10 +4,10 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
-import Config from './config';
 import GlobalConfig from '../../globalConfig';
 import { getKaniPath } from '../../model/kaniRunner';
 import { CommandArgs, getRootDir, splitCommand } from '../../utils';
+import Config from './config';
 
 const { execFile } = require('child_process');
 
@@ -31,10 +31,14 @@ enum CoverageStatus {
 	None = "NONE"
 }
 
+const warningMessage = `Kani's coverage output generation is an unstable feature.`;
+
 // Callback function for the coverage code lens action
 export async function runCodeCoverageAction(renderer: CoverageRenderer, functionName: string): Promise<void> {
 	const globalConfig = GlobalConfig.getInstance();
 	const kaniBinaryPath = globalConfig.getFilePath();
+
+	vscode.window.showWarningMessage(warningMessage);
 
 	const activeEditor = vscode.window.activeTextEditor;
 	const currentFileUri = activeEditor?.document.uri.fsPath;
@@ -42,24 +46,25 @@ export async function runCodeCoverageAction(renderer: CoverageRenderer, function
 	const playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --coverage -Z line-coverage --harness ${functionName}`;
 	const processOutput = await runCoverageCommand(playbackCommand, functionName);
 
+
 	if(processOutput.statusCode == 0) {
 		const coverageOutputArray = processOutput.result;
 
-		const formatted = parseCoverageFormatted(coverageOutputArray);
-		globalConfig.setCoverage(formatted);
+		// Convert the array of (file, line, status) objects into Map<file <line, status>>
+		// since we need to cache this globally
+		const coverageGlobalMap = parseCoverageFormatted(coverageOutputArray);
+		globalConfig.setCoverage(coverageGlobalMap);
 
-		// log global cached map
-		console.log(formatted);
-
-		renderer.renderInterface(vscode.window.visibleTextEditors, formatted);
+		renderer.renderInterface(vscode.window.visibleTextEditors, coverageGlobalMap);
 	}
 }
 
 /**
- * Run the visualize command to generate the report, parse the output and return the result
+ * Run the --coverage command (with -Z line-coverage) to generate the coverage output, parse the output and return the result
  *
- * @param command - the cargo kani | kani command to run --visualize
- * @returns - the result of executing the visualize command and parsing the output
+ * @param command - the kani command to run along with the harness name
+ * @param harnessName - name of the harness
+ * @returns - the result of executing the --coverage command and parsing the output
  */
 async function runCoverageCommand(command: string, harnessName: string): Promise<any> {
 	// Get the full resolved path for the root directory of the crate
@@ -121,14 +126,14 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 		terminal.show();
 	}
 
-
 	const coverage = parseCoverageData(coverageResultsArray);
 
 	// No command found from Kani
 	return coverage;
 }
 
-// Parse the new format and convert it into a coverageMap
+// Parse Coverage entry objects and convert it into CoverageMap or a map<file_path, map<line_number, status>>
+// We store this map as the global cache since it allows easy sorting and retrieval by file name, needed by VS Code
 function parseCoverageFormatted(entries: CoverageEntry[]): Map<string, Map<number, string>> {
 	const nestedMap: Map<string, Map<number, string>> = new Map();
 
@@ -151,7 +156,7 @@ function parseCoverageFormatted(entries: CoverageEntry[]): Map<string, Map<numbe
 	return nestedMap;
 }
 
-// Convert
+// Convert coverage Kani's output into CoverageEntry objects
 function parseCoverageData(data: string[]): CoverageEntry[] {
 	const coverageEntries: CoverageEntry[] = [];
 

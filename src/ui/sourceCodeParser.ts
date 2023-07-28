@@ -6,8 +6,8 @@ import path from 'path';
 import * as vscode from 'vscode';
 import Parser from 'web-tree-sitter';
 
-import { HarnessMetadata } from './sourceMap';
 import { countOccurrences, getConcatenatedModuleName } from '../utils';
+import { HarnessMetadata } from './sourceMap';
 
 // Parse for kani::proof helper function
 export async function loadParser(): Promise<Parser> {
