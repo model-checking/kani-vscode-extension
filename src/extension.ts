@@ -20,7 +20,7 @@ import { CodelensProvider } from './ui/CodeLensProvider';
 import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
 import CoverageConfig from './ui/coverage/config';
-import { Renderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
+import { CoverageRenderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
 import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
@@ -251,7 +251,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	});
 
 	// Seperate rendering logic and re-use everywhere to highlight and de-highlight
-	const renderer = new Renderer(coverageConfig);
+	const renderer = new CoverageRenderer(coverageConfig);
 
 	// Register a command to de-highlight the coverage in the active editor
 	const dehighlightCoverageCommand = vscode.commands.registerCommand(

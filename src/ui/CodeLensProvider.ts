@@ -78,6 +78,9 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 					this.codeLenses.push(debugTestCodelens);
 				}
 			}
+
+			// The setting for the coverage code lens needs to be switched on for the mechanism
+			// to be enabled
 			if (vscode.workspace.getConfiguration('codelens-kani').get('highlightCoverage', true)) {
 				for (const harness of kani_harnesses) {
 					const harness_name = harness.harnessName;
