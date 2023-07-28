@@ -77,10 +77,6 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	const globalConfig = GlobalConfig.getInstance();
 	const kaniBinaryPath = await getKaniPath('kani');
 
-	vscode.window.showInformationMessage(
-		`Kani located at ${kaniBinaryPath} being used for verification`,
-	);
-
 	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 	return new Promise((resolve, _reject) => {
 		execFile(kaniBinaryPath, args, options, async (_error: any, stdout: any, _stderr: any) => {
@@ -112,9 +108,19 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 
 	const coverageResultsArray = coverageResults.split('\n')!;
 
+	// If the global setting for showing output is on, show the output
+	const config = vscode.workspace.getConfiguration('Kani');
+	const showOutputWindow = config.get('showOutputWindow');
+
 	const terminal = vscode.window.createOutputChannel('Coverage Report');
 	terminal.appendLine(coverageResults);
-	terminal.show();
+
+	// Use the value to show or hide the output window
+	if (showOutputWindow) {
+		// Open channel but don't change focus
+		terminal.show();
+	}
+
 
 	const coverage = parseCoverageData(coverageResultsArray);
 
