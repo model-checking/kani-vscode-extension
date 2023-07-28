@@ -6,6 +6,11 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
+import {
+	KaniResponseError,
+	checkOutputForError,
+	responseParserInterface,
+} from './kaniOutputParser';
 import { KaniResponse } from '../constants';
 import GlobalConfig from '../globalConfig';
 import {
@@ -15,11 +20,6 @@ import {
 	showErrorWithReportIssueButton,
 	splitCommand,
 } from '../utils';
-import {
-	KaniResponseError,
-	checkOutputForError,
-	responseParserInterface,
-} from './kaniOutputParser';
 
 // Store the output from process into a object with this type
 interface CommandOutput {
