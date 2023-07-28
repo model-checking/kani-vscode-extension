@@ -44,8 +44,11 @@ async function getBinaryPath(): Promise<string | undefined> {
 
 		const output = execFileSync(kaniBinaryPath, commandSplit.args, options);
 		const outputString = output.toString();
-
 		const lines = outputString.trim().split('\n');
+		// Remove version string before json parsing
+		lines.shift();
+
+		// Parse json objects from response
 		const jsonMessages = lines.map((line: string) => JSON.parse(line));
 
 		/*
