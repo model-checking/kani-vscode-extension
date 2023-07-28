@@ -66,6 +66,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// create a uri for the root folder
 	context.subscriptions.push(controller);
+	// Store coverage objects in a global cache when highlighting. When de-highlighting, the same objects need to be disposed
 	const coverageConfig = new CoverageConfig(context);
 	const globalConfig = GlobalConfig.getInstance();
 	const crateURI: Uri = getRootDirURI();
@@ -229,16 +230,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', true, true);
 	});
 
-	// Allows VSCode to disable VSCode globally
+	// Allows VSCode to disable code lens globally
 	vscode.commands.registerCommand('codelens-kani.disableCodeLens', () => {
 		vscode.workspace.getConfiguration('codelens-kani').update('enableCodeLens', false, true);
 	});
 
+	// Allows VSCode to enable highlighting globally
 	vscode.commands.registerCommand('codelens-kani.enableCoverage', () => {
 		vscode.workspace.getConfiguration('codelens-kani').update('highlightCoverage', true, true);
 	});
 
-	// Allows VSCode to disable VSCode globally
+	// Allows VSCode to disable highlighting globally
 	vscode.commands.registerCommand('codelens-kani.disableCoverage', () => {
 		vscode.workspace.getConfiguration('codelens-kani').update('highlightCoverage', false, true);
 	});
@@ -248,6 +250,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		runKaniPlayback(args);
 	});
 
+	// Seperate rendering logic and re-use everywhere to highlight and de-highlight
 	const renderer = new Renderer(coverageConfig);
 
 	// Register a command to de-highlight the coverage in the active editor
@@ -264,6 +267,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
 		vscode.workspace.onDidSaveTextDocument(async (e) => await updateNodeForDocument(e)),
 		vscode.window.onDidChangeActiveTextEditor((editor) => {
+			// VS Code resets highlighting everytime a document is changed or switched
+			// in order to workaround this issue, the highlighting needs to be rendered each time
+			// to keep the rendering time light, we store the coverage metadata as a global cache
 			const cache = globalConfig.getCoverage();
 			renderer.renderInterfaceForFile(editor!, cache);
 		}),
@@ -279,12 +285,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			connectToDebugger(programName),
 		),
 	);
+	// Register the command for running the coverage action on a harness
 	context.subscriptions.push(
-		// Register the command for the code lens Kani test runner function
 		vscode.commands.registerCommand('codelens-kani.highlightCoverage', (args: any) => {
 			runCodeCoverageAction(renderer, args);
 		}),
 	);
 
+	// Register the command for de-highlighting kani's coverage action on a harness
 	context.subscriptions.push(dehighlightCoverageCommand);
 }
