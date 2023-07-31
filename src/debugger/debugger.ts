@@ -44,8 +44,12 @@ async function getBinaryPath(): Promise<string | undefined> {
 
 		const output = execFileSync(kaniBinaryPath, commandSplit.args, options);
 		const outputString = output.toString();
-
 		const lines = outputString.trim().split('\n');
+		// Remove version string before JSON parsing
+		// NOTE: This is a temporary patch till <https://github.com/model-checking/kani/issues/2649> is fixed.
+		lines.shift();
+
+		// Parse JSON objects from response
 		const jsonMessages = lines.map((line: string) => JSON.parse(line));
 
 		/*
