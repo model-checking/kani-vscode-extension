@@ -250,7 +250,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		runKaniPlayback(args);
 	});
 
-	// Seperate rendering logic and re-use everywhere to highlight and de-highlight
+	// Separate rendering logic and re-use everywhere to highlight and de-highlight
 	const renderer = new CoverageRenderer(coverageConfig);
 
 	// Register a command to de-highlight the coverage in the active editor

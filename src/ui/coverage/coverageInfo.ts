@@ -31,7 +31,7 @@ enum CoverageStatus {
 	None = "NONE"
 }
 
-const warningMessage = `Kani's coverage output generation is an unstable feature.`;
+const warningMessage = `Line coverage is an unstable feature.`;
 
 // Callback function for the coverage code lens action
 export async function runCodeCoverageAction(renderer: CoverageRenderer, functionName: string): Promise<void> {
@@ -80,7 +80,7 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	};
 
 	const globalConfig = GlobalConfig.getInstance();
-	const kaniBinaryPath = globalConfig.getFilePath();
+	const kaniBinaryPath = `/Users/jaisnan/kani/scripts/cargo-kani`;
 
 	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 	return new Promise((resolve, _reject) => {
@@ -132,8 +132,8 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 	return coverage;
 }
 
-// Parse Coverage entry objects and convert it into CoverageMap or a map<file_path, map<line_number, status>>
-// We store this map as the global cache since it allows easy sorting and retrieval by file name, needed by VS Code
+// Parse `CoverageEntry` objects and convert it into CoverageMap or a map<file_path, map<line_number, status>>.
+// We store this map as the global cache since it allows easy sorting and retrieval by file name, needed by VS Code.
 function parseCoverageFormatted(entries: CoverageEntry[]): Map<string, Map<number, string>> {
 	const nestedMap: Map<string, Map<number, string>> = new Map();
 
