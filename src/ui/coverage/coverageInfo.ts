@@ -80,7 +80,7 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	};
 
 	const globalConfig = GlobalConfig.getInstance();
-	const kaniBinaryPath = `/Users/jaisnan/kani/scripts/cargo-kani`;
+	const kaniBinaryPath = globalConfig.getFilePath();
 
 	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 	return new Promise((resolve, _reject) => {
