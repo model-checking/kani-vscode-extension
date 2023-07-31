@@ -46,7 +46,7 @@ async function getBinaryPath(): Promise<string | undefined> {
 		const outputString = output.toString();
 		const lines = outputString.trim().split('\n');
 		// Remove version string before json parsing
-		// This is a temporary patch till https://github.com/model-checking/kani/issues/2649 is fixed.
+		// NOTE: This is a temporary patch till <https://github.com/model-checking/kani/issues/2649> is fixed.
 		lines.shift();
 
 		// Parse json objects from response
