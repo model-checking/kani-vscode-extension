@@ -43,7 +43,7 @@ export async function runCodeCoverageAction(renderer: CoverageRenderer, function
 	const activeEditor = vscode.window.activeTextEditor;
 	const currentFileUri = activeEditor?.document.uri.fsPath;
 
-	const playbackCommand: string = `${kaniBinaryPath} ${currentFileUri} --coverage -Z line-coverage --harness ${functionName}`;
+	const playbackCommand: string = `${kaniBinaryPath} --coverage -Z line-coverage --harness ${functionName}`;
 	const processOutput = await runCoverageCommand(playbackCommand, functionName);
 
 
@@ -80,7 +80,7 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	};
 
 	const globalConfig = GlobalConfig.getInstance();
-	const kaniBinaryPath = await getKaniPath('kani');
+	const kaniBinaryPath = globalConfig.getFilePath();
 
 	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 	return new Promise((resolve, _reject) => {
