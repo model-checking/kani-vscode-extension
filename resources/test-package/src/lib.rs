@@ -1,3 +1,6 @@
+//! This package is intended to assist in manually testing the features of the
+//! extension. The tests to be performed are the following:
+//!
 //! 1. Run verification for `test_success` and check that it passes.
 //! 2. Run verification for `test_failure` and check that it fails with
 //!    "assertion failed: x < 4096".
@@ -18,8 +21,8 @@
 //!    "funs::find_index":
 //!     - The first and last highlighted lines are yellow.
 //!     - The second and third highlighted lines are green.
-//!     - The remaining highlighted line is red. Comments indicating the correct
-//!    colors are available in "funs::find_index".
+//!     - The remaining highlighted line is red.
+//!    Comments indicating the correct colors are available in "funs::find_index".
 mod funs;
 
 #[kani::proof]
