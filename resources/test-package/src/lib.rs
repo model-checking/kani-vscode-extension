@@ -28,25 +28,30 @@
 //!    Comments indicating the correct colors are available in "funs::find_index".
 mod funs;
 
-#[kani::proof]
-fn test_success() {
-    let x: u32 = kani::any();
-    kani::assume(x < 4096);
-    let y = funs::estimate_size(x);
-    assert!(y < 10);
-}
+#[cfg(kani)]
+mod verify {
+    use super::*;
 
-#[kani::proof]
-fn test_failure() {
-    let x: u32 = kani::any();
-    let y = funs::estimate_size(x);
-    assert!(y < 10);
-}
+    #[kani::proof]
+    fn test_success() {
+        let x: u32 = kani::any();
+        kani::assume(x < 4096);
+        let y = funs::estimate_size(x);
+        assert!(y < 10);
+    }
 
-#[kani::proof]
-fn test_coverage() {
-    let numbers = [10, 20, 30, 40, 50];
-    let target = 30;
-    let result = funs::find_index(&numbers, target);
-    assert_eq!(result, Some(2));
+    #[kani::proof]
+    fn test_failure() {
+        let x: u32 = kani::any();
+        let y = funs::estimate_size(x);
+        assert!(y < 10);
+    }
+
+    #[kani::proof]
+    fn test_coverage() {
+        let numbers = [10, 20, 30, 40, 50];
+        let target = 30;
+        let result = funs::find_index(&numbers, target);
+        assert_eq!(result, Some(2));
+    }
 }
