@@ -1,3 +1,6 @@
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! This package is intended to assist in manually testing the features of the
 //! extension. The tests to be performed are the following:
 //!

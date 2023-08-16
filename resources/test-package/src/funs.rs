@@ -1,3 +1,6 @@
+// Copyright Kani Contributors
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 pub fn estimate_size(x: u32) -> u32 {
     assert!(x < 4096);
 
