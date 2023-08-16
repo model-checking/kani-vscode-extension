@@ -24,9 +24,9 @@ pub fn estimate_size(x: u32) -> u32 {
 
 pub fn find_index(nums: &[i32], target: i32) -> Option<usize> {
     for (index, &num) in nums.iter().enumerate() { // coverage should be yellow
-        if num == target {                                     // coverage should be green
-            return Some(index);                                // coverage should be green
+        if num == target { // coverage should be green
+            return Some(index); // coverage should be green
         }
     }
-    None                                                       // coverage should be red
-}// coverage should be yellow
+    None // coverage should be red
+} // coverage should be yellow
