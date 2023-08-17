@@ -1,6 +1,6 @@
 # Kani Visual Studio Code Extension
 
-A [Visual Studio Code](https://code.visualstudio.com/) extension that allows users to run and debug their [Kani Rust Verifier](https://github.com/model-checking/kani) harnesses in vscode.
+A [Visual Studio Code](https://code.visualstudio.com/) extension that allows users to run and debug their [Kani Rust Verifier](https://github.com/model-checking/kani) harnesses in VS Code.
 
 ## Usage
 
@@ -22,7 +22,7 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 ## Requirements
 
 -   [Visual Studio Code](https://code.visualstudio.com/) 1.50 or newer
--   [Kani](https://github.com/model-checking/kani) 0.29 or newer
+-   [Kani](https://github.com/model-checking/kani) 0.34 or newer
 
 NOTE: The extension only works on Cargo packages. For standalone Rust files, Kani is only available on the command line.
 
