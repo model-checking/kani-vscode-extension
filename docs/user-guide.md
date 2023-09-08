@@ -113,3 +113,10 @@ Coverage information (as described in the [RFC for line coverage](https://model-
  - **Red:** Indicates `NONE` coverage.
 
 **NOTE**: Line-based coverage information is an unstable feature.
+
+
+#### De-highlight coverage information
+
+To remove or de-highlight the coverage information presented on the UI, open the command palette with `Shift + Command + P` (Mac) / `Ctrl + Shift + P` (Windows/Linux). Then, search for the command `De-highlight coverage`. This should revert the VS Code UI to it's normal state (pre-coverage).
+
+![De-highlight command](../resources/screenshots/de-highlight.png)
