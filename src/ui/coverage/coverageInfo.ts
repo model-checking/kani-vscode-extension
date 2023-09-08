@@ -84,7 +84,13 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 
 	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 	return new Promise((resolve, _reject) => {
-		execFile(kaniBinaryPath, args, options, async (_error: any, stdout: any, _stderr: any) => {
+		execFile(kaniBinaryPath, args, options, async (error: any, stdout: any, stderr: any) => {
+
+			// Check for compilation errors from Kani
+			if(stderr && stderr.includes('error: could not compile')) {
+				vscode.window.showInformationMessage(`Kani had errors during compilation to following errors: \n${stdout}`);
+			}
+
 			if (stdout) {
 				const parseResult = await parseKaniCoverageOutput(stdout);
 				resolve({ statusCode: 0, result: parseResult });
