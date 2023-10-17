@@ -17,5 +17,5 @@ export namespace KaniArguments {
 	export const testsFlag: string = `--tests`;
 	export const outputFormatFlag: string = `--output-format`;
 	export const unstableFormatFlag: string = `--enable-unstable`;
-	export const stubbingFlag: string = `--enable-stubbing`;
+	export const stubbingFlag: string = `-Z=stubbing`;
 }

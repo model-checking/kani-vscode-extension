@@ -20,7 +20,6 @@ jobs:
 
       - name: Check TS linting
         run: |
-          npm install -g npm@9.8
           npm install
           npm run lint
 
