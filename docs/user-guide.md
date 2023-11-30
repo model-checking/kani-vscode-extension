@@ -16,6 +16,8 @@ This guide provides the various workflows that you can use to verify and debug y
   - [View trace report in window](#view-trace-report-in-window)
 - [Kani output logging](#kani-output-logging)
   - [View full Kani output](#view-full-kani-output)
+- [Coverage information](#coverage-information)
+  - [View coverage information](#view-coverage-information)
 
 ### Verify Kani harnesses
 
@@ -81,7 +83,7 @@ By clicking the `Generate report for (your harness)` option in the error banner,
 You can click on the `Preview in Editor` button to view the HTML trace within VSCode.
 It should look like this:
 
-![Generate Report](../resources/screenshots/view-report.png)
+![View Report](../resources/screenshots/view-report.png)
 
 
 ### Kani output logging
@@ -91,3 +93,30 @@ It should look like this:
 For every test run, you can view the full output from Kani logged into the output channel as a text file. To view the log, open the output channel, and click on the channel drop down list to view a channel called `Output (Kani): ...`
 
 ![Generate Report](../resources/screenshots/view-output.png)
+
+### Coverage information
+
+Line-based coverage information can be displayed for any harness as in:
+
+![Coverage information](../resources/screenshots/coverage-info.png)
+
+To enable the coverage feature in the extension, toggle on the `Codelens-kani: Highlight Coverage` setting in `Settings > Extensions > Kani`.
+
+#### View coverage information
+
+Once the coverage feature is enabled, the `Get coverage info` action should be visible on top of each Kani harness in the project.
+Running the `Get coverage info` highlights all lines for which coverage information was obtained.
+
+Coverage information (as described in the [RFC for line coverage](https://model-checking.github.io/kani/rfc/rfcs/0008-line-coverage.html#postprocessing-coverage-checks))  is represented with three colors:
+ - **Green:** Indicates `FULL` coverage.
+ - **Yellow:** Indicates `PARTIAL` coverage.
+ - **Red:** Indicates `NONE` coverage.
+
+**NOTE**: Line-based coverage information is an unstable feature.
+
+
+#### De-highlight coverage information
+
+To remove or de-highlight the coverage information presented on the UI, open the command palette with `Shift + Command + P` (Mac) / `Ctrl + Shift + P` (Windows/Linux). Then, search for the command `De-highlight coverage`. This should revert the VS Code UI to it's normal state (pre-coverage).
+
+![De-highlight command](../resources/screenshots/de-highlight.png)

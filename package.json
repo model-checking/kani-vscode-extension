@@ -15,7 +15,7 @@
     "url": "https://github.com/model-checking/kani-vscode-extension/issues"
   },
   "qna": "https://github.com/model-checking/kani-vscode-extension/blob/main/docs/troubleshooting.md",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -53,6 +53,14 @@
         "title": "Disable Codelens",
         "command": "codelens-kani.disableCodeLens",
         "category": "CodeLens Sample"
+      },
+      {
+        "command": "codelens-kani.highlightCoverage",
+        "title": "Highlight Coverage"
+      },
+      {
+        "command": "codelens-kani.dehighlightCoverage",
+        "title": "De-Highlight Coverage"
       }
     ],
     "configuration": {
@@ -61,6 +69,11 @@
         "codelens-kani.enableCodeLens": {
           "type": "boolean",
           "default": true
+        },
+        "codelens-kani.highlightCoverage": {
+          "type": "boolean",
+          "default": false,
+          "description": "Controls the visibility of the `generate coverage` button by default."
         },
         "Kani.showOutputWindow": {
           "type": "boolean",

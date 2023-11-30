@@ -1,6 +1,6 @@
 # Kani Visual Studio Code Extension
 
-A [Visual Studio Code](https://code.visualstudio.com/) extension that allows users to run and debug their [Kani Rust Verifier](https://github.com/model-checking/kani) harnesses in vscode.
+A [Visual Studio Code](https://code.visualstudio.com/) extension that allows users to run and debug their [Kani Rust Verifier](https://github.com/model-checking/kani) harnesses in VS Code.
 
 ## Usage
 
@@ -18,11 +18,12 @@ Check [user guide](docs/user-guide.md) for more detailed information.
 -   One-click button for verifying Kani harnesses.
 -   Generate counterexamples as Rust unit tests.
 -   Debug counterexamples using a standard debugger.
+-   View coverage information inline using VS Code source highlighting.
 
 ## Requirements
 
 -   [Visual Studio Code](https://code.visualstudio.com/) 1.50 or newer
--   [Kani](https://github.com/model-checking/kani) 0.29 or newer
+-   [Kani](https://github.com/model-checking/kani) 0.34 or newer
 
 NOTE: The extension only works on Cargo packages. For standalone Rust files, Kani is only available on the command line.
 
@@ -32,7 +33,7 @@ NOTE: The extension only works on Cargo packages. For standalone Rust files, Kan
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
 | `kani.enable-codelens` | Enable Codelens actions for `Run Test (Kani)` & `Debug Test (Kani)`.                                                                                                      | `true`                                                         |
 | `kani.show-output-window`     | Toggle to show the output terminal window containing the full output from Kani.                                                                  | `false`                                                     |
-
+| `kani.highlight-coverage` | Toggle to enable the codelens button for `Generage Coverage` by default.  | `false`
 
 ## Installation
 

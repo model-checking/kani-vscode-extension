@@ -72,19 +72,13 @@ function createCommand(
 	testFlag: boolean = false,
 	stubbing_args?: boolean,
 ): string {
-	let harnessCommand = '';
-	if (!testFlag) {
-		if (stubbing_args === undefined || !stubbing_args) {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
-		} else {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
-		}
-	} else {
-		if (stubbing_args === undefined || !stubbing_args) {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.packageFlag} ${packageName}  ${KaniArguments.harnessFlag} ${harnessName}`;
-		} else {
-			harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.testsFlag} ${KaniArguments.unstableFormatFlag} ${KaniArguments.stubbingFlag} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
-		}
+	let harnessCommand = `${KaniConstants.CargoKaniExecutableName} ${KaniArguments.packageFlag} ${packageName} ${KaniArguments.harnessFlag} ${harnessName}`;
+	if (testFlag) {
+		harnessCommand = `${harnessCommand} ${KaniArguments.testsFlag}`;
+	}
+
+	if (stubbing_args !== undefined && stubbing_args) {
+		harnessCommand = `${harnessCommand} ${KaniArguments.stubbingFlag}`;
 	}
 
 	return harnessCommand;
