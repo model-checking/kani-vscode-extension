@@ -14,6 +14,7 @@
   "bugs": {
     "url": "https://github.com/model-checking/kani-vscode-extension/issues"
   },
+  "qna": "https://github.com/model-checking/kani-vscode-extension/blob/main/docs/troubleshooting.md",
   "version": "0.0.6",
   "engines": {
     "vscode": "^1.70.0"
