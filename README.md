@@ -4,7 +4,7 @@ A [Visual Studio Code](https://code.visualstudio.com/) extension that allows use
 
 ## Usage
 
-![Kani Usage](kani-demo.png)
+![Kani Usage](resources/screenshots/kani-demo-mini.png)
 
 1.  Open a Rust package in Visual Studio Code.
 2.  Navigate to the testing panel and expand on the Kani harness tree view where the harnesses are shown.
