@@ -1,14 +1,14 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 import * as path from 'path';
-
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 
 import GlobalConfig from '../../globalConfig';
 import { getKaniPath } from '../../model/kaniRunner';
 import { CommandArgs, getRootDir, splitCommand } from '../../utils';
 import Config from './config';
-
+import { loadAndHighlightCoverage } from './coverageSource';
 const { execFile } = require('child_process');
 
 // Interface for parsing Kani's output and storing as an object
@@ -43,9 +43,10 @@ export async function runCodeCoverageAction(renderer: CoverageRenderer, function
 	const activeEditor = vscode.window.activeTextEditor;
 	const currentFileUri = activeEditor?.document.uri.fsPath;
 
-	const playbackCommand: string = `${kaniBinaryPath} --coverage -Z line-coverage --harness ${functionName}`;
+	// Run this command: cargo kani --coverage -Z source-coverage --harness verify_success
+	// to generate the source coverage output
+	const playbackCommand: string = `${kaniBinaryPath} --coverage -Z source-coverage --harness ${functionName}`;
 	const processOutput = await runCoverageCommand(playbackCommand, functionName);
-
 
 	if(processOutput.statusCode == 0) {
 		const coverageOutputArray = processOutput.result;
@@ -93,6 +94,27 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	});
 }
 
+function getCoverageJsonPath(output: string): string | null {
+	const regex = /\[info\] Coverage results saved to (.*)/;
+	const match = output.match(regex);
+
+	if (match && match[1]) {
+	  return match[1].trim();
+	}
+
+	return null;
+}
+
+function readJsonFromPath(filePath: string): any {
+	try {
+	  const jsonString = fs.readFileSync(filePath, 'utf-8');
+	  return JSON.parse(jsonString);
+	} catch (error) {
+	  console.error('Error reading or parsing JSON file:', error);
+	  return null;
+	}
+}
+
 /**
  * Search for the path to the report printed in Kani's output, and detect if we are in a remote
  * enviroment before returning the result.
@@ -103,10 +125,56 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
  */
 async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined> {
 	const kaniOutput: string = stdout;
-	const kaniOutputArray: string[] = kaniOutput.split('Coverage Results:\n');
+	const kaniOutputArray: string[] = kaniOutput.split('Source-based code coverage results:\n');
+
+	const jsonFilePath = getCoverageJsonPath(kaniOutput);
+	console.log("The kani output is \n", jsonFilePath);
+
+	if (jsonFilePath) {
+		const files = fs.readdirSync(jsonFilePath);
+		const jsonFiles = files.filter(file => path.extname(file) === '.json');
+
+		// In jsonFiles, store the string that contains the substring kaniraw.json and read that path
+		if(jsonFiles.length > 0) {
+			const kanirawJson = jsonFiles.find(file => file.includes('kaniraw.json'));
+			if(kanirawJson) {
+				const filePath = path.join(jsonFilePath, kanirawJson);
+				const jsonContent = readJsonFromPath(filePath);
+				console.log("The json content is \n", jsonContent);
+
+				// Take this jsonContent and create an Map<file <region, status>>
+				if(jsonContent) {
+					const coverageMap: Map<string, Map<any, string>> = new Map();
+					for (const file in jsonContent['data']) {
+						console.log("what is a file", file);
+						const regions = jsonContent['data'][file];
+						const regionMap: Map<any, string> = new Map();
+
+						for (const region of regions) {
+							const startLine = region.region.start[0];
+							const startCol = region.region.start[1]
+							const endLine = region.region.end[0];
+							const endCol = region.region.end[1]
+
+							const status = region.status;
+							// Create a VSCode range with start line and column
+							const start = new vscode.Position(startLine - 1, startCol - 1);
+							const end = new vscode.Position(endLine - 1, endCol - 1);
+							const range = new vscode.Range(start, end);
+
+							regionMap.set(range, status);
+						}
+
+						coverageMap.set(file, regionMap);
+					}
+					console.log("Coverage map is \n");
+					console.log(coverageMap);
+				}
+			}
+		}
+	}
 
 	const coverageResults = kaniOutputArray.at(1);
-
 	if(coverageResults === undefined) {
 		return '';
 	}
