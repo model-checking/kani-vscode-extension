@@ -8,7 +8,6 @@ import GlobalConfig from '../../globalConfig';
 import { getKaniPath } from '../../model/kaniRunner';
 import { CommandArgs, getRootDir, splitCommand, fullToRelativePath } from '../../utils';
 import Config from './config';
-import { loadAndHighlightCoverage } from './coverageSource';
 const { execFile } = require('child_process');
 
 // Interface for parsing Kani's output and storing as an object
