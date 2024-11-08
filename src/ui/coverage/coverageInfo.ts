@@ -1,13 +1,14 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+
 import * as vscode from 'vscode';
 
-import GlobalConfig from '../../globalConfig';
-import { getKaniPath } from '../../model/kaniRunner';
-import { CommandArgs, getRootDir, splitCommand, fullToRelativePath } from '../../utils';
 import Config from './config';
+import GlobalConfig from '../../globalConfig';
+import { fullToRelativePath, getRootDir} from '../../utils';
+
 const { execFile } = require('child_process');
 
 // Interface for parsing Kani's output and storing as an object
@@ -92,7 +93,7 @@ async function runCoverageCommand(command: string, harnessName: string): Promise
 	});
 }
 
-function getCoverageJsonPath(output: string): string | null {
+function getCoverageJsonPath(output: string): string | undefined {
 	const regex = /\[info\] Coverage results saved to (.*)/;
 	const match = output.match(regex);
 
@@ -100,7 +101,7 @@ function getCoverageJsonPath(output: string): string | null {
 	  return match[1].trim();
 	}
 
-	return null;
+	return undefined;
 }
 
 function readJsonFromPath(filePath: string): any {
@@ -109,7 +110,7 @@ function readJsonFromPath(filePath: string): any {
 	  return JSON.parse(jsonString);
 	} catch (error) {
 	  console.error('Error reading or parsing JSON file:', error);
-	  return null;
+	  return undefined;
 	}
 }
 
@@ -277,9 +278,9 @@ export class CoverageRenderer {
 		});
 	}
 
-	public convertMapToLines(coverageMap: Map<any, any>) {
+	public convertMapToLines(coverageMap: Map<any, any>): CoverageLines {
 		// Parse this into coverageLines i.e if the status of the range in coverageMap is COVERED, add it to full or else if it is UNCOVERED, add it to None
-		let coverageLines: CoverageLines = {
+		const coverageLines: CoverageLines = {
 			full: [],
 			none: [],
 			partial: [],
