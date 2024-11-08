@@ -126,8 +126,6 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 	const kaniOutputArray: string[] = kaniOutput.split('Source-based code coverage results:\n');
 
 	const jsonFilePath = getCoverageJsonPath(kaniOutput);
-	console.log("The kani output is \n", jsonFilePath);
-
 	const coverageMap: Map<string, Map<any, string>> = new Map();
 
 	if (jsonFilePath) {
@@ -140,12 +138,10 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 			if(kanirawJson) {
 				const filePath = path.join(jsonFilePath, kanirawJson);
 				const jsonContent = readJsonFromPath(filePath);
-				console.log("The json content is \n", jsonContent);
 
 				// Take this jsonContent and create an Map<file <region, status>>
 				if(jsonContent) {
 					for (const file in jsonContent['data']) {
-						console.log("what is a file", file);
 						const regions = jsonContent['data'][file];
 						const regionMap: Map<any, string> = new Map();
 
@@ -166,8 +162,6 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 
 						coverageMap.set(file, regionMap);
 					}
-					console.log("Coverage map is \n");
-					console.log(coverageMap);
 				}
 			}
 		}
