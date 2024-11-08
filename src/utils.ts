@@ -227,14 +227,14 @@ export function getConcatenatedModuleName(map: Map<string, string[]>): Map<strin
 
 // Function to convert full path to relative path
 export function fullToRelativePath(fullPath: string): string {
-    // Get the workspace folder
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fullPath));
+	// Get the workspace folder
+	const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fullPath));
 
-    if (workspaceFolder) {
-        // Convert to relative path
-        return path.relative(workspaceFolder.uri.fsPath, fullPath);
-    }
+	if (workspaceFolder) {
+		// Convert to relative path
+		return path.relative(workspaceFolder.uri.fsPath, fullPath);
+	}
 
-    // If not in a workspace, return the full path
-    return fullPath;
+	// If not in a workspace, return the full path
+	return fullPath;
 }
