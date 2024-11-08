@@ -5,6 +5,7 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
+// eslint-disable-next-line import/order
 import Config from './config';
 import GlobalConfig from '../../globalConfig';
 import { fullToRelativePath, getRootDir} from '../../utils';
