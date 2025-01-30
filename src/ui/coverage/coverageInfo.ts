@@ -4,10 +4,10 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
+import Config from './config';
 import GlobalConfig from '../../globalConfig';
 import { getKaniPath } from '../../model/kaniRunner';
 import { CommandArgs, getRootDir, splitCommand } from '../../utils';
-import Config from './config';
 
 const { execFile } = require('child_process');
 
