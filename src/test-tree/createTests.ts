@@ -443,34 +443,14 @@ class FailedCase extends TestCase {
 	}
 
 	handleFailure(): TestMessage {
-		const failureMessage: MarkdownString = this.appendLink(this.failed_checks);
-		const finalFailureMessage: MarkdownString = this.appendConcretePlaybackLink(failureMessage);
+		const finalFailureMessage: MarkdownString = this.appendConcretePlaybackLink(this.failed_checks);
 		const messageWithLink = new TestMessage(finalFailureMessage);
 		return messageWithLink;
 	}
 
 	// Add link and present to the user as the diff message
-	appendLink(failedChecks: string): MarkdownString {
+	appendConcretePlaybackLink(failedChecks: string): MarkdownString {
 		const sample: MarkdownString = this.makeMarkdown(failedChecks);
-		// vscode.commands.executeCommand('Kani.runViewerReport', this.harness_name);
-		const args = [
-			{
-				harnessName: this.harness_name,
-				harnessFile: this.file_name,
-				harnessType: this.proof_boolean,
-			},
-		];
-		const stageCommandUri = Uri.parse(
-			`command:Kani.runViewerReport?${encodeURIComponent(JSON.stringify(args))}`,
-		);
-		sample.appendMarkdown(`[Generate report for ${this.harness_name}](${stageCommandUri})`);
-
-		return sample;
-	}
-
-	// Add link and present to the user as the diff message
-	appendConcretePlaybackLink(sample: MarkdownString): MarkdownString {
-		sample.appendMarkdown('<br>');
 		const args = [
 			{
 				harnessName: this.harness_name,

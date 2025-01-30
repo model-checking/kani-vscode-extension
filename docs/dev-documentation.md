@@ -1,6 +1,6 @@
 ### Build from Source
 
-The Kani extension is built using NPM and nodejs. Here is the [NPM install guide](https://nodejs.dev/en/learn/how-to-install-nodejs/)
+The Kani extension is built using NPM and nodejs. Here is the [NPM install guide](https://nodejs.org/en/download)
 for steps on installing it on your operating system.
 
 You will also need to install `make` on your machine using `apt-get install build-essential` or `brew install make`.
