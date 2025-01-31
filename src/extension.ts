@@ -21,7 +21,6 @@ import { callConcretePlayback } from './ui/concrete-playback/concretePlayback';
 import { runKaniPlayback } from './ui/concrete-playback/kaniPlayback';
 import CoverageConfig from './ui/coverage/config';
 import { CoverageRenderer, runCodeCoverageAction } from './ui/coverage/coverageInfo';
-import { callViewerReport } from './ui/reportView/callReport';
 import { showInformationMessage } from './ui/showMessage';
 import { SourceCodeParser } from './ui/sourceCodeParser';
 import { startWatchingWorkspace } from './ui/watchWorkspace';
@@ -181,15 +180,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		showInformationMessage('Kani.runcargoKani');
 	});
 
-	// Register the run viewer report command
-	const runningViewerReport = vscode.commands.registerCommand(
-		'Kani.runViewerReport',
-		async (harnessArgs) => {
-			callViewerReport('Kani.runViewerReport', harnessArgs);
-		},
-	);
-
-	// Register the run viewer report command
+	// Register the concrete playback command
 	const runningConcretePlayback = vscode.commands.registerCommand(
 		'Kani.runConcretePlayback',
 		async (harnessArgs) => {
@@ -277,7 +268,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	context.subscriptions.push(runKani);
 	context.subscriptions.push(runcargoKani);
-	context.subscriptions.push(runningViewerReport);
 	context.subscriptions.push(runningConcretePlayback);
 	context.subscriptions.push(providerDisposable);
 	context.subscriptions.push(

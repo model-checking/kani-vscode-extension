@@ -11,7 +11,7 @@ import GlobalConfig from '../../globalConfig';
 import { CommandArgs, getPackageName, getRootDir, splitCommand } from '../../utils';
 
 /**
- * Call the visualize flag on the harness and render the html page
+ * Call the concrete playback feature in Kani.
  *
  * @param commandURI - vscode command that is being executed
  * @param harnessObj - metadata about the harness
@@ -37,7 +37,7 @@ export async function callConcretePlayback(harnessObj: {
 		finalCommand = `${responseObject}`;
 	}
 
-	// Wait for the the visualize command to finish generating the report
+	// Wait for the the playback command to finish
 	executePlaybackCommand(finalCommand);
 }
 

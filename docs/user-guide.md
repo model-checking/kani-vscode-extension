@@ -11,9 +11,6 @@ This guide provides the various workflows that you can use to verify and debug y
   - [Generate a counterexample unit test](#generate-a-counterexample-unit-test)
   - [Run Kani-generated unit test](#run-kani-generated-unit-test)
   - [Debug a Kani-generated unit test](#debug-kani-generated-unit-test)
-- [View trace report](#view-trace-report)
-  - [Generate trace report](#generate-trace-report)
-  - [View trace report in window](#view-trace-report-in-window)
 - [Kani output logging](#kani-output-logging)
   - [View full Kani output](#view-full-kani-output)
 - [Coverage information](#coverage-information)
@@ -32,11 +29,9 @@ This is how the VSCode window looks like when you click on the panel:
 
 You can then run your harnesses using the harness tree view by clicking the play button beside the harness that was automatically picked up by the Kani VSCode Extension.
 Once you run the harness using the extension, you are shown an error message if the verification fails.
-You are then presented with two options:
- 1. [Generate the report for the harness](#view-trace-report)
- 2. [Run concrete playback to generate unit tests](#use-concrete-playback-to-debug-a-kani-harness).
+You are then presented with the option to
+[run concrete playback to generate unit tests](#use-concrete-playback-to-debug-a-kani-harness).
 
-We are going to describe the flows in detail in their respective sections, but explain the concrete playback feature first.
 
 ![Image: run harness.gif](../resources/screenshots/run-proof.gif)
 
@@ -68,22 +63,6 @@ By setting breakpoints and clicking the `Debug Test (Kani)` button, you are take
 
 
 You can then use the debugger controller to step through, into, out of, replay and also change values on the trace panel on the left for interactive debugging.
-
-
-### View trace report
-
-#### Generate trace report
-
-By clicking the `Generate report for (your harness)` option in the error banner, you can view the trace for the harness in an HTML report.
-
-![Generate Report](../resources/screenshots/generate-report.png)
-
-#### View trace report in window
-
-You can click on the `Preview in Editor` button to view the HTML trace within VSCode.
-It should look like this:
-
-![View Report](../resources/screenshots/view-report.png)
 
 
 ### Kani output logging
