@@ -5,31 +5,17 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
-// eslint-disable-next-line import/order
 import Config from './config';
 import GlobalConfig from '../../globalConfig';
 import { fullToRelativePath, getRootDir } from '../../utils';
 
 const { execFile } = require('child_process');
 
-// Interface for parsing Kani's output and storing as an object
-interface CoverageEntry {
-	filePath: string;
-	lineNumber: number;
-	coverageStatus: string;
-}
-
 // Interface for storing the coverage status for each line of a document.
 export interface CoverageLines {
 	full: vscode.Range[];
 	partial: vscode.Range[];
 	none: vscode.Range[];
-}
-
-enum CoverageStatus {
-	Full = 'FULL',
-	Partial = 'PARTIAL',
-	None = 'NONE',
 }
 
 const warningMessage = `Source-based coverage is an unstable feature.`;
@@ -44,9 +30,6 @@ export async function runCodeCoverageAction(
 
 	vscode.window.showWarningMessage(warningMessage);
 
-	const activeEditor = vscode.window.activeTextEditor;
-	const currentFileUri = activeEditor?.document.uri.fsPath;
-
 	// Run this command: cargo kani --coverage -Z source-coverage --harness verify_success
 	// to generate the source coverage output
 	const playbackCommand: string = `${kaniBinaryPath} --coverage -Z source-coverage --harness ${functionName}`;
@@ -56,7 +39,6 @@ export async function runCodeCoverageAction(
 
 		// Convert the array of (file, line, status) objects into Map<file <line, status>>
 		// since we need to cache this globally
-		// const coverageGlobalMap = parseCoverageFormatted(coverageOutputArray);
 		globalConfig.setCoverage(coverageGlobalMap);
 		renderer.renderInterface(vscode.window.visibleTextEditors, coverageGlobalMap);
 	}
@@ -186,58 +168,8 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 		terminal.show();
 	}
 
-	// const coverage = parseCoverageData(coverageResultsArray);
 	// No command found from Kani
 	return coverageMap;
-}
-
-// Parse `CoverageEntry` objects and convert it into CoverageMap or a map<file_path, map<line_number, status>>.
-// We store this map as the global cache since it allows easy sorting and retrieval by file name, needed by VS Code.
-function parseCoverageFormatted(entries: CoverageEntry[]): Map<string, Map<number, string>> {
-	const nestedMap: Map<string, Map<number, string>> = new Map();
-
-	for (const entry of entries) {
-		const { filePath, lineNumber, coverageStatus } = entry;
-
-		// Check if the outer map already has an entry for the filePath
-		let innerMap = nestedMap.get(filePath);
-
-		// If not, create a new inner map and set it in the outer map
-		if (!innerMap) {
-			innerMap = new Map<number, CoverageStatus>();
-			nestedMap.set(filePath, innerMap);
-		}
-
-		// Set the coverageStatus in the inner map for the lineNumber
-		innerMap.set(lineNumber, coverageStatus);
-	}
-
-	return nestedMap;
-}
-
-// Convert coverage Kani's output into CoverageEntry objects
-function parseCoverageData(data: string[]): CoverageEntry[] {
-	const coverageEntries: CoverageEntry[] = [];
-
-	for (const entry of data) {
-		const parts = entry.split(', ');
-
-		if (parts.length === 3) {
-			const [filePath, lineNumberStr, coverageStatus] = parts;
-			if (filePath.includes('Complete - ')) {
-				return coverageEntries;
-			}
-			const lineNumber = parseInt(lineNumberStr.trim(), 10);
-
-			coverageEntries.push({
-				filePath,
-				lineNumber,
-				coverageStatus,
-			});
-		}
-	}
-
-	return coverageEntries;
 }
 
 // Class representing the Renderer that handles rendering coverage highlights in the editor.
@@ -272,7 +204,6 @@ export class CoverageRenderer {
 			// Fetch the coverage data for a file from the coverageMap.
 			const relativePath = fullToRelativePath(editor.document.fileName);
 			const fileMap = coverageMap.get(relativePath)!;
-			// const coverageLines = this.createCoverage(editor.document, fileMap);
 
 			const coverageLines = this.convertMapToLines(fileMap);
 			this.renderHighlight(editor, coverageLines);
