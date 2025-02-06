@@ -32,7 +32,7 @@ enum CoverageStatus {
 	None = 'NONE',
 }
 
-const warningMessage = `Line coverage is an unstable feature.`;
+const warningMessage = `Source-based coverage is an unstable feature.`;
 
 // Callback function for the coverage code lens action
 export async function runCodeCoverageAction(

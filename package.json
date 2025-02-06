@@ -70,11 +70,6 @@
           "type": "boolean",
           "default": true
         },
-        "codelens-kani.highlightCoverage": {
-          "type": "boolean",
-          "default": false,
-          "description": "Controls the visibility of the `generate coverage` button by default."
-        },
         "Kani.showOutputWindow": {
           "type": "boolean",
           "default": false,
