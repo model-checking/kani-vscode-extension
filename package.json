@@ -17,7 +17,7 @@
   "qna": "https://github.com/model-checking/kani-vscode-extension/blob/main/docs/troubleshooting.md",
   "version": "0.0.6",
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.95.0"
   },
   "categories": [
     "Testing"
@@ -70,11 +70,6 @@
           "type": "boolean",
           "default": true
         },
-        "codelens-kani.highlightCoverage": {
-          "type": "boolean",
-          "default": false,
-          "description": "Controls the visibility of the `generate coverage` button by default."
-        },
         "Kani.showOutputWindow": {
           "type": "boolean",
           "default": false,
@@ -97,7 +92,7 @@
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "16.x",
-    "@types/vscode": "^1.70.0",
+    "@types/vscode": "^1.95.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "@vscode/test-electron": "^2.4.1",

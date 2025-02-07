@@ -33,7 +33,6 @@ NOTE: The extension only works on Cargo packages. For standalone Rust files, Kan
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
 | `kani.enable-codelens` | Enable Codelens actions for `Run Test (Kani)` & `Debug Test (Kani)`.                                                                                                      | `true`                                                         |
 | `kani.show-output-window`     | Toggle to show the output terminal window containing the full output from Kani.                                                                  | `false`                                                     |
-| `kani.highlight-coverage` | Toggle to enable the codelens button for `Generage Coverage` by default.  | `false`
 
 ## Installation
 
