@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 name: Run Unit Tests
 on: pull_request
-
+permissions:
+  contents: read
 
 jobs:
   build:
