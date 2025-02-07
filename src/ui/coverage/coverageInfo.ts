@@ -20,21 +20,24 @@ interface CoverageEntry {
 
 // Interface for storing the coverage status for each line of a document.
 export interface CoverageLines {
-    full: vscode.Range[];
-    partial: vscode.Range[];
-    none: vscode.Range[];
+	full: vscode.Range[];
+	partial: vscode.Range[];
+	none: vscode.Range[];
 }
 
 enum CoverageStatus {
-	Full = "FULL",
-	Partial = "PARTIAL",
-	None = "NONE"
+	Full = 'FULL',
+	Partial = 'PARTIAL',
+	None = 'NONE',
 }
 
 const warningMessage = `Line coverage is an unstable feature.`;
 
 // Callback function for the coverage code lens action
-export async function runCodeCoverageAction(renderer: CoverageRenderer, functionName: string): Promise<void> {
+export async function runCodeCoverageAction(
+	renderer: CoverageRenderer,
+	functionName: string,
+): Promise<void> {
 	const globalConfig = GlobalConfig.getInstance();
 	const kaniBinaryPath = globalConfig.getFilePath();
 
@@ -46,8 +49,7 @@ export async function runCodeCoverageAction(renderer: CoverageRenderer, function
 	const playbackCommand: string = `${kaniBinaryPath} --coverage -Z line-coverage --harness ${functionName}`;
 	const processOutput = await runCoverageCommand(playbackCommand, functionName);
 
-
-	if(processOutput.statusCode == 0) {
+	if (processOutput.statusCode == 0) {
 		const coverageOutputArray = processOutput.result;
 
 		// Convert the array of (file, line, status) objects into Map<file <line, status>>
@@ -107,7 +109,7 @@ async function parseKaniCoverageOutput(stdout: string): Promise<any | undefined>
 
 	const coverageResults = kaniOutputArray.at(1);
 
-	if(coverageResults === undefined) {
+	if (coverageResults === undefined) {
 		return '';
 	}
 
@@ -161,21 +163,21 @@ function parseCoverageData(data: string[]): CoverageEntry[] {
 	const coverageEntries: CoverageEntry[] = [];
 
 	for (const entry of data) {
-	  const parts = entry.split(', ');
+		const parts = entry.split(', ');
 
-	  if (parts.length === 3) {
-		const [filePath, lineNumberStr, coverageStatus] = parts;
-		if(filePath.includes('Complete - ')) {
-			return coverageEntries;
+		if (parts.length === 3) {
+			const [filePath, lineNumberStr, coverageStatus] = parts;
+			if (filePath.includes('Complete - ')) {
+				return coverageEntries;
+			}
+			const lineNumber = parseInt(lineNumberStr.trim(), 10);
+
+			coverageEntries.push({
+				filePath,
+				lineNumber,
+				coverageStatus,
+			});
 		}
-		const lineNumber = parseInt(lineNumberStr.trim(), 10);
-
-		coverageEntries.push({
-		  filePath,
-		  lineNumber,
-		  coverageStatus,
-		});
-	  }
 	}
 
 	return coverageEntries;
@@ -184,21 +186,22 @@ function parseCoverageData(data: string[]): CoverageEntry[] {
 // Class representing the Renderer that handles rendering coverage highlights in the editor.
 export class CoverageRenderer {
 	private configStore: Config;
-	constructor(
-        configStore: Config,
-    ) {
-        this.configStore = configStore;
-    }
+	constructor(configStore: Config) {
+		this.configStore = configStore;
+	}
 
 	/**
 	 * Renders coverage highlights for multiple files.
 	 * @param editors - An array of text editor files to render coverage highlights for.
 	 * @param coverageMap - A map containing coverage data for each file.
 	 */
-	public renderInterface(editors: readonly vscode.TextEditor[], coverageMap: Map<string, Map<number, string>>): void {
+	public renderInterface(
+		editors: readonly vscode.TextEditor[],
+		coverageMap: Map<string, Map<number, string>>,
+	): void {
 		editors.forEach((editor) => {
 			// If coverageMap is empty, de-highlight the files
-			if(coverageMap.size == 0) {
+			if (coverageMap.size == 0) {
 				const coverageLines: CoverageLines = {
 					full: [],
 					none: [],
@@ -222,8 +225,11 @@ export class CoverageRenderer {
 	 * @param editor - The text editor to render coverage highlights for.
 	 * @param coverageMap - A map containing coverage data for each file.
 	 */
-	public renderInterfaceForFile(editor: vscode.TextEditor, coverageMap: Map<string, Map<number, string>>): void {
-		if(coverageMap.size == 0) {
+	public renderInterfaceForFile(
+		editor: vscode.TextEditor,
+		coverageMap: Map<string, Map<number, string>>,
+	): void {
+		if (coverageMap.size == 0) {
 			const coverageLines: CoverageLines = {
 				full: [],
 				none: [],
@@ -233,13 +239,12 @@ export class CoverageRenderer {
 			this.renderHighlight(editor, coverageLines);
 		}
 		const fileMap = coverageMap.get(editor.document.fileName);
-		if(fileMap === undefined){
+		if (fileMap === undefined) {
 			return;
 		}
 		const coverageLines = this.createCoverage(editor.document, fileMap);
 		this.renderHighlight(editor, coverageLines);
 	}
-
 
 	/**
 	 * Creates coverage highlights for a given text document based on the coverageFileMap.
@@ -247,30 +252,33 @@ export class CoverageRenderer {
 	 * @param coverageFileMap - A map containing coverage status for each line number.
 	 * @returns An object containing coverage highlights categorized as 'full', 'partial', and 'none'.
 	 */
-	public createCoverage(doc: vscode.TextDocument, coverageFileMap: Map<number, string>): CoverageLines {
+	public createCoverage(
+		doc: vscode.TextDocument,
+		coverageFileMap: Map<number, string>,
+	): CoverageLines {
 		const coverageLines: CoverageLines = {
-            full: [],
-            none: [],
-            partial: [],
-        };
+			full: [],
+			none: [],
+			partial: [],
+		};
 
 		for (let lineNum = 1; lineNum <= doc.lineCount; lineNum++) {
 			const line = doc.lineAt(lineNum - 1);
 			const status = coverageFileMap.get(lineNum);
 
-			if(status === undefined) {
+			if (status === undefined) {
 				continue;
 			}
 
 			const range = new vscode.Range(line.range.start, line.range.end);
 			switch (status) {
-				case "FULL":
+				case 'FULL':
 					coverageLines.full.push(range);
 					break;
-				case "PARTIAL":
+				case 'PARTIAL':
 					coverageLines.partial.push(range);
 					break;
-				case "NONE":
+				case 'NONE':
 					coverageLines.none.push(range);
 					break;
 				default:
