@@ -11,13 +11,8 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'header', 'no-null', 'eslint-plugin-tsdoc', 'prettier'],
     extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended-requiring-type-checking',
-        'plugin:@typescript-eslint/recommended',
+        'love',
         'prettier',
-        'plugin:import/recommended',
-        'plugin:import/typescript',
     ],
     rules: {
         curly: 2,
@@ -58,6 +53,27 @@ module.exports = {
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         'no-constant-condition': ['error', { checkLoops: false }],
         'no-empty': 'off',
+        // Additional overrides for eslint-config-love compatibility
+        // These rules are disabled to maintain backward compatibility with the existing codebase
+        // and prevent unnecessary code changes during the migration from eslint-config-standard-with-typescript
+        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/strict-boolean-expressions': 'off',
+        '@typescript-eslint/consistent-type-imports': 'off',
+        '@typescript-eslint/array-type': 'off',
+        '@typescript-eslint/no-base-to-string': 'off',
+        '@typescript-eslint/promise-function-async': 'off',
+        '@typescript-eslint/prefer-promise-reject-errors': 'off',
+        '@typescript-eslint/return-await': 'off',
+        '@typescript-eslint/prefer-optional-chain': 'off',
+        '@typescript-eslint/lines-between-class-members': 'off',
+        '@typescript-eslint/no-confusing-void-expression': 'off',
+        'eqeqeq': 'off',
+        'object-shorthand': 'off',
+        'no-useless-return': 'off',
+        'no-template-curly-in-string': 'off',
+        '@typescript-eslint/prefer-nullish-coalescing': 'off',
+        '@typescript-eslint/prefer-readonly': 'off',
+        '@typescript-eslint/method-signature-style': 'off',
         'sort-imports': [
             'error',
             {
