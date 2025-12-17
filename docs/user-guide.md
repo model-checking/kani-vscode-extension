@@ -75,23 +75,17 @@ For every test run, you can view the full output from Kani logged into the outpu
 
 ### Coverage information
 
-Line-based coverage information can be displayed for any harness as in:
+Source-based coverage information can be displayed for any harness as in:
 
 ![Coverage information](../resources/screenshots/coverage-info.png)
-
-To enable the coverage feature in the extension, toggle on the `Codelens-kani: Highlight Coverage` setting in `Settings > Extensions > Kani`.
 
 #### View coverage information
 
 Once the coverage feature is enabled, the `Get coverage info` action should be visible on top of each Kani harness in the project.
 Running the `Get coverage info` highlights all lines for which coverage information was obtained.
 
-Coverage information (as described in the [RFC for line coverage](https://model-checking.github.io/kani/rfc/rfcs/0008-line-coverage.html#postprocessing-coverage-checks))  is represented with three colors:
- - **Green:** Indicates `FULL` coverage.
- - **Yellow:** Indicates `PARTIAL` coverage.
- - **Red:** Indicates `NONE` coverage.
-
-**NOTE**: Line-based coverage information is an unstable feature.
+Coverage information (as described in the [RFC for source coverage](https://model-checking.github.io/kani/rfc/rfcs/0011-source-coverage.html#user-experience)) is represented by highlighting the portion of the line that is covered.
+Red means that that portion is not covered; green means that it is covered.
 
 
 #### De-highlight coverage information
