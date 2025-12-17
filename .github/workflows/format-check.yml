@@ -2,21 +2,23 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 name: Format Check
 on: pull_request
+permissions:
+  contents: read
 
 jobs:
   format-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Execute copyright check
         run: ./scripts/run-copyright-check.sh
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '16.x'
+          node-version: 24
 
       - name: Check TS linting
         run: |
