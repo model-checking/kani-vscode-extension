@@ -34,6 +34,7 @@ suite('Test source code parsing', () => {
 	test('Test if all kani harnesses are detected', async () => {
 		const parser = await loadParser();
 		const tree = parser.parse(kaniProofs);
+		assert.ok(tree, 'Parser should return a tree');
 		assert.deepStrictEqual(
 			SourceCodeParser.findHarnesses(tree.rootNode.namedChildren),
 			findHarnessesResultKani,
@@ -43,6 +44,7 @@ suite('Test source code parsing', () => {
 	test('Test if all Bolero harnesses are detected', async () => {
 		const parser = await loadParser();
 		const tree = parser.parse(boleroProofs);
+		assert.ok(tree, 'Parser should return a tree');
 		assert.deepStrictEqual(
 			SourceCodeParser.searchParseTreeForFunctions(tree.rootNode),
 			findHarnessesResultBolero,
