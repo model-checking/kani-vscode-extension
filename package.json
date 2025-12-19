@@ -89,6 +89,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/emscripten": "^1.41.5",
     "@types/glob": "^8.1.0",
     "@types/minimatch": "^5.1.2",
     "@types/mocha": "^9.1.1",

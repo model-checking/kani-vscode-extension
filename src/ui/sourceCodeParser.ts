@@ -4,7 +4,7 @@ import * as assert from 'assert';
 import path from 'path';
 
 import * as vscode from 'vscode';
-import Parser from 'web-tree-sitter';
+import { Language, Parser } from 'web-tree-sitter';
 
 import { countOccurrences, getConcatenatedModuleName } from '../utils';
 import { HarnessMetadata } from './sourceMap';
@@ -13,7 +13,7 @@ import { HarnessMetadata } from './sourceMap';
 export async function loadParser(): Promise<Parser> {
 	await Parser.init();
 	const parser = new Parser();
-	const lang = await Parser.Language.load(path.join(__dirname, '../..', 'tree-sitter-rust.wasm'));
+	const lang = await Language.load(path.join(__dirname, '../..', 'tree-sitter-rust.wasm'));
 	parser.setLanguage(lang);
 	return parser;
 }
@@ -28,6 +28,9 @@ export namespace SourceCodeParser {
 	export const checkTextForProofs = async (content: string): Promise<boolean> => {
 		const parser = await loadParser();
 		const tree = parser.parse(content);
+		if (!tree) {
+			return false;
+		}
 		return checkforKani(tree.rootNode);
 	};
 
@@ -35,6 +38,9 @@ export namespace SourceCodeParser {
 	export async function getAttributeFromRustFile(file: string): Promise<HarnessMetadata[]> {
 		const parser = await loadParser();
 		const tree = parser.parse(file);
+		if (!tree) {
+			return [];
+		}
 		const harnesses = searchParseTreeForFunctions(tree.rootNode);
 		const harnessesMapped = addModuleToFunction(tree.rootNode, harnesses);
 		const sortedHarnessByline = [...harnessesMapped].sort(
@@ -178,6 +184,9 @@ export namespace SourceCodeParser {
 	export async function extractKaniTestMetadata(text: string): Promise<any[]> {
 		const parser = await loadParser();
 		const tree = parser.parse(text);
+		if (!tree) {
+			return [];
+		}
 		const rootNode = tree.rootNode;
 
 		// Find the attribute by searching for its text
