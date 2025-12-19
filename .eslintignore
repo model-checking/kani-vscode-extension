@@ -1,6 +1,0 @@
-node_modules/**
-**/*.json
-**/*.gen.ts
-dist/**
-types/*.d.ts
-.eslintrc.js
