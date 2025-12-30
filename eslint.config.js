@@ -32,7 +32,6 @@ module.exports = tseslint.config(
             },
         },
         plugins: {
-            '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
             header: eslintPluginHeader,
             'no-null': eslintPluginNoNull,
             tsdoc: eslintPluginTsdoc,
