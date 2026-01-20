@@ -83,7 +83,7 @@ async function getBinaryPath(): Promise<string | undefined> {
 	}
 }
 
-export async function connectToDebugger(functionName: string): void {
+export async function connectToDebugger(functionName: string): Promise<void> {
 	// The binary that is being referred to here, is the binary present in the cargo artifacts.
 	// It looks like this - kani_concrete_playback_check_estimate_size_14615086421508420155
 	const binaryName = await getBinaryPath();
