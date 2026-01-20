@@ -149,8 +149,7 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 			failureResponseMessage += `${checkInstanceObject.createFailureMessage()}\n`;
 			failureDisplayMessage = `${checkInstanceObject.createDisplayMessage()}\n`;
 		} else if (!success_statuses.includes(checkInstanceObject.status)) {
-			failureResponseMessage +=
-				`${checkInstanceObject.createFailureMessage()}WARNING: unknown status returned from Kani.\n\n`;
+			failureResponseMessage += `${checkInstanceObject.createFailureMessage()}WARNING: unknown status returned from Kani.\n\n`;
 			failureDisplayMessage = `${checkInstanceObject.createDisplayMessage()}\n`;
 		}
 	}
