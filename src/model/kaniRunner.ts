@@ -40,9 +40,9 @@ export async function getKaniVersion(pathKani: string): Promise<void> {
 
 			if (stdout) {
 				// Split the stdout by whitespace to separate words
-				const words = stdout.split(/\s+/);
+				const words = stdout.split(/\s+/u);
 				// Find the word that contains the version number
-				const versionWord = words.find((word) => /\d+(\.\d+){1,}/.test(word))!;
+				const versionWord = words.find((word) => /\d+(\.\d+){1,}/u.test(word))!;
 				const versionNum: number = parseFloat(versionWord);
 
 				console.log(`Kani version is ${versionNum}`);

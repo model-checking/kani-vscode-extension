@@ -122,6 +122,7 @@ module.exports = tseslint.config(
             '@typescript-eslint/class-methods-use-this': 'off',
             'max-lines': 'off',
             'guard-for-in': 'off',
+            'require-unicode-regexp': 'off', // Disabled because 'v' flag requires ES2024, but project targets ES2020
             'sort-imports': [
                 'error',
                 {
