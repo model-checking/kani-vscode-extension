@@ -106,7 +106,7 @@ async function runCoverageCommand(
 }
 
 function getCoverageJsonPath(output: string): string | undefined {
-	const regex = /\[info\] Coverage results saved to (.*)/;
+	const regex = /\[info\] Coverage results saved to (.*)/u;
 	const match = output.match(regex);
 
 	if (match && match[1]) {

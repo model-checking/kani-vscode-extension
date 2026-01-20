@@ -95,7 +95,7 @@ export async function getOrCreateFile(
 	// Label from the file URI
 	const packageName = await getPackageNameFromFilePath(uri);
 	if (packageName !== undefined) {
-		testLabel = packageName + '/' + uri.fsPath.split('/').pop()!;
+		testLabel = `${packageName}/${uri.fsPath.split('/').pop()!}`;
 	} else {
 		testLabel = uri.fsPath.split('/').pop()!;
 	}
@@ -129,6 +129,7 @@ export class TestFile {
 	): Promise<void> {
 		try {
 			const content: string = await getContentFromFilesystem(item.uri!);
+			// eslint-disable-next-line require-atomic-updates
 			item.error = undefined;
 			this.updateFromContents(controller, content, item);
 			if (treeRoot && this.didResolve) {

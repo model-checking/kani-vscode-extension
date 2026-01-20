@@ -169,7 +169,7 @@ For example - Input: '"my command" --arg1 "file with spaces.txt"';
 Output: ['my command', '--arg1', 'file with spaces.txt']
 */
 function parseCommand(command: string): string[] {
-	const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+	const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/gu;
 	const parts = [];
 	let match;
 	while ((match = regex.exec(command))) {

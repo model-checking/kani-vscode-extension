@@ -146,13 +146,12 @@ function parseChecksArray(checksArray: Array<string>): KaniResponse {
 		const checkInstance: string[] = checksArray[i].split('\n');
 		const checkInstanceObject: CheckInstance = convertChecktoObject(checkInstance);
 		if (failure_statuses.includes(checkInstanceObject.status)) {
-			failureResponseMessage += checkInstanceObject.createFailureMessage() + '\n';
-			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
+			failureResponseMessage += `${checkInstanceObject.createFailureMessage()}\n`;
+			failureDisplayMessage = `${checkInstanceObject.createDisplayMessage()}\n`;
 		} else if (!success_statuses.includes(checkInstanceObject.status)) {
 			failureResponseMessage +=
-				checkInstanceObject.createFailureMessage() +
-				'WARNING: unknown status returned from Kani.\n\n';
-			failureDisplayMessage = checkInstanceObject.createDisplayMessage() + '\n';
+				`${checkInstanceObject.createFailureMessage()}WARNING: unknown status returned from Kani.\n\n`;
+			failureDisplayMessage = `${checkInstanceObject.createDisplayMessage()}\n`;
 		}
 	}
 	const failureResponse: KaniResponse = {
@@ -174,7 +173,7 @@ function convertChecktoObject(checkInstance: Array<string>): CheckInstance {
 	for (let i = 0; i < checkInstance.length; i++) {
 		if (i === 0) {
 			const property: string[] = checkInstance[i].split(': ');
-			checkNumber = parseInt(property[0].replace(/^\D+/g, ''));
+			checkNumber = parseInt(property[0].replace(/^\D+/gu, ''));
 			propertyName = property[1];
 		} else {
 			const responseVariable: Variable = splitString(checkInstance[i]);

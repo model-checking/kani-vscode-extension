@@ -14,7 +14,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 	public readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
 
 	constructor() {
-		this.regex = /kani_concrete_playback/g;
+		this.regex = /kani_concrete_playback/gu;
 
 		vscode.workspace.onDidChangeConfiguration((_) => {
 			this._onDidChangeCodeLenses.fire();
@@ -53,7 +53,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 				const line = document.lineAt(startPosition.row);
 				const indexOf = line.text.indexOf(function_item_name);
 				const position = new vscode.Position(line.lineNumber, indexOf);
-				const range = document.getWordRangeAtPosition(position, new RegExp(this.regex));
+				const range = document.getWordRangeAtPosition(position, this.regex);
 
 				const runTestAction = {
 					title: '$(play) Run Test (Kani)',
