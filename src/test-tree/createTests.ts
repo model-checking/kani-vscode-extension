@@ -131,8 +131,7 @@ export class TestFile {
 	): Promise<void> {
 		try {
 			const content: string = await getContentFromFilesystem(item.uri!);
-			// eslint-disable-next-line require-atomic-updates -- item is only being
-			// read before await and modified after await
+			// eslint-disable-next-line require-atomic-updates -- item is only being read before await
 			item.error = undefined;
 			this.updateFromContents(controller, content, item);
 			if (treeRoot && this.didResolve) {
