@@ -32,8 +32,10 @@ interface TestFileMetaData {
  *
  * @returns List of workspace folders if they are rust crates
  */
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function getWorkspaceTestPatterns() {
+export function getWorkspaceTestPatterns(): Array<{
+	workspaceFolder: vscode.WorkspaceFolder;
+	pattern: vscode.RelativePattern;
+}> {
 	if (!vscode.workspace.workspaceFolders) {
 		return [];
 	}
@@ -129,7 +131,8 @@ export class TestFile {
 	): Promise<void> {
 		try {
 			const content: string = await getContentFromFilesystem(item.uri!);
-			// eslint-disable-next-line require-atomic-updates
+			// eslint-disable-next-line require-atomic-updates -- item is only being
+			// read before await and modified after await
 			item.error = undefined;
 			this.updateFromContents(controller, content, item);
 			if (treeRoot && this.didResolve) {
@@ -151,8 +154,7 @@ export class TestFile {
 	): Promise<void> {
 		const ancestors = [{ item, children: [] as vscode.TestItem[] }];
 
-		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-		const ascend = (depth: number) => {
+		const ascend = (depth: number): void => {
 			while (ancestors.length > depth) {
 				const finished = ancestors.pop()!;
 				if (finished.children.length > 0) {
