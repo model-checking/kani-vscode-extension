@@ -16,10 +16,7 @@ class CoverageConfig {
 	public partialcovered!: TextEditorDecorationType;
 	public uncovered!: TextEditorDecorationType;
 
-	private context: ExtensionContext;
-
 	constructor(context: ExtensionContext) {
-		this.context = context;
 		this.setup();
 	}
 

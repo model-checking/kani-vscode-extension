@@ -423,7 +423,6 @@ export class TestCase {
  */
 class FailedCase extends TestCase {
 	private readonly failed_checks: string;
-	private readonly failed_message?: string;
 
 	constructor(
 		failed_checks: string,
@@ -435,9 +434,6 @@ class FailedCase extends TestCase {
 	) {
 		super(file_name, harness_name, package_name, harness_type);
 		this.failed_checks = failed_checks;
-		if (failed_message) {
-			this.failed_message = failed_message;
-		}
 	}
 
 	getLabel(): string {
