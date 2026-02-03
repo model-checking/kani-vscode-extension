@@ -18,7 +18,9 @@ export async function run(): Promise<void> {
 	const files = await glob('**/**.test.js', { cwd: testsRoot });
 
 	// Add files to the test suite
-	files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
+	files.forEach((f) => {
+		mocha.addFile(path.resolve(testsRoot, f));
+	});
 
 	return new Promise((resolve, reject) => {
 		try {
