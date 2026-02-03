@@ -83,30 +83,23 @@ async function runCoverageCommand(
 			kaniBinaryPath,
 			args,
 			options,
-			(
+			async (
 				_error: ExecFileException | null,
 				stdout: string | Buffer,
 				stderr: string | Buffer,
 			) => {
-				void (async () => {
-					// FIXME: there is likely a better way to check that coverage actually ran,
-					// but relying on any printed message from coverage is brittle,
-					// and we can't use the error code, since the error code corresponds to verification failure and not coverage status.
-					if (stdout) {
-						const parseResult = await parseKaniCoverageOutput(stdout.toString());
-						resolve({ statusCode: 0, coverage: parseResult });
-					} else {
-						resolve({
-							statusCode: 1,
-							error: stderr.toString() || 'No output from coverage command',
-						});
-					}
-				})().catch((err: unknown) => {
+				// FIXME: there is likely a better way to check that coverage actually ran,
+				// but relying on any printed message from coverage is brittle,
+				// and we can't use the error code, since the error code corresponds to verification failure and not coverage status.
+				if (stdout) {
+					const parseResult = await parseKaniCoverageOutput(stdout.toString());
+					resolve({ statusCode: 0, coverage: parseResult });
+				} else {
 					resolve({
 						statusCode: 1,
-						error: err instanceof Error ? err.message : String(err),
+						error: stderr.toString() || 'No output from coverage command',
 					});
-				});
+				}
 			},
 		);
 	});

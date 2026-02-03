@@ -123,6 +123,7 @@ module.exports = tseslint.config(
             'max-lines': 'off',
             'guard-for-in': 'off',
             'require-unicode-regexp': 'off', // Disabled because 'v' flag requires ES2024, but project targets ES2020
+            '@typescript-eslint/strict-void-return': 'off', // Allow async functions in void-returning contexts (e.g., callbacks, test functions)
             'sort-imports': [
                 'error',
                 {

@@ -207,15 +207,14 @@ async function executeKaniProcess(
 	cargoKaniMode: boolean,
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
-		execFile(kaniBinaryPath, args, options, (error, stdout, stderr) => {
-			void (async () => {
-				// Store the output of the process into an object
-				const output: CommandOutput = {
-					stdout: stdout.toString(),
-					stderr: stderr.toString(),
-					errorCode: error?.code,
-					error: error,
-				};
+		execFile(kaniBinaryPath, args, options, async (error, stdout, stderr) => {
+			// Store the output of the process into an object
+			const output: CommandOutput = {
+				stdout: stdout.toString(),
+				stderr: stderr.toString(),
+				errorCode: error?.code,
+				error: error,
+			};
 
 			// Send output to diagnostics and return if there is an error in stdout
 			// this means that the command could not be executed.
@@ -262,9 +261,6 @@ async function executeKaniProcess(
 				// verification successful
 				resolve(0);
 			}
-			})().catch((err: unknown) => {
-				reject(err);
-			});
 		});
 	});
 }
