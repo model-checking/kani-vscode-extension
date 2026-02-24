@@ -223,15 +223,18 @@ async function executeKaniProcess(
 				if (result) {
 					sendErrorToChannel(output, args);
 					reject(new Error(error?.message));
+					return;
 				}
 			} catch (error) {
 				if (error instanceof KaniResponseError) {
 					if (error.name === 'KaniCompilationError') {
 						sendErrorToChannel(output, args);
 						reject(new Error(error?.message));
+						return;
 					}
 				}
 				reject(error);
+				return;
 			}
 			// Send output to output channel specific to the harness
 			sendOutputToChannel(output, args);
