@@ -1,6 +1,6 @@
 // Copyright Kani Contributors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
-import { ExecFileException, execFile } from 'child_process';
+import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -79,29 +79,20 @@ async function runCoverageCommand(
 
 	vscode.window.showInformationMessage(`Generating coverage for ${harnessName}`);
 	return new Promise<CoverageCommandResult>((resolve) => {
-		execFile(
-			kaniBinaryPath,
-			args,
-			options,
-			async (
-				_error: ExecFileException | null,
-				stdout: string | Buffer,
-				stderr: string | Buffer,
-			) => {
-				// FIXME: there is likely a better way to check that coverage actually ran,
-				// but relying on any printed message from coverage is brittle,
-				// and we can't use the error code, since the error code corresponds to verification failure and not coverage status.
-				if (stdout) {
-					const parseResult = await parseKaniCoverageOutput(stdout.toString());
-					resolve({ statusCode: 0, coverage: parseResult });
-				} else {
-					resolve({
-						statusCode: 1,
-						error: stderr.toString() || 'No output from coverage command',
-					});
-				}
-			},
-		);
+		execFile(kaniBinaryPath, args, options, async (_error, stdout, stderr) => {
+			// FIXME: there is likely a better way to check that coverage actually ran,
+			// but relying on any printed message from coverage is brittle,
+			// and we can't use the error code, since the error code corresponds to verification failure and not coverage status.
+			if (stdout) {
+				const parseResult = await parseKaniCoverageOutput(stdout.toString());
+				resolve({ statusCode: 0, coverage: parseResult });
+			} else {
+				resolve({
+					statusCode: 1,
+					error: stderr.toString() || 'No output from coverage command',
+				});
+			}
+		});
 	});
 }
 
