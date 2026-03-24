@@ -84,12 +84,12 @@ async function runCoverageCommand(
 			// but relying on any printed message from coverage is brittle,
 			// and we can't use the error code, since the error code corresponds to verification failure and not coverage status.
 			if (stdout) {
-				const parseResult = await parseKaniCoverageOutput(stdout.toString());
+				const parseResult = await parseKaniCoverageOutput(stdout);
 				resolve({ statusCode: 0, coverage: parseResult });
 			} else {
 				resolve({
 					statusCode: 1,
-					error: stderr.toString() || 'No output from coverage command',
+					error: stderr || 'No output from coverage command',
 				});
 			}
 		});
