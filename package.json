@@ -94,7 +94,7 @@
     "@types/node": "25.x",
     "@types/vscode": "^1.115.0",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
-    "@typescript-eslint/parser": "^8.58.2",
+    "@typescript-eslint/parser": "^8.59.0",
     "@vscode/test-electron": "^2.4.1",
     "eslint": "^10.2.0",
     "eslint-config-love": "^152.0.0",
