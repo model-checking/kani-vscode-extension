@@ -92,7 +92,7 @@
     "@types/emscripten": "^1.41.5",
     "@types/mocha": "^10.0.10",
     "@types/node": "25.x",
-    "@types/vscode": "^1.120.0",
+    "@types/vscode": "^1.125.0",
     "@typescript-eslint/eslint-plugin": "^8.61.1",
     "@typescript-eslint/parser": "^8.62.0",
     "@vscode/test-electron": "^3.0.0",
