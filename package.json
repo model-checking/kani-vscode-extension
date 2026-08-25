@@ -109,7 +109,7 @@
     "glob": "^13.0.6",
     "mocha": "^11.8.0",
     "prettier": "3.9.6",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "overrides": {
     "minimatch": "^10.0.0"
