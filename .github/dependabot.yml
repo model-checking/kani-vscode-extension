@@ -14,3 +14,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # TypeScript 7.x is the native ("Corsa"/Go) rewrite and does not expose
+      # the classic JS compiler API (e.g. `ts.Extension`). Our lint toolchain
+      # depends on that API via @typescript-eslint, whose peer requirement is
+      # still `typescript <6.1.0`, so bumping to 7.x breaks `npm run lint`
+      # (see #352). Ignore the major bump until @typescript-eslint supports it.
+      - dependency-name: "typescript"
+        versions: [">=7.0.0"]
